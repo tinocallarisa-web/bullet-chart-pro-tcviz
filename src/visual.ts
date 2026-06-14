@@ -57,7 +57,7 @@ export class BulletChartPro implements IVisual {
     private events:           powerbi.extensibility.IVisualEventService;
     private selectionManager: ISelectionManager;
     private settings:         BulletSettings;
-    private isPro:            boolean = true;  // DEV: set false + uncomment checkLicense() before AppSource
+    private isPro:            boolean = false; // set true locally to test Pro features
 
     constructor(options: VisualConstructorOptions) {
         this.host             = options.host;
@@ -80,7 +80,7 @@ export class BulletChartPro implements IVisual {
             e.preventDefault();
         });
 
-        // this.checkLicense();
+        this.checkLicense();
     }
 
     // ── License ──────────────────────────────────────────────────────
