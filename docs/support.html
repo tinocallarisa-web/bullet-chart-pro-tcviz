@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — Bullet Chart Pro | TCViz</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
+    h1   { color: #0078D4; }
+    h2   { margin-top: 2em; }
+    .card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Support — Bullet Chart Pro</h1>
+  <p><strong>Publisher:</strong> TCViz &nbsp;|&nbsp;
+     <strong>Email:</strong> <a href="mailto:tinocallarisa@gmail.com">tinocallarisa@gmail.com</a></p>
+
+  <h2>Quick start</h2>
+  <div class="card">
+    <ol>
+      <li>Add the visual from Microsoft AppSource.</li>
+      <li>Drag a <strong>dimension</strong> field (e.g. Region, Month) into the <em>Category</em> well.</li>
+      <li>Drag your <strong>real/actual measure</strong> into the <em>Actual (Real)</em> well.</li>
+      <li>Drag your <strong>target measure</strong> into the <em>Target</em> well.</li>
+      <li>Variance (absolute + %) is computed <strong>automatically</strong> — no DAX needed.</li>
+    </ol>
+  </div>
+
+  <h2>Common questions</h2>
+
+  <p><strong>Why is variance not showing?</strong><br>
+  Make sure both the <em>Actual</em> and <em>Target</em> fields are populated. Variance is only
+  calculated when both values are present. Also check that "Show variance label" is enabled in
+  the Format pane → Variance section.</p>
+
+  <p><strong>Can I change the green/red threshold?</strong><br>
+  Yes. In the Format pane → Variance section, set the "Threshold for green/red" value.
+  Variances above this number are shown in green; below are red (default: 0).</p>
+
+  <p><strong>How do I unlock Pro features?</strong><br>
+  Purchase a Pro license through Microsoft AppSource. After purchase, Pro features (trellis,
+  forecast marker, vertical orientation) activate automatically for licensed users.</p>
+
+  <p><strong>The visual shows "Unlicensed Features" for some users</strong><br>
+  Each user who views reports containing Pro features needs their own Pro license.
+  Go to Microsoft 365 admin center → Billing → Licenses to assign licenses.</p>
+
+  <p><strong>Does this work in Power BI Embedded or Report Server?</strong><br>
+  Free features work in all environments. Pro license validation via
+  <code>IVisualLicenseManager</code> requires Power BI Service.</p>
+
+  <h2>Contact support</h2>
+  <div class="card">
+    <p>For bugs, feature requests, or licensing questions:<br>
+    📧 <a href="mailto:tinocallarisa@gmail.com">tinocallarisa@gmail.com</a></p>
+    <p>Please include your Power BI version and a screenshot of the issue.</p>
+  </div>
+</body>
+</html>

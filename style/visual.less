@@ -1,0 +1,24 @@
+/*
+ * Bullet Chart Pro — TCViz
+ * Minimal styles: most visual styling is done in SVG attributes inside visual.ts
+ */
+
+.bullet-chart-pro {
+    /* Container */
+    display: block;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+
+    /* Remove outline ring on focus in most browsers, keep for keyboard nav */
+    &:focus {
+        outline: 2px solid #0078D4;
+        outline-offset: -2px;
+    }
+
+    /* Scrollable when more rows than viewport */
+    svg {
+        display: block;
+        overflow: visible;
+    }
+}

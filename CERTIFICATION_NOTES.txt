@@ -1,0 +1,55 @@
+══════════════════════════════════════════════════════════════════
+  NOTAS DE CERTIFICACIÓN — COPIAR Y PEGAR EN PARTNER CENTER
+  (Este campo se borra en cada reenvío — guarda este fichero)
+══════════════════════════════════════════════════════════════════
+
+Source code (certification branch):
+https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/tree/certification
+
+Privacy Policy: https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/privacy.html
+Terms of Use:   https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/terms.html
+Support:        https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html
+
+License validation:
+This visual uses the official Microsoft IVisualLicenseManager API.
+No external license server is used.
+Plan identifier: bullet-chart-pro-tcviz
+
+Free tier (no license required):
+- Real vs Target with automatic variance calculation (no DAX)
+- Color-coded variance labels (absolute + %)
+- 3 qualitative bands with configurable thresholds
+- IBCS mode
+- Horizontal orientation
+- Cross-filtering / highlight support
+
+Pro tier (requires active AppSource license):
+- Trellis / Small Multiples layout
+- Forecast marker (triangle)
+- Vertical orientation
+
+Testing instructions:
+1. Import the sample .pbix file included with the submission.
+2. Without a Pro license, verify:
+   - Variance labels appear automatically (Actual - Target / %)
+   - Qualitative bands render correctly
+   - Clicking a bar cross-filters other visuals
+   - Trellis option is hidden in the Format pane
+3. With the test license key below, verify:
+   - Trellis option appears in Format pane → Trellis section
+   - Forecast marker appears when Forecast field is populated
+
+Test license key: [AÑADIR ANTES DE PUBLICAR]
+
+══════════════════════════════════════════════════════════════════
+  CHECKLIST PRE-PUBLICACIÓN
+══════════════════════════════════════════════════════════════════
+
+[ ] Versión subida en pbiviz.json y package.json
+[ ] renderingStarted / renderingFinished / renderingFailed en update()
+[ ] Filter-in (highlight) funciona — barras sin datos aparecen dimmed
+[ ] spIdentifier = "bullet-chart-pro-tcviz" coincide con Plan ID en Partner Center
+[ ] URLs privacy, terms, support activas en GitHub Pages
+[ ] Rama "certification" en GitHub actualizada
+[ ] Fichero .pbix de muestra con datos reales incluido
+[ ] Estas notas copiadas en el campo "Notas para certificación" antes de publicar
