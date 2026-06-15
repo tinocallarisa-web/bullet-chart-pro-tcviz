@@ -66,7 +66,7 @@ export class BulletChartPro implements IVisual {
         this.settings         = getDefaultSettings();
         this.container        = options.element;
 
-        this.container.style.overflow = "hidden";
+        this.container.style.overflow = "auto";
         this.container.style.position = "relative";
         this.container.tabIndex       = 0;
 
@@ -264,7 +264,8 @@ export class BulletChartPro implements IVisual {
         const s   = this.settings;
         const max = this.calcMax(data) * 1.1 || 1;
         const L   = this.hLayout(s, vpW, Math.floor(vpH / data.length));
-        this.clearSvg(vpW, vpH);
+        const totalH = L.rowH * data.length;
+        this.clearSvg(vpW, Math.max(vpH, totalH));
         this.attachClearClick();
         const allow = this.canInteract();
         data.forEach((d, i) => this.renderHRow(d, i * L.rowH, L, max, s, allow, this.rootSvg, `h${i}`));
@@ -576,7 +577,8 @@ export class BulletChartPro implements IVisual {
         const allow      = this.canInteract();
         const globalMax  = this.calcMax(panels.flatMap(p => p.data)) * 1.1 || 1;
 
-        this.clearSvg(vpW, vpH);
+        const totalTrellisH = TRELLIS_GAP + nRows * (panelH + TRELLIS_GAP);
+        this.clearSvg(vpW, Math.max(vpH, totalTrellisH));
         this.attachClearClick();
 
         panels.forEach((panel, pi) => {

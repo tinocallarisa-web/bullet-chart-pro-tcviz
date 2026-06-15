@@ -1,7 +1,7 @@
 {
   "name": "bullet-chart-pro-tcviz",
   "description": "Power BI Bullet Chart Pro — Real vs Target with integrated variance, no DAX",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "pbiviz": "pbiviz",
@@ -11,12 +11,13 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "powerbi-visuals-api": "~5.8.0"
+    "powerbi-visuals-api": "~5.10.0"
   },
   "devDependencies": {
-    "powerbi-visuals-tools": "^5.4.0",
-    "typescript": "~5.0.4",
-    "@types/node": "^18.0.0"
+    "@types/node": "^18.0.0",
+    "eslint": "^10.5.0",
+    "powerbi-visuals-tools": "^7.1.0",
+    "typescript": "~5.0.4"
   },
   "capabilities": "capabilities.json",
   "pbiviz": "pbiviz.json",
