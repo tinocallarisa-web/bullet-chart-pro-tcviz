@@ -5,57 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Support — Bullet Chart Pro | TCViz</title>
   <style>
-    body { font-family: Segoe UI, Arial, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
-    h1   { color: #0078D4; }
-    h2   { margin-top: 2em; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
+    h1   { color: #0078D4; margin-bottom: 4px; }
+    h2   { margin-top: 2.2em; color: #1a1a2e; border-bottom: 2px solid #e0e0e0; padding-bottom: 6px; }
+    h3   { margin-top: 1.4em; color: #333; }
     .card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    .badge { display: inline-block; background: #e8433a; color: #fff; font-size: .72rem; padding: 1px 7px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
+    .badge.free { background: #388e3c; }
+    nav { margin-bottom: 32px; font-size: .95rem; }
+    nav a { color: #0078D4; text-decoration: none; margin-right: 20px; }
+    nav a:hover { text-decoration: underline; }
+    .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); margin: 20px 0 32px; }
+    .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    details { border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; background: #fff; }
+    details summary { font-weight: 600; cursor: pointer; color: #1a1a2e; }
+    details p, details ul { margin-top: 10px; }
+    footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: .9rem; color: #888; }
   </style>
 </head>
 <body>
+
   <h1>Support — Bullet Chart Pro</h1>
   <p><strong>Publisher:</strong> TCViz &nbsp;|&nbsp;
-     <strong>Email:</strong> <a href="mailto:tinocallarisa@gmail.com">tinocallarisa@gmail.com</a></p>
+     <strong>Email:</strong> <a href="mailto:tinocallarisa@tcviz.com">tinocallarisa@tcviz.com</a> &nbsp;|&nbsp;
+     <strong>Version:</strong> 1.2.0.0</p>
 
+  <nav>
+    <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">Report an issue</a>
+    <a href="use-case.html">Use case</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </nav>
+
+  <!-- VIDEO -->
+  <h2>Overview video</h2>
+  <div class="video-wrap">
+    <iframe src="https://www.youtube.com/embed/bDW7qly8Mdo" allowfullscreen title="Bullet Chart Pro — overview and features"></iframe>
+  </div>
+
+  <!-- QUICK START -->
   <h2>Quick start</h2>
   <div class="card">
     <ol>
       <li>Add the visual from Microsoft AppSource.</li>
       <li>Drag a <strong>dimension</strong> field (e.g. Region, Month) into the <em>Category</em> well.</li>
-      <li>Drag your <strong>real/actual measure</strong> into the <em>Actual (Real)</em> well.</li>
+      <li>Drag your <strong>actual measure</strong> into the <em>Actual (Real)</em> well.</li>
       <li>Drag your <strong>target measure</strong> into the <em>Target</em> well.</li>
       <li>Variance (absolute + %) is computed <strong>automatically</strong> — no DAX needed.</li>
     </ol>
   </div>
 
-  <h2>Common questions</h2>
+  <!-- FAQ -->
+  <h2>Frequently asked questions</h2>
 
-  <p><strong>Why is variance not showing?</strong><br>
-  Make sure both the <em>Actual</em> and <em>Target</em> fields are populated. Variance is only
-  calculated when both values are present. Also check that "Show variance label" is enabled in
-  the Format pane → Variance section.</p>
+  <h3>Data & Variance</h3>
 
-  <p><strong>Can I change the green/red threshold?</strong><br>
-  Yes. In the Format pane → Variance section, set the "Threshold for green/red" value.
-  Variances above this number are shown in green; below are red (default: 0).</p>
+  <details>
+    <summary>Why is variance not showing?</summary>
+    <p>Make sure both the <em>Actual</em> and <em>Target</em> fields are populated. Variance is only calculated when both values are present. Also check that <strong>Show variance label</strong> is enabled in Format pane → Variance.</p>
+  </details>
 
-  <p><strong>How do I unlock Pro features?</strong><br>
-  Purchase a Pro license through Microsoft AppSource. After purchase, Pro features (trellis,
-  forecast marker, vertical orientation) activate automatically for licensed users.</p>
+  <details>
+    <summary>Can I change the green/red threshold?</summary>
+    <p>Yes. Format pane → Variance → <strong>Green/red threshold</strong>. Variances above this number are shown in green; below in red. Default is 0.</p>
+  </details>
 
-  <p><strong>The visual shows "Unlicensed Features" for some users</strong><br>
-  Each user who views reports containing Pro features needs their own Pro license.
-  Go to Microsoft 365 admin center → Billing → Licenses to assign licenses.</p>
+  <details>
+    <summary>Does it support negative values?</summary>
+    <p>Yes. When your data contains negative values the chart automatically switches to a bipolar scale with a zero baseline drawn at the correct position.</p>
+  </details>
 
-  <p><strong>Does this work in Power BI Embedded or Report Server?</strong><br>
-  Free features work in all environments. Pro license validation via
-  <code>IVisualLicenseManager</code> requires Power BI Service.</p>
+  <details>
+    <summary>Can I format numbers as currency, thousands, etc.?</summary>
+    <p>Yes — the visual reads the format string directly from your Power BI measure. Apply the format in Power BI (e.g. <code>€#,0</code>) and the visual will use it automatically. Calculation Groups are also supported.</p>
+  </details>
 
-  <h2>Contact support</h2>
+  <h3>Features & Format pane</h3>
+
+  <details>
+    <summary>How do I use Small Multiples (trellis)? <span class="badge">Pro</span></summary>
+    <p>Drag a dimension into the <em>Small Multiples By</em> field. In Format pane → Small Multiples, set the number of columns and choose whether to sync the scale across panels.</p>
+  </details>
+
+  <details>
+    <summary>How do I add reference lines?</summary>
+    <p>Format pane → Reference Lines → enable Line 1 or Line 2. Set the value, label and color. Reference lines appear across all panels in Small Multiples mode.</p>
+  </details>
+
+  <details>
+    <summary>Can I color individual bars differently?</summary>
+    <p>Yes. Format pane → Colors → click the <strong>fx</strong> button next to any category name to set a custom color or a conditional formatting rule for that bar.</p>
+  </details>
+
+  <details>
+    <summary>How do I enable drilldown?</summary>
+    <p>Add a hierarchy or multiple fields to the <em>Category</em> well. Use Power BI's drill navigation buttons (top-left of the visual) or double-click a bar to drill down.</p>
+  </details>
+
+  <details>
+    <summary>Does it support High Contrast mode?</summary>
+    <p>Yes. The visual detects Power BI's High Contrast setting automatically and adjusts all colors (bars, axis, legend, bands) to use the system palette.</p>
+  </details>
+
+  <details>
+    <summary>Can I use keyboard navigation?</summary>
+    <p>Yes — <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> cycle through bars, <kbd>Enter</kbd> selects, <kbd>Escape</kbd> clears selection. The focused bar is highlighted with a visible focus ring.</p>
+  </details>
+
+  <h3>Licensing</h3>
+
+  <details>
+    <summary>How do I unlock Pro features?</summary>
+    <p>Purchase a Pro license through Microsoft AppSource. After purchase, Pro features (Small Multiples, Forecast marker) activate automatically for licensed users in Power BI Service.</p>
+  </details>
+
+  <details>
+    <summary>Some users see "Unlicensed Features"</summary>
+    <p>Each user who views reports containing Pro features needs their own Pro license. Go to <strong>Microsoft 365 admin center → Billing → Licenses</strong> to assign licenses to your team.</p>
+  </details>
+
+  <details>
+    <summary>Does this work in Power BI Embedded or Report Server?</summary>
+    <p>Free features work in all environments. Pro license validation via <code>IVisualLicenseManager</code> requires Power BI Service. In Embedded or Report Server, the visual renders free-tier features only.</p>
+  </details>
+
+  <!-- CONTACT -->
+  <h2>Contact & issues</h2>
   <div class="card">
-    <p>For bugs, feature requests, or licensing questions:<br>
-    📧 <a href="mailto:tinocallarisa@gmail.com">tinocallarisa@gmail.com</a></p>
-    <p>Please include your Power BI version and a screenshot of the issue.</p>
+    <p>For bugs, feature requests, or licensing questions:</p>
+    <p>📧 <a href="mailto:tinocallarisa@tcviz.com">tinocallarisa@tcviz.com</a></p>
+    <p>🐛 <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">GitHub Issues</a> — preferred for bug reports (include Power BI version + screenshot)</p>
+    <p>📄 <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a> — full version history</p>
   </div>
+
+  <footer>
+    Bullet Chart Pro by TCViz &nbsp;|&nbsp;
+    <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
+    <a href="terms.html">Terms of Use</a>
+  </footer>
+
 </body>
 </html>

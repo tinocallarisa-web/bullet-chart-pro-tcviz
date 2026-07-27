@@ -34,11 +34,30 @@ export interface BulletSettings {
     labelWidthPct:      number;   // % of viewport width for category column (5-40)
     rightPanelWidthPct: number;   // % of viewport width for values/variance column (10-45)
 
+    // ── Axis / Scale ──────────────────────────────────────────────────
+    showAxis:           boolean;
+
+    // ── Legend ────────────────────────────────────────────────────────
+    showLegend:         boolean;
+    legendPosition:     "top" | "bottom";
+
+    // ── Reference Lines ───────────────────────────────────────────────
+    refLine1Show:       boolean;
+    refLine1Value:      number;
+    refLine1Label:      string;
+    refLine1Color:      string;
+    refLine2Show:       boolean;
+    refLine2Value:      number;
+    refLine2Label:      string;
+    refLine2Color:      string;
+
     // ── Trellis / Small Multiples (Pro) ───────────────────────────────
     trellisEnabled:     boolean;
     trellisColumns:     number;
     trellisSyncScale:   boolean;
     trellisShowTitle:   boolean;
+    trellisPanelColor:  string;
+    trellisBorderColor: string;
 }
 
 export function getDefaultSettings(): BulletSettings {
@@ -71,9 +90,25 @@ export function getDefaultSettings(): BulletSettings {
         labelWidthPct:      22,
         rightPanelWidthPct: 34,
 
+        showAxis:           true,
+
+        showLegend:         true,
+        legendPosition:     "bottom",
+
+        refLine1Show:       false,
+        refLine1Value:      0,
+        refLine1Label:      "",
+        refLine1Color:      "#E53935",
+        refLine2Show:       false,
+        refLine2Value:      0,
+        refLine2Label:      "",
+        refLine2Color:      "#FB8C00",
+
         trellisEnabled:     false,
         trellisColumns:     2,
         trellisSyncScale:   true,
         trellisShowTitle:   true,
+        trellisPanelColor:  "#FAFAFA",
+        trellisBorderColor: "#E0E0E0",
     };
 }

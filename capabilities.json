@@ -24,6 +24,12 @@
       "name": "forecast",
       "kind": "Measure",
       "displayName": "Forecast [Pro]"
+    },
+    {
+      "name": "tooltips",
+      "kind": "Measure",
+      "displayName": "Tooltips",
+      "requiredTypes": [{ "numeric": true }, { "bool": true }]
     }
   ],
   "dataViewMappings": [
@@ -34,7 +40,8 @@
           "trellisBy": { "max": 1 },
           "actual":    { "max": 1 },
           "target":    { "max": 1 },
-          "forecast":  { "max": 1 }
+          "forecast":  { "max": 1 },
+          "tooltips":  { "max": 10 }
         }
       ],
       "categorical": {
@@ -49,7 +56,8 @@
           "select": [
             { "bind": { "to": "actual"   } },
             { "bind": { "to": "target"   } },
-            { "bind": { "to": "forecast" } }
+            { "bind": { "to": "forecast" } },
+            { "bind": { "to": "tooltips" } }
           ]
         }
       }
@@ -109,27 +117,72 @@
         "showCategoryLabel": { "displayName": "Show category",     "type": { "bool": true } },
         "showActualValue":   { "displayName": "Show actual value", "type": { "bool": true } },
         "showTargetValue":   { "displayName": "Show target value", "type": { "bool": true } },
-        "fontSize":          { "displayName": "Font size",         "type": { "formatting": { "fontSize": true } } }
+        "fontSize":          { "displayName": "Font size",         "type": { "formatting": { "fontSize":   true } } },
+        "fontFamily":        { "displayName": "Font family",       "type": { "formatting": { "fontFamily": true } } }
       }
     },
     "layout": {
-      "displayName": "Column Widths",
+      "displayName": "Layout",
       "properties": {
         "labelWidthPct":      { "displayName": "Category column width % (5-40)",  "type": { "numeric": true } },
-        "rightPanelWidthPct": { "displayName": "Values panel width % (10-45)",    "type": { "numeric": true } }
+        "rightPanelWidthPct": { "displayName": "Values panel width % (10-45)",    "type": { "numeric": true } },
+        "showAxis":           { "displayName": "Show scale axis",                 "type": { "bool":    true } }
+      }
+    },
+    "legend": {
+      "displayName": "Legend",
+      "properties": {
+        "showLegend":     { "displayName": "Show legend", "type": { "bool": true } },
+        "legendPosition": {
+          "displayName": "Position",
+          "type": {
+            "enumeration": [
+              { "value": "bottom", "displayName": "Bottom" },
+              { "value": "top",    "displayName": "Top"    }
+            ]
+          }
+        }
+      }
+    },
+    "referenceLines": {
+      "displayName": "Reference Lines",
+      "properties": {
+        "refLine1Show":  { "displayName": "Line 1 – Show",  "type": { "bool":    true } },
+        "refLine1Value": { "displayName": "Line 1 – Value", "type": { "numeric": true } },
+        "refLine1Label": { "displayName": "Line 1 – Label", "type": { "text":    true } },
+        "refLine1Color": { "displayName": "Line 1 – Color", "type": { "fill": { "solid": { "color": true } } } },
+        "refLine2Show":  { "displayName": "Line 2 – Show",  "type": { "bool":    true } },
+        "refLine2Value": { "displayName": "Line 2 – Value", "type": { "numeric": true } },
+        "refLine2Label": { "displayName": "Line 2 – Label", "type": { "text":    true } },
+        "refLine2Color": { "displayName": "Line 2 – Color", "type": { "fill": { "solid": { "color": true } } } }
       }
     },
     "trellis": {
       "displayName": "Small Multiples [Pro]",
       "properties": {
-        "enabled":        { "displayName": "Enable small multiples", "type": { "bool":    true } },
-        "columns":        { "displayName": "Columns",                "type": { "numeric": true } },
-        "syncScale":      { "displayName": "Sync scale across panels","type": { "bool":    true } },
-        "trellisShowTitle": { "displayName": "Show panel titles",    "type": { "bool":    true } }
+        "enabled":           { "displayName": "Enable small multiples", "type": { "bool":    true } },
+        "columns":           { "displayName": "Columns",                "type": { "numeric": true } },
+        "syncScale":         { "displayName": "Sync scale across panels","type": { "bool":    true } },
+        "trellisShowTitle":  { "displayName": "Show panel titles",      "type": { "bool":    true } },
+        "trellisPanelColor": { "displayName": "Panel background color", "type": { "fill": { "solid": { "color": true } } } },
+        "trellisBorderColor":{ "displayName": "Panel border color",     "type": { "fill": { "solid": { "color": true } } } }
       }
     }
   },
   "privileges": [],
+  "sorting": {
+    "default": {}
+  },
+  "drilldown": {
+    "roles": ["category"]
+  },
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas":  true
+    },
+    "roles": ["tooltips"]
+  },
   "supportsHighlight":               true,
   "supportsLandingPage":             true,
   "supportsKeyboardFocus":           true,
