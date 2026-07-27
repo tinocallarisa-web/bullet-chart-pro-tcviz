@@ -1,0 +1,69 @@
+{
+  "displayName": "Bullet Chart Pro",
+  "description": "Professional Bullet Chart with Real vs Target variance calculated automatically — no DAX required.",
+
+  "Visual_Category":  "Category",
+  "Visual_TrellisBy": "Small Multiples By [Pro]",
+  "Visual_Actual":    "Actual (Real)",
+  "Visual_Target":    "Target",
+  "Visual_Forecast":  "Forecast [Pro]",
+  "Visual_Tooltips":  "Tooltips",
+
+  "Visual_General":             "General",
+  "Visual_General_Orientation": "Orientation",
+  "Visual_General_IbcsMode":    "IBCS Mode",
+
+  "Visual_Colors":              "Colors",
+  "Visual_Colors_ActualColor":  "Actual bar",
+  "Visual_Colors_TargetColor":  "Target marker",
+  "Visual_Colors_ForecastColor":"Forecast marker",
+  "Visual_Colors_PositiveColor":"Positive variance",
+  "Visual_Colors_NegativeColor":"Negative variance",
+  "Visual_Colors_Band1Color":   "Band 1 (worst)",
+  "Visual_Colors_Band2Color":   "Band 2 (mid)",
+  "Visual_Colors_Band3Color":   "Band 3 (best)",
+
+  "Visual_Bands":           "Qualitative Bands",
+  "Visual_Bands_ShowBands": "Show bands",
+  "Visual_Bands_Band1Pct":  "Band 1 threshold %",
+  "Visual_Bands_Band2Pct":  "Band 2 threshold %",
+
+  "Visual_Variance":                   "Variance",
+  "Visual_Variance_ShowVariance":      "Show variance label",
+  "Visual_Variance_ShowVariancePct":   "Show variance %",
+  "Visual_Variance_VarianceThreshold": "Green/red threshold",
+
+  "Visual_Labels":                   "Labels",
+  "Visual_Labels_ShowCategoryLabel": "Show category",
+  "Visual_Labels_ShowActualValue":   "Show actual value",
+  "Visual_Labels_ShowTargetValue":   "Show target value",
+  "Visual_Labels_FontSize":          "Font size",
+  "Visual_Labels_FontFamily":        "Font family",
+
+  "Visual_Layout":                    "Layout",
+  "Visual_Layout_LabelWidthPct":      "Category column width % (5-40)",
+  "Visual_Layout_RightPanelWidthPct": "Values panel width % (10-45)",
+  "Visual_Layout_ShowAxis":           "Show scale axis",
+
+  "Visual_Legend":                 "Legend",
+  "Visual_Legend_ShowLegend":      "Show legend",
+  "Visual_Legend_LegendPosition":  "Position",
+
+  "Visual_ReferenceLines":              "Reference Lines",
+  "Visual_ReferenceLines_RefLine1Show": "Line 1 – Show",
+  "Visual_ReferenceLines_RefLine1Value":"Line 1 – Value",
+  "Visual_ReferenceLines_RefLine1Label":"Line 1 – Label",
+  "Visual_ReferenceLines_RefLine1Color":"Line 1 – Color",
+  "Visual_ReferenceLines_RefLine2Show": "Line 2 – Show",
+  "Visual_ReferenceLines_RefLine2Value":"Line 2 – Value",
+  "Visual_ReferenceLines_RefLine2Label":"Line 2 – Label",
+  "Visual_ReferenceLines_RefLine2Color":"Line 2 – Color",
+
+  "Visual_Trellis":                      "Small Multiples [Pro]",
+  "Visual_Trellis_Enabled":              "Enable small multiples",
+  "Visual_Trellis_Columns":              "Columns",
+  "Visual_Trellis_SyncScale":            "Sync scale across panels",
+  "Visual_Trellis_TrellisShowTitle":     "Show panel titles",
+  "Visual_Trellis_TrellisPanelColor":    "Panel background color",
+  "Visual_Trellis_TrellisBorderColor":   "Panel border color"
+}
