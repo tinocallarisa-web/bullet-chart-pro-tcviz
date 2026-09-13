@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bullet Chart Pro — Visual Infographic | TCViz</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg:#FAF9F5; --bg2:#EDE9DE; --bd:#F5F3ED; --line:#DAD9D4;
+      --t1:#3D3929; --t2:#535146; --t3:#83827D;
+      --acc:#2B6CB0; --accd:#1F4E80; --acc2:#3E9C5B; --acc2l:#D9EFE0;
+      --gold:#D9A441; --violet:#8E5FC4; --neg:#B5473A;
+      --band1:#EDE9DE; --band2:#DAD9D4; --band3:#B8B5AB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #888; color: var(--t1); }
+
+    #dl-btn {
+      position: fixed; top: 12px; left: 12px; z-index: 10;
+      background: var(--acc); color: #fff; border: none; border-radius: 6px;
+      padding: 8px 16px; font: 700 13px 'Segoe UI', sans-serif; cursor: pointer;
+    }
+    #dl-btn:hover { background: var(--accd); }
+    #fitcheck { position: fixed; bottom: 10px; right: 10px; z-index: 10; font: 700 13px 'Segoe UI', sans-serif; padding: 6px 12px; border-radius: 6px; color: #fff; }
+
+    #infographic {
+      width: 1366px; height: 768px; overflow: hidden;
+      background: var(--bg); color: var(--t1);
+      display: flex; flex-direction: column;
+      padding: 12px 28px;
+    }
+
+    /* ── HEADER ── */
+    .header { display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; margin-bottom: 4px; }
+    .header h1 { font-size: 28px; font-weight: 700; line-height: 1.1; }
+    .header h1 span { color: var(--acc); }
+    .header .sub { color: var(--t3); font-size: 13px; margin-top: 3px; }
+    .badge-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 520px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; background: var(--bd); border: 1px solid var(--line); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--t2); }
+    .badge.red  { background: var(--acc); border-color: var(--acc); color: #fff; }
+    .badge.blue { background: var(--acc2l); border-color: var(--acc2); color: var(--acc2); }
+    .header h1 span.version-tag { vertical-align: middle; font-size: 12px; color: #fff; } .version-tag { background: var(--acc); color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700; padding: 3px 10px; }
+
+    /* ── MAIN GRID ── */
+    .main { display: grid; grid-template-columns: 372px 300px 318px 1fr; gap: 12px; flex: 1; }
+    .col { display: flex; flex-direction: column; gap: 5px; }
+
+    .sec-head { display: flex; align-items: center; gap: 7px; }
+    .sec-head .num { width: 20px; height: 20px; border-radius: 50%; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .sec-head h2 { font-size: 13px; color: var(--acc); font-weight: 700; }
+
+    .panel { background: var(--bd); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+
+    /* ── ANATOMY ── */
+    .anatomy-title { font-size: 9px; font-weight: 700; color: var(--t3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .chart-svg-wrap svg { background: #fff; border-radius: 6px; }
+    .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; }
+    .legend-item { display: flex; align-items: flex-start; gap: 6px; background: #fff; border-radius: 6px; padding: 3px 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; border: 1px solid var(--line); }
+    .legend-item > div { font-size: 9.5px; line-height: 1.2; } .legend-item strong { display: block; font-size: 10.5px; color: var(--t1); line-height: 1.2; }
+    .legend-item span { font-size: 9.5px; color: var(--t3); line-height: 1.2; }
+
+    /* ── STATS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    .stat-card { background: var(--bd); border: 1px solid var(--line); border-radius: 6px; padding: 4px 4px; text-align: center; }
+    .stat-card .num { font-size: 17px; font-weight: 700; color: var(--acc); line-height: 1.1; }
+    .stat-card .lbl { font-size: 9px; color: var(--t3); line-height: 1.15; }
+    .stats-row .stat-card:first-child { background: linear-gradient(135deg, var(--acc), var(--acc2)); border-color: transparent; }
+    .stats-row .stat-card:first-child .num, .stats-row .stat-card:first-child .lbl { color: #fff; }
+
+    /* ── FIELD WELLS ── */
+    .wells-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .well-card { background: #fff; border-radius: 6px; padding: 4px 7px; border: 1px solid var(--line); border-left: 4px solid var(--acc); }
+    .well-card.pro { border-left-color: var(--acc2); }
+    .well-card.opt { border-left-color: #8FB3DA; }
+    .well-card .wlabel { font-size: 8.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--t3); }
+    .well-card.pro .wlabel { color: var(--acc2); }
+    .well-card .wname { font-size: 11px; font-weight: 700; color: var(--t1); line-height: 1.2; }
+    .well-card .wdesc { font-size: 9.5px; color: var(--t2); margin-top: 1px; line-height: 1.25; }
+
+    /* ── FEATURES ── */
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .feat-card { background: #fff; border-radius: 6px; padding: 5px 8px; border: 1px solid var(--line); border-top: 3px solid var(--acc); position: relative; }
+    .feat-card.pro { border-top-color: var(--acc2); }
+    .feat-card .icon { font-size: 13px; float: left; margin-right: 4px; line-height: 1.2; }
+    .feat-card h3 { font-size: 11px; color: var(--t1); line-height: 1.25; margin-bottom: 2px; padding-right: 26px; }
+    .feat-card p { font-size: 9.5px; color: var(--t2); line-height: 1.3; clear: both; }
+    .pro-pill { position: absolute; top: 4px; right: 5px; background: var(--acc2); color: #fff; font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 8px; letter-spacing: .5px; }
+
+    /* ── FREE vs PRO ── */
+    .tier-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: 10px; overflow: hidden; border: 2px solid var(--line); }
+    .tier-table th { padding: 4px 8px; font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: .8px; }
+    .tier-table th:first-child { background: var(--bd); color: var(--t2); }
+    .tier-table th.free { background: var(--acc); color: #fff; text-align: center; width: 48px; }
+    .tier-table th.pro  { background: var(--acc2); color: #fff; text-align: center; width: 48px; }
+    .tier-table td { padding: 1.5px 8px; border-bottom: 1px solid var(--bd); font-size: 10.5px; color: var(--t2); line-height: 1.3; }
+    .tier-table td:not(:first-child) { text-align: center; font-size: 11px; }
+    .tier-table tr:last-child td { border-bottom: none; }
+    .check { color: var(--acc); font-weight: 700; }
+    .tier-table td.check:last-child { color: var(--acc2); }
+    .cross { color: var(--line); }
+
+    /* ── FORMAT PANE ── */
+    .pane-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+    .pane-group { background: #fff; border-radius: 6px; padding: 3px 7px; border: 1px solid var(--line); }
+    .pane-group h4 { font-size: 10.5px; color: var(--t1); font-weight: 700; line-height: 1.25; }
+    .pane-group ul { list-style: none; font-size: 9.5px; line-height: 1.3; }
+    .pane-group ul li { display: inline; font-size: 9.5px; color: var(--t2); line-height: 1.3; }
+    .pane-group ul li::before { content: ' · '; color: var(--acc); font-weight: 700; }
+    .pane-group ul li:first-child::before { content: ''; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 16px; display: flex; flex-direction: column; gap: 5px; }
+    .timeline::before { content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(to bottom, var(--acc), var(--acc2)); }
+    .tl-item { position: relative; }
+    .tl-dot { position: absolute; left: -16px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); border: 2px solid #fff; box-shadow: 0 0 0 1.5px var(--acc); }
+    .tl-item:nth-child(2) .tl-dot { background: var(--accd); box-shadow: 0 0 0 1.5px var(--accd); }
+    .tl-item:nth-child(3) .tl-dot { background: var(--acc2); box-shadow: 0 0 0 1.5px var(--acc2); }
+    .tl-card { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+    .tl-card { font-size: 9.5px; } .tl-card .tl-ver { font-size: 9.5px; font-weight: 700; color: var(--t3); letter-spacing: .8px; }
+    .tl-card .tl-date { float: right; font-size: 9.5px; color: var(--t3); margin-left: 6px; }
+    .tl-card h3 { font-size: 11px; color: var(--t1); margin: 1px 0 3px; }
+    .tl-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+    .tl-tag { background: rgba(43,108,176,.10); color: var(--acc); font-size: 9px; font-weight: 600; padding: 0 6px; border-radius: 8px; }
+    .tl-tag.g { background: var(--acc2l); color: var(--acc2); }
+    .tl-tag.r { background: var(--acc); color: #fff; }
+
+    /* ── FOOTER ── */
+    footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 2px; border-top: 1px solid var(--line); font-size: 11px; color: var(--t3); }
+    footer p { display: inline; }
+    footer a { color: var(--t3); text-decoration: none; }
+    footer a:hover { color: var(--acc); }
+    .foot-left { display: flex; align-items: center; gap: 14px; }
+
+    @media print { @page { size: A4 landscape; margin: 0; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #dl-btn, #fitcheck { display: none; } }
+  </style>
+</head>
+<body>
+<button id="dl-btn" onclick="download()">Download PNG</button>
+<div id="fitcheck"></div>
+
+<div id="infographic">
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<div class="header">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 828 362" width="136" height="60">
+    <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F4E80"/><stop offset="0.55" stop-color="#2B6CB0"/><stop offset="1" stop-color="#3E9C5B"/>
+    </linearGradient></defs>
+    <g transform="translate(40,46)">
+      <rect x="22" y="20" width="150" height="150" rx="30" fill="none" stroke="url(#g)" stroke-width="11"/>
+      <g fill="url(#g)">
+        <rect x="42" y="110" width="20" height="58" rx="5"/><rect x="70" y="86" width="20" height="82" rx="5"/>
+        <rect x="98" y="62" width="20" height="106" rx="5"/><rect x="126" y="38" width="20" height="130" rx="5"/>
+      </g>
+    </g>
+    <text x="258" y="246" font-family="Poppins,sans-serif" font-weight="700" font-size="196" letter-spacing="-4">
+      <tspan fill="url(#g)">tc</tspan><tspan fill="#3D3929">viz</tspan>
+    </text>
+    <text x="264" y="306" font-family="Poppins,sans-serif" font-weight="500" font-size="31" letter-spacing="6.5" fill="#83827D">VISUALS TO POWER BI</text>
+  </svg>
+  <div>
+    <h1>Bullet Chart <span>Pro</span> <span class="version-tag">v1.2.0.0</span></h1>
+    <p class="sub">Power BI Custom Visual — Real vs Target · Variance · Bands · Trellis</p>
+  </div>
+  <div class="badge-row">
+    <div class="badge">📊 No DAX Required</div>
+    <div class="badge red">⚡ IBCS Compliant</div>
+    <div class="badge blue">🏷️ Free / Pro Tiers</div>
+    <div class="badge">♿ Accessible</div>
+    <div class="badge">📑 AppSource Certified</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ═════════ COLUMN A ═════════ -->
+  <div class="col">
+    <!-- ═══════════════ 1. ANATOMY ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">1</div>
+      <h2>Anatomy of a Bullet Chart</h2>
+    </div>
+    <div class="panel">
+      <div class="anatomy-title">Visual breakdown — horizontal orientation</div>
+      <div class="chart-svg-wrap">
+        <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+          <rect x="0" y="0" width="820" height="200" fill="#fff"/>
+          <!-- ── Row 1 ── -->
+          <text x="14" y="52" font-family="Segoe UI,Arial" font-size="13" fill="#3D3929" dominant-baseline="middle">North Region</text>
+          <rect x="180" y="30" width="174" height="44" rx="2" fill="#EDE9DE"/>
+          <rect x="354" y="30" width="120" height="44" rx="2" fill="#DAD9D4"/>
+          <rect x="474" y="30" width="120" height="44" rx="2" fill="#B8B5AB"/>
+          <rect x="180" y="38" width="310" height="28" rx="3" fill="#3D3929"/>
+          <rect x="420" y="26" width="5" height="52" rx="1" fill="#2B6CB0"/>
+          <rect x="470" y="30" width="4" height="44" rx="1" fill="#D9A441" opacity=".85"/>
+          <line x1="540" y1="22" x2="540" y2="82" stroke="#8E5FC4" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="543" y="22" font-family="Segoe UI,Arial" font-size="9" fill="#8E5FC4">Ref 1</text>
+          <rect x="608" y="33" width="46" height="28" rx="4" fill="#3E9C5B" opacity=".15"/>
+          <text x="631" y="52" font-family="Segoe UI,Arial" font-size="12" fill="#3E9C5B" font-weight="700" text-anchor="middle">+8.2%</text>
+          <text x="695" y="52" font-family="Segoe UI,Arial" font-size="12" fill="#3D3929" text-anchor="middle">83.4K</text>
+          <!-- ── Row 2 ── -->
+          <text x="14" y="128" font-family="Segoe UI,Arial" font-size="13" fill="#3D3929" dominant-baseline="middle">South Region</text>
+          <rect x="180" y="106" width="174" height="44" rx="2" fill="#EDE9DE"/>
+          <rect x="354" y="106" width="120" height="44" rx="2" fill="#DAD9D4"/>
+          <rect x="474" y="106" width="120" height="44" rx="2" fill="#B8B5AB"/>
+          <rect x="180" y="114" width="230" height="28" rx="3" fill="#3D3929"/>
+          <rect x="358" y="102" width="5" height="52" rx="1" fill="#2B6CB0"/>
+          <rect x="410" y="106" width="4" height="44" rx="1" fill="#D9A441" opacity=".85"/>
+          <line x1="540" y1="98" x2="540" y2="158" stroke="#8E5FC4" stroke-width="2" stroke-dasharray="5,3"/>
+          <rect x="608" y="109" width="46" height="28" rx="4" fill="#B5473A" opacity=".15"/>
+          <text x="631" y="128" font-family="Segoe UI,Arial" font-size="12" fill="#B5473A" font-weight="700" text-anchor="middle">-5.1%</text>
+          <text x="695" y="128" font-family="Segoe UI,Arial" font-size="12" fill="#3D3929" text-anchor="middle">61.2K</text>
+          <!-- Axis line -->
+          <line x1="180" y1="170" x2="594" y2="170" stroke="#DAD9D4" stroke-width="1"/>
+          <text x="180" y="185" font-family="Segoe UI,Arial" font-size="10" fill="#83827D" text-anchor="middle">0</text>
+          <text x="300" y="185" font-family="Segoe UI,Arial" font-size="10" fill="#83827D" text-anchor="middle">25K</text>
+          <text x="420" y="185" font-family="Segoe UI,Arial" font-size="10" fill="#83827D" text-anchor="middle">50K</text>
+          <text x="540" y="185" font-family="Segoe UI,Arial" font-size="10" fill="#83827D" text-anchor="middle">75K</text>
+          <text x="594" y="185" font-family="Segoe UI,Arial" font-size="10" fill="#83827D" text-anchor="middle">100K</text>
+          <!-- ── CALLOUT ARROWS ── -->
+          <line x1="90" y1="52" x2="90" y2="190" stroke="#83827D" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="90" y="196" font-family="Segoe UI,Arial" font-size="9" fill="#83827D" text-anchor="middle">① Category</text>
+          <line x1="267" y1="30" x2="267" y2="10" stroke="#83827D" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="267" y="7" font-family="Segoe UI,Arial" font-size="9" fill="#83827D" text-anchor="middle">② Band 1 (Poor)</text>
+          <line x1="415" y1="30" x2="415" y2="10" stroke="#83827D" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="415" y="7" font-family="Segoe UI,Arial" font-size="9" fill="#83827D" text-anchor="middle">③ Band 2 (OK)</text>
+          <line x1="335" y1="52" x2="760" y2="52" stroke="#83827D" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="765" y="52" font-family="Segoe UI,Arial" font-size="9" fill="#3D3929" font-weight="700">④ Actual bar</text>
+          <line x1="422" y1="26" x2="422" y2="7" stroke="#2B6CB0" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="422" y="4" font-family="Segoe UI,Arial" font-size="9" fill="#2B6CB0" text-anchor="middle">⑤ Target</text>
+          <line x1="472" y1="30" x2="560" y2="10" stroke="#D9A441" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="564" y="8" font-family="Segoe UI,Arial" font-size="9" fill="#D9A441">⑥ Forecast</text>
+          <line x1="631" y1="33" x2="631" y2="10" stroke="#3E9C5B" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="631" y="7" font-family="Segoe UI,Arial" font-size="9" fill="#3E9C5B" text-anchor="middle">⑦ Variance</text>
+          <line x1="695" y1="33" x2="695" y2="10" stroke="#83827D" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="695" y="7" font-family="Segoe UI,Arial" font-size="9" fill="#83827D" text-anchor="middle">⑧ Value</text>
+        </svg>
+      </div>
+      <div class="legend-grid">
+        <div class="legend-item"><div class="legend-dot" style="background:#3D3929"></div><div><strong>① Actual Bar</strong><span>The primary measure — scales from zero to chart max</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2B6CB0"></div><div><strong>⑤ Target Marker</strong><span>Vertical line — success threshold for the period</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D9A441"></div><div><strong>⑥ Forecast Marker</strong><span>Expected end-of-period value [Pro]</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EDE9DE"></div><div><strong>② Band 1 — Poor</strong><span>Performance below threshold (% of max)</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#DAD9D4"></div><div><strong>③ Band 2 — Satisfactory</strong><span>Mid-range performance zone</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#B8B5AB"></div><div><strong>Band 3 — Good</strong><span>Top performance zone</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#3E9C5B"></div><div><strong>⑦ Variance</strong><span>Auto-calculated: Actual − Target, abs + %</span></div></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8E5FC4"></div><div><strong>Reference Line</strong><span>Up to 2 custom vertical benchmarks [Pro]</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ STATS ═══════════════ -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="num">0</div><div class="lbl">DAX measures needed for variance</div></div>
+      <div class="stat-card"><div class="num">9</div><div class="lbl">Format pane sections</div></div>
+      <div class="stat-card"><div class="num">2K</div><div class="lbl">Max data rows per render</div></div>
+      <div class="stat-card"><div class="num">2</div><div class="lbl">Orientations: Horizontal & Vertical</div></div>
+      <div class="stat-card"><div class="num">3</div><div class="lbl">Versions shipped since May 2026</div></div>
+    </div>
+
+    <!-- ═══════════════ 6. TIMELINE ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">6</div>
+      <h2>Release Timeline</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-date">Jul 27, 2026</div>
+          <div class="tl-ver">v1.2.0.0 <span class="tl-date" style="color:#2B6CB0;float:none">Latest</span></div>
+          <h3>Trellis · Reference Lines · Accessibility</h3>
+          <div class="tl-tags">
+            <span class="tl-tag r">Small Multiples</span>
+            <span class="tl-tag r">Reference Lines</span>
+            <span class="tl-tag r">Negative Values</span>
+            <span class="tl-tag r">High Contrast</span>
+            <span class="tl-tag r">Bookmarks</span>
+            <span class="tl-tag r">Conditional Formatting</span>
+            <span class="tl-tag r">Dynamic Format Strings</span>
+            <span class="tl-tag r">Keyboard Nav</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-date">Jun 15, 2026</div>
+          <div class="tl-ver">v1.1.0.0</div>
+          <h3>Tooltips · Drilldown · Legend · Axis</h3>
+          <div class="tl-tags">
+            <span class="tl-tag">Tooltips</span>
+            <span class="tl-tag">Drilldown</span>
+            <span class="tl-tag">Legend</span>
+            <span class="tl-tag">Axis / Scale</span>
+            <span class="tl-tag">Scroll</span>
+            <span class="tl-tag">Sorting</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-date">May 1, 2026</div>
+          <div class="tl-ver">v1.0.0.0</div>
+          <h3>Initial Release</h3>
+          <div class="tl-tags">
+            <span class="tl-tag g">Actual vs Target</span>
+            <span class="tl-tag g">Variance</span>
+            <span class="tl-tag g">Bands</span>
+            <span class="tl-tag g">IBCS Mode</span>
+            <span class="tl-tag g">Free / Pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ COLUMN B ═════════ -->
+  <div class="col">
+    <!-- ═══════════════ 2. FIELD WELLS ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">2</div>
+      <h2>Data Field Wells</h2>
+    </div>
+    <div class="wells-grid">
+      <div class="well-card">
+        <div class="wlabel">Required</div>
+        <div class="wname">📂 Category</div>
+        <div class="wdesc">Grouping field — one row per value. Supports hierarchy drilldown.</div>
+      </div>
+      <div class="well-card">
+        <div class="wlabel">Required</div>
+        <div class="wname">📊 Actual (Real)</div>
+        <div class="wdesc">Primary measure. The bar length. Supports Dynamic Format Strings.</div>
+      </div>
+      <div class="well-card opt">
+        <div class="wlabel">Optional</div>
+        <div class="wname">🎯 Target</div>
+        <div class="wdesc">Success threshold. Renders as a vertical marker; drives auto variance.</div>
+      </div>
+      <div class="well-card pro">
+        <div class="wlabel">Pro only</div>
+        <div class="wname">🔮 Forecast [Pro]</div>
+        <div class="wdesc">Expected end-of-period value. Shown as a distinct colored marker.</div>
+      </div>
+      <div class="well-card pro">
+        <div class="wlabel">Pro only</div>
+        <div class="wname">🗂️ Small Multiples By [Pro]</div>
+        <div class="wdesc">Split the visual into side-by-side trellis panels by any grouping field.</div>
+      </div>
+      <div class="well-card opt">
+        <div class="wlabel">Optional</div>
+        <div class="wname">💬 Tooltips</div>
+        <div class="wdesc">Up to 10 additional measures shown in Power BI tooltip. Numeric or boolean.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ 5. FORMAT PANE ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">5</div>
+      <h2>Format Pane — Quick Reference</h2>
+    </div>
+    <div class="pane-grid">
+      <div class="pane-group"><h4>⚙️ General</h4><ul><li>Orientation (H / V)</li><li>IBCS Mode (toggle)</li></ul></div>
+      <div class="pane-group"><h4>🎨 Colors</h4><ul><li>Actual bar color</li><li>Target marker color</li><li>Forecast marker color</li><li>Positive / Negative variance</li><li>Band 1 / 2 / 3 colors</li></ul></div>
+      <div class="pane-group"><h4>📐 Qualitative Bands</h4><ul><li>Show bands (toggle)</li><li>Band 1 threshold %</li><li>Band 2 threshold %</li></ul></div>
+      <div class="pane-group"><h4>📊 Variance</h4><ul><li>Show variance (toggle)</li><li>Show variance % (toggle)</li><li>Variance threshold</li></ul></div>
+      <div class="pane-group"><h4>🏷️ Labels</h4><ul><li>Category label (toggle)</li><li>Actual value (toggle)</li><li>Target value (toggle)</li><li>Font size</li><li>Font family</li></ul></div>
+      <div class="pane-group"><h4>📏 Layout</h4><ul><li>Label width %</li><li>Right panel width %</li><li>Show axis (toggle)</li></ul></div>
+      <div class="pane-group"><h4>🗺️ Legend</h4><ul><li>Show legend (toggle)</li><li>Position (top / bottom)</li></ul></div>
+      <div class="pane-group"><h4>📏 Reference Lines</h4><ul><li>Line 1: show / value / label / color</li><li>Line 2: show / value / label / color</li></ul></div>
+      <div class="pane-group"><h4>🪟 Trellis [Pro]</h4><ul><li>Enabled (toggle)</li><li>Columns</li><li>Sync scale (toggle)</li><li>Show panel title</li><li>Panel bg / border color</li></ul></div>
+    </div>
+  </div>
+
+  <!-- ═════════ COLUMN C ═════════ -->
+  <div class="col">
+    <!-- ═══════════════ 3. FEATURES ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">3</div>
+      <h2>Key Features</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feat-card"><div class="icon">⚡</div><h3>Zero DAX Variance</h3><p>Actual − Target variance calculated automatically. Absolute value + percentage, color-coded green/red.</p></div>
+      <div class="feat-card"><div class="icon">🎨</div><h3>IBCS Mode</h3><p>One toggle switches to a monochrome IBCS-compliant palette for standards-based reporting.</p></div>
+      <div class="feat-card"><div class="icon">🔄</div><h3>Orientation</h3><p>Horizontal or vertical layout. Switch in a single click from the General format section.</p></div>
+      <div class="feat-card pro"><div class="pro-pill">PRO</div><div class="icon">🪟</div><h3>Small Multiples / Trellis</h3><p>Side-by-side panels per dimension value. Independent or synchronized axis scales.</p></div>
+      <div class="feat-card pro"><div class="pro-pill">PRO</div><div class="icon">📏</div><h3>Reference Lines</h3><p>Up to 2 configurable vertical benchmarks with custom labels and colors. Propagate across trellis panels.</p></div>
+      <div class="feat-card"><div class="icon">➖</div><h3>Negative Values</h3><p>Automatic bipolar scale with zero-baseline when data contains negative values.</p></div>
+      <div class="feat-card"><div class="icon">♿</div><h3>Accessibility</h3><p>Full keyboard navigation (Arrow / Enter / Escape). High Contrast mode with host color palette.</p></div>
+      <div class="feat-card"><div class="icon">🔖</div><h3>Bookmarks & Cross-filter</h3><p>Selection state persisted via bookmarks. Cross-highlight and multi-visual selection supported.</p></div>
+      <div class="feat-card"><div class="icon">💬</div><h3>Tooltips & Drilldown</h3><p>Canvas report tooltips. Hierarchy drilldown on the category role with drill-navigation controls.</p></div>
+      <div class="feat-card"><div class="icon">🎯</div><h3>Conditional Formatting</h3><p>Per-category actual bar color via the format pane "fx" button — no DAX workaround needed.</p></div>
+      <div class="feat-card"><div class="icon">🔢</div><h3>Dynamic Format Strings</h3><p>Actual, Target and Forecast values respect the measure's native format string. Supports Calculation Groups.</p></div>
+      <div class="feat-card"><div class="icon">📜</div><h3>Scroll & Sorting</h3><p>Vertical scroll when categories overflow the viewport. Native Power BI sort controls wired up.</p></div>
+    </div>
+  </div>
+
+  <!-- ═════════ COLUMN D ═════════ -->
+  <div class="col">
+    <!-- ═══════════════ 4. FREE vs PRO ═══════════════ -->
+    <div class="sec-head">
+      <div class="num">4</div>
+      <h2>Free vs Pro</h2>
+    </div>
+    <table class="tier-table">
+      <thead>
+        <tr><th>Feature</th><th class="free">Free</th><th class="pro">Pro</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Actual vs Target comparison</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Automatic variance (absolute + %)</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Qualitative performance bands (3 zones)</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>IBCS monochrome mode</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Horizontal & vertical orientation</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Conditional formatting per category</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Tooltips (standard + canvas)</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Drilldown & hierarchy</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Keyboard navigation & high contrast</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Bookmarks & cross-visual selection</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Dynamic Format Strings</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Negative values (bipolar scale)</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Scroll + native sorting</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td><strong>Small Multiples / Trellis</strong></td><td class="cross">—</td><td class="check">✓</td></tr>
+        <tr><td><strong>Forecast marker</strong></td><td class="cross">—</td><td class="check">✓</td></tr>
+        <tr><td><strong>Reference lines (×2)</strong></td><td class="cross">—</td><td class="check">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /main -->
+
+<footer>
+  <div class="foot-left">
+    <svg width="70" height="30" viewBox="0 0 828 362">
+      <defs><linearGradient id="gf" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#1F4E80"/><stop offset="0.55" stop-color="#2B6CB0"/><stop offset="1" stop-color="#3E9C5B"/>
+      </linearGradient></defs>
+      <g transform="translate(40,46)">
+        <rect x="22" y="20" width="150" height="150" rx="30" fill="none" stroke="url(#gf)" stroke-width="11"/>
+        <g fill="url(#gf)">
+          <rect x="42" y="110" width="20" height="58" rx="5"/><rect x="70" y="86" width="20" height="82" rx="5"/>
+          <rect x="98" y="62" width="20" height="106" rx="5"/><rect x="126" y="38" width="20" height="130" rx="5"/>
+        </g>
+      </g>
+      <text x="258" y="246" font-family="Poppins,sans-serif" font-weight="700" font-size="196"><tspan fill="url(#gf)">tc</tspan><tspan fill="#3D3929">viz</tspan></text>
+    </svg>
+    <p><strong style="color:#3D3929">Bullet Chart Pro</strong> by TCViz &nbsp;·&nbsp;
+      <a href="support.html">Support</a> &nbsp;·&nbsp;
+      <a href="docs.html">Documentation</a> &nbsp;·&nbsp;
+      <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a> &nbsp;·&nbsp;
+      <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+      <a href="terms.html">Terms</a>
+    </p>
+  </div>
+  <p>© 2026 TCViz · <a href="mailto:support@tcviz.com">support@tcviz.com</a></p>
+</footer>
+
+</div><!-- /infographic -->
+
+<script>
+function download() {
+  html2canvas(document.getElementById('infographic'), { width: 1366, height: 768, scale: 1 }).then(function (canvas) {
+    const a = document.createElement('a');
+    a.download = 'bullet-chart-pro-infographic.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+}
+function checkFit() {
+  const h = document.getElementById('infographic').scrollHeight;
+  const box = document.getElementById('fitcheck');
+  if (h > 768) { box.textContent = 'OVERFLOW: ' + (h - 768) + 'px'; box.style.background = '#B00020'; document.title = 'OVERFLOW'; }
+  else { box.textContent = 'FIT 1366×768'; box.style.background = '#3E9C5B'; document.title = 'FIT'; }
+}
+window.addEventListener('load', function () { checkFit(); if (document.fonts) document.fonts.ready.then(checkFit); });
+</script>
+</body>
+</html>
