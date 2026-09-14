@@ -6,6 +6,46 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 
 ---
 
+## [1.3.0.0] — 2026-09-14
+
+### Changed
+- **Forecast marker is a Pro feature**, as the Terms of Use already stated. In 1.2.0.0 the marker was drawn
+  for every user; it is now drawn — and included in tooltips, legend and scale — only with an active licence.
+- **Vertical orientation is a Pro feature**, as the Terms of Use already stated. Without a licence the chart
+  renders horizontally; the format pane keeps the chosen value and Power BI shows its licence notice.
+- **Free users can see what Pro offers.** The *Small Multiples [Pro]* card is visible in the format pane for
+  everyone. Previously it was hidden without a licence, so the only Pro feature could not be discovered.
+- **Small Multiples split as soon as a field is added** to *Small Multiples By*. "Enable small multiples"
+  now defaults to on; before, a licensed user had to find and switch it on or nothing happened.
+
+### Added
+- **Power BI's own purchase notifications.** When a Free user adds a field to *Small Multiples By* or
+  *Forecast*, or switches small multiples on, the visual calls `notifyFeatureBlocked` and
+  `notifyLicenseRequired`, which carry the purchase path. They fire only once the licence is resolved, and
+  are cleared as soon as it resolves to Pro or the Pro fields are removed.
+- `build-test.js` to produce test builds (`_test` Pro, `_testfree` Free) without editing the source by hand.
+
+### Fixed
+- **A licence in the `Warning` state was treated as Free.** Warning is the grace period of a failed payment;
+  the customer has paid and now keeps Pro through it.
+- **Publish to Web, embedding and export no longer ask anyone to buy.** `isLicenseUnsupportedEnv` and
+  `isLicenseInfoAvailable` are honoured: where the licence cannot be read, the free experience renders
+  without purchase prompts.
+- **Bars disappeared when the visual was narrow.** The values column is sized in pixels from the longest
+  label, so on a narrow visual the category and values columns took the whole width. The bar now keeps at
+  least 40% of the width: the values column shrinks first, then hides, then the category column shrinks.
+- **Small Multiples panels overlapped each other and the legend** when the visual was short. Panel height
+  came only from dividing the viewport, while rows never go below 28 px. Each panel is now at least as tall
+  as its rows (the visual scrolls instead), and panels narrower than 220 px reduce the column count.
+- **Removed `supportsOnObjectFormatting`** from capabilities: it was declared but not implemented.
+
+### Documentation
+- Corrected the 1.2.0.0 entry below: per-category bar colour is a colour picker per category, not
+  rule-based (fx) conditional formatting, and `supportsConditionalFormatting` / `supportsBookmarkActions`
+  were never declared in `capabilities.json` (neither is a valid capability flag).
+
+---
+
 ## [1.2.0.0] — 2026-07-27
 
 ### Added

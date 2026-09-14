@@ -49,6 +49,7 @@ const FORECAST_SIZE   = 5;
 const CHART_PAD_R     = 8;
 const TRELLIS_GAP     = 10;
 const TRELLIS_TITLE_H = 28;
+const MIN_PANEL_W     = 220;  // below this a small-multiples panel is unreadable: use fewer columns
 const VERT_PAD_TOP    = 8;
 const VERT_PAD_BOT    = 20;
 const VERT_PAD_LR     = 6;
@@ -56,6 +57,7 @@ const LEGEND_H        = 22;
 const AXIS_H          = 16;   // height reserved below chart rows for H-axis labels
 const MAX_ROW_H       = 72;   // cap row height so tall visuals don't look odd
 const MIN_COL_W       = 32;   // minimum column width in vertical mode before H-scroll kicks in
+const PLAN_ID         = "bullet-chart-pro-tcviz";   // debe coincidir con el Plan ID de Partner Center
 
 // ═══════════════════════════════════════════════════════════════════
 //  Visual
@@ -70,7 +72,12 @@ export class BulletChartPro implements IVisual {
     private selectionManager: ISelectionManager;
     private tooltipService:   ITooltipService;
     private settings:         BulletSettings;
-    private isPro:            boolean = false; // set true locally to test Pro features
+    private isPro:            boolean = false; // ISPRO_MARKER — build-test.js lo parchea; nunca a mano
+    private licenseResolved      = false;  // no se avisa de compra hasta conocer la licencia
+    private licenseEnvSupported  = true;   // false en Publish to Web, embebido, exportación
+    private licenseInfoAvailable = true;   // false si la licencia no se pudo leer
+    private licenseIconShown     = false;
+    private lastBlockedNotice    = "";
     private lastOptions:      VisualUpdateOptions | null = null;
     private lastDataPoints:   BulletDataPoint[] = [];
     private focusedIndex:     number = -1;
@@ -136,19 +143,79 @@ export class BulletChartPro implements IVisual {
     // ── License ──────────────────────────────────────────────────────
 
     private async checkLicense(): Promise<void> {
-        if (this.isPro) return; // test mode: isPro hardcoded to true, skip license check
+        if (this.isPro) { this.licenseResolved = true; return; } // build de test con Pro forzado
         try {
             const lm = (this.host as any).licenseManager;
-            if (!lm) return;
+            if (!lm) { this.licenseResolved = true; return; }
             const r = await lm.getAvailableServicePlans();
-            const wasNotPro = !this.isPro;
-            this.isPro = !!(r?.plans?.some(
-                (p: any) => p.spIdentifier === "bullet-chart-pro-tcviz" && p.state === 1));
-            // Re-render if license state changed and we have pending options
-            if (wasNotPro && this.isPro && this.lastOptions) {
-                this.update(this.lastOptions);
+            // Donde la licencia no se puede consultar, un cliente de pago también se ve Free.
+            this.licenseEnvSupported  = !r?.isLicenseUnsupportedEnv;
+            this.licenseInfoAvailable = r?.isLicenseInfoAvailable !== false;
+            // ServicePlanState: Active = 1, Warning = 2. Warning es el periodo de gracia de un
+            // cobro fallido: el cliente ya pagó y conserva Pro mientras se resuelve.
+            const pro = !!(r?.plans?.some(
+                (p: any) => p.spIdentifier === PLAN_ID && (p.state === 1 || p.state === 2)));
+            this.licenseResolved = true;
+            if (pro && !this.isPro) {
+                this.isPro = true;
+                this.clearLicenseNotice();
+                if (this.lastOptions) this.update(this.lastOptions);
+            } else if (!pro) {
+                this.notifyProBlocked(this.lastOptions?.dataViews?.[0]);
             }
-        } catch { this.isPro = false; }
+        } catch {
+            // Free, sin avisos: si no se pudo leer la licencia no sabemos si ya pagó.
+            this.isPro = false;
+            this.licenseInfoAvailable = false;
+            this.licenseResolved = true;
+        }
+    }
+
+    /** Funciones Pro que el usuario ha intentado usar en este informe. */
+    private attemptedPro(dv: DataView | undefined): string[] {
+        const wanted: string[] = [];
+        const cat = dv?.categorical;
+        const trellisOn = (dv?.metadata?.objects as any)?.trellis?.enabled === true;
+        if (trellisOn || cat?.categories?.some(c => c.source.roles?.["trellisBy"])) wanted.push("Small Multiples");
+        if (cat?.values?.some(v => v.source.roles?.["forecast"])) wanted.push("the Forecast marker");
+        if ((dv?.metadata?.objects as any)?.general?.orientation === "vertical") wanted.push("vertical orientation");
+        return wanted;
+    }
+
+    /**
+     * Aviso de compra con las notificaciones de Power BI, que llevan la ruta de compra.
+     * Microsoft pide no dibujar UI de licencias propia. Solo cuando el usuario ha intentado
+     * algo Pro, y solo con la licencia ya resuelta.
+     */
+    private notifyProBlocked(dv: DataView | undefined): void {
+        if (this.isPro) { this.clearLicenseNotice(); return; }
+        if (!this.licenseResolved) return;
+        const wanted = this.attemptedPro(dv);
+        if (!wanted.length) { this.clearLicenseNotice(); return; }
+        if (!this.licenseEnvSupported || !this.licenseInfoAvailable) return;
+
+        const lm = (this.host as any).licenseManager;
+        if (!this.licenseIconShown) {
+            this.licenseIconShown = true;
+            // LicenseNotificationType.General es const enum: 0 en runtime
+            try { lm?.notifyLicenseRequired?.(0); } catch { /* best effort */ }
+        }
+        const sig = wanted.join("|");
+        if (sig === this.lastBlockedNotice) return;   // no repetir en cada resize o refresco
+        this.lastBlockedNotice = sig;
+        const one = wanted.length === 1;
+        try {
+            lm?.notifyFeatureBlocked?.(
+                `Bullet Chart Pro: ${wanted.join(" and ")} ${one ? "is" : "are"} part of the Pro plan. ` +
+                `Get a licence to enable ${one ? "it" : "them"}.`);
+        } catch { /* best effort */ }
+    }
+
+    private clearLicenseNotice(): void {
+        this.lastBlockedNotice = "";
+        if (!this.licenseIconShown) return;
+        this.licenseIconShown = false;
+        try { (this.host as any).licenseManager?.clearLicenseNotification?.(); } catch { /* best effort */ }
     }
 
     // ── Settings ─────────────────────────────────────────────────────
@@ -292,7 +359,8 @@ export class BulletChartPro implements IVisual {
     ): BulletDataPoint {
         const actual   = ac.values[i] as number | null;
         const target   = tc ? tc.values[i] as number | null : null;
-        const forecast = fc ? fc.values[i] as number | null : null;
+        // Forecast es Pro: en Free no se dibuja, ni entra en tooltip, leyenda o escala
+        const forecast = (fc && this.isPro) ? fc.values[i] as number | null : null;
         const variance    = (actual != null && target != null) ? actual - target : null;
         const variancePct = (variance != null && target != null && target !== 0)
             ? (variance / Math.abs(target)) * 100 : null;
@@ -342,8 +410,11 @@ export class BulletChartPro implements IVisual {
 
             this.settings = this.parseSettings(dv);
             const s = this.settings;
+            this.notifyProBlocked(dv);
 
-            if (this.isPro && s.trellisEnabled) {
+            // Small multiples: basta con poner un campo en su pozo (enabled viene true por defecto)
+            const hasTrellisField = !!dv.categorical?.categories?.some(c => c.source.roles?.["trellisBy"]);
+            if (this.isPro && s.trellisEnabled && hasTrellisField) {
                 const panels = this.parseTrellis(dv);
                 this.lastDataPoints = panels.flatMap(p => p.data);
                 if (!panels.length) { this.renderLanding(vp); }
@@ -363,7 +434,9 @@ export class BulletChartPro implements IVisual {
             const catCol = dv.categorical?.categories?.find(c => c.source.roles?.["category"]);
             const drillLabel = this.isDrilled ? (catCol?.source.displayName ?? "") : "";
 
-            if (s.orientation === "vertical") this.renderVertical(data, vp.width, vp.height, drillLabel);
+            // Vertical es Pro: en Free se dibuja en horizontal (el panel conserva lo elegido y
+            // notifyProBlocked lanza el aviso de Power BI)
+            if (s.orientation === "vertical" && this.isPro) this.renderVertical(data, vp.width, vp.height, drillLabel);
             else                              this.renderHorizontal(data, vp.width, vp.height, drillLabel);
 
             this.events.renderingFinished(options);
@@ -842,24 +915,31 @@ export class BulletChartPro implements IVisual {
 
     private renderTrellis(panels: TrellisPanel[], vpW: number, vpH: number): void {
         const s      = this.settings;
-        const cols   = Math.max(1, s.trellisColumns);
-        const nRows  = Math.ceil(panels.length / cols);
         const titleH = s.trellisShowTitle ? TRELLIS_TITLE_H : 0;
 
         // Reserve space for legend before computing panel heights
         const legendH    = s.showLegend ? LEGEND_H : 0;
         const isTop      = s.legendPosition === "top";
-        const availH     = vpH - legendH;
+        const availH     = Math.max(0, vpH - legendH);
         const panelOffY  = isTop ? legendH : 0; // panels shift down when legend is on top
 
+        // Columnas: nunca paneles más estrechos que MIN_PANEL_W. Si no caben, menos columnas.
+        const fitCols    = Math.max(1, Math.floor((vpW - TRELLIS_GAP) / (MIN_PANEL_W + TRELLIS_GAP)));
+        const cols       = Math.max(1, Math.min(s.trellisColumns, fitCols, panels.length));
+        const nRows      = Math.ceil(panels.length / cols);
         const panelW     = Math.floor((vpW - TRELLIS_GAP * (cols  + 1)) / cols);
-        const panelH     = Math.floor((availH - TRELLIS_GAP * (nRows + 1)) / nRows);
-        const contentH   = Math.max(20, panelH - titleH);
-        const maxRows    = Math.max(...panels.map(p => p.data.length));
-        const targetRowH  = Math.max(24, Math.floor(contentH / maxRows));
+        const maxRows    = Math.max(1, ...panels.map(p => p.data.length));
+        const fitH       = Math.floor((availH - TRELLIS_GAP * (nRows + 1)) / nRows);
+        const targetRowH  = Math.max(24, Math.floor((fitH - titleH) / maxRows));
         const allData     = panels.flatMap(p => p.data);
         const autoRightW  = this.estimateRightW(allData, s, s.fontSize);
         const L           = this.hLayout(s, panelW, targetRowH, autoRightW);
+        // Cada panel mide al menos lo que ocupan sus filas (rowH nunca baja de 28). Antes el alto
+        // salía solo del reparto del viewport y las filas se dibujaban encima del panel siguiente
+        // y de la leyenda. Si no caben, el SVG crece y el contenedor hace scroll.
+        const minPanelH  = s.orientation === "vertical" ? titleH + 120 : titleH + maxRows * L.rowH + 4;
+        const panelH     = Math.max(fitH, minPanelH);
+        const contentH   = Math.max(20, panelH - titleH);
         const allow      = this.canInteract();
         const { min: gRMin, max: gRMax } = this.calcRange(allData);
         const globalDomainMin = Math.min(0, gRMin);
@@ -973,13 +1053,27 @@ export class BulletChartPro implements IVisual {
         const barY    = Math.floor((rowH - barH) / 2);
         const aBarH   = Math.max(3, Math.floor(barH * 0.55));
         const aBarY   = barY + Math.floor((barH - aBarH) / 2);
-        const labelW  = s.showCategoryLabel ? Math.round(vpW * s.labelWidthPct / 100) : 0;
+        let labelW    = s.showCategoryLabel ? Math.round(vpW * s.labelWidthPct / 100) : 0;
         // autoRightW: computed from actual data so column always fits the longest number.
         // Falls back to rightPanelWidthPct when no data is available yet.
-        const rightW  = autoRightW != null
+        let rightW    = autoRightW != null
             ? autoRightW
             : (s.showActualValue || s.showVariance || s.showTargetValue)
                 ? Math.round(vpW * s.rightPanelWidthPct / 100) : 0;
+        // La barra es lo esencial. rightW va en píxeles fijos (sale del texto más largo), así que
+        // en un visual estrecho etiqueta + valores se comían todo el ancho y la barra desaparecía.
+        // Se garantiza un mínimo para la barra: primero se estrecha la columna de valores, si
+        // queda inservible se oculta, y solo después se estrecha la de categorías.
+        const avail    = Math.max(0, vpW - CHART_PAD_R);
+        const minChart = Math.min(avail, Math.max(60, Math.round(vpW * 0.4)));
+        if (labelW + rightW > avail - minChart) {
+            rightW = Math.max(0, avail - minChart - labelW);
+            if (rightW < 50) rightW = 0;
+            if (labelW + rightW > avail - minChart) {
+                labelW = Math.max(0, avail - minChart - rightW);
+                if (labelW < 40) labelW = 0;
+            }
+        }
         const chartW  = Math.max(20, vpW - labelW - rightW - CHART_PAD_R);
         return { rowH, barH, barY, actualBarH: aBarH, actualBarY: aBarY, labelW, rightW, chartW };
     }
@@ -1601,7 +1695,9 @@ export class BulletChartPro implements IVisual {
                     refLine2Show:s.refLine2Show, refLine2Value:s.refLine2Value, refLine2Label:s.refLine2Label, refLine2Color:{solid:{color:s.refLine2Color}},
                 }}); break;
             case "trellis":
-                if (this.isPro) inst.push({ objectName:n, selector:null, properties:{
+                // Visible también en Free: si no, nadie descubre que Pro existe.
+                // El display name ya lleva "[Pro]" y activarlo sin licencia dispara el aviso.
+                inst.push({ objectName:n, selector:null, properties:{
                     enabled:s.trellisEnabled, columns:s.trellisColumns, syncScale:s.trellisSyncScale,
                     trellisShowTitle:s.trellisShowTitle,
                     trellisPanelColor:{solid:{color:s.trellisPanelColor}},

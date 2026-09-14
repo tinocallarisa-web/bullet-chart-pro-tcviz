@@ -104,7 +104,7 @@ export function getDefaultSettings(): BulletSettings {
         refLine2Label:      "",
         refLine2Color:      "#FB8C00",
 
-        trellisEnabled:     false,
+        trellisEnabled:     true,    // con licencia, poner un campo en Small Multiples By ya divide
         trellisColumns:     2,
         trellisSyncScale:   true,
         trellisShowTitle:   true,

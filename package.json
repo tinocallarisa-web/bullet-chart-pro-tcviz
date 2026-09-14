@@ -1,7 +1,7 @@
 {
   "name": "bullet-chart-pro-tcviz",
   "description": "Power BI Bullet Chart Pro — Real vs Target with integrated variance, no DAX",
-  "version": "1.0.1",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "pbiviz": "pbiviz",

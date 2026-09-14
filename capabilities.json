@@ -72,7 +72,7 @@
           "type": {
             "enumeration": [
               { "value": "horizontal", "displayName": "Horizontal" },
-              { "value": "vertical",   "displayName": "Vertical"   }
+              { "value": "vertical",   "displayName": "Vertical [Pro]" }
             ]
           }
         },
@@ -187,6 +187,5 @@
   "supportsLandingPage":             true,
   "supportsKeyboardFocus":           true,
   "supportsMultiVisualSelection":    true,
-  "supportsSynchronizingFilterState": true,
-  "supportsOnObjectFormatting":      true
+  "supportsSynchronizingFilterState": true
 }
