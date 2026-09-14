@@ -1,4 +1,4 @@
-BULLET CHART PRO -- TIPS & HINTS (v1.3.0.0)
+BULLET CHART PRO -- TIPS & HINTS (v1.3.1.0)
 
 GETTING STARTED
 1. Drag a category (region, product, KPI name) into Category.

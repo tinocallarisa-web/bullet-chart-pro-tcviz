@@ -57,7 +57,18 @@ const LEGEND_H        = 22;
 const AXIS_H          = 16;   // height reserved below chart rows for H-axis labels
 const MAX_ROW_H       = 72;   // cap row height so tall visuals don't look odd
 const MIN_COL_W       = 32;   // minimum column width in vertical mode before H-scroll kicks in
-const PLAN_ID         = "bullet-chart-pro-tcviz";   // debe coincidir con el Plan ID de Partner Center
+const PLAN_ID         = "bullet-chart-pro-tcviz";   // Plan ID: última parte del Service ID de Partner Center
+
+/**
+ * spIdentifier es el Service ID completo de Partner Center ("editor.oferta.plan", p.ej.
+ * "tino_callarisa.bullet-chart-pro-tcviz.bullet-chart-pro-tcviz"), no el Plan ID corto:
+ * lo dice la documentación de la licensing API. Comparar solo con el Plan ID dejaba en
+ * Free a quien pagaba. Se acepta el Service ID que termina en ".<plan>" y también el Plan ID.
+ */
+function matchesPlan(spIdentifier: unknown, planId: string): boolean {
+    const sp = String(spIdentifier ?? "");
+    return sp === planId || sp.endsWith("." + planId);
+}
 
 // ═══════════════════════════════════════════════════════════════════
 //  Visual
@@ -154,7 +165,7 @@ export class BulletChartPro implements IVisual {
             // ServicePlanState: Active = 1, Warning = 2. Warning es el periodo de gracia de un
             // cobro fallido: el cliente ya pagó y conserva Pro mientras se resuelve.
             const pro = !!(r?.plans?.some(
-                (p: any) => p.spIdentifier === PLAN_ID && (p.state === 1 || p.state === 2)));
+                (p: any) => matchesPlan(p.spIdentifier, PLAN_ID) && (p.state === 1 || p.state === 2)));
             this.licenseResolved = true;
             if (pro && !this.isPro) {
                 this.isPro = true;

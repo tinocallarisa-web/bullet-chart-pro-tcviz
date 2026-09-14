@@ -1,4 +1,4 @@
-# Bullet Chart Pro — Tips & Hints (v1.3.0.0)
+# Bullet Chart Pro — Tips & Hints (v1.3.1.0)
 
 ## Getting started
 
