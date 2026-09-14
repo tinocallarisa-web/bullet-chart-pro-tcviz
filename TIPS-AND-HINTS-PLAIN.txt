@@ -1,0 +1,51 @@
+BULLET CHART PRO -- TIPS & HINTS (v1.3.0.0)
+
+GETTING STARTED
+1. Drag a category (region, product, KPI name) into Category.
+2. Drag your measure into Actual (Real). The bullets render straight away.
+3. Drag the goal into Target. Variance (absolute and %) is calculated by the visual. No DAX.
+4. Qualitative bands are on by default. Set their thresholds in Format > Qualitative Bands.
+
+FIELD WELLS
+. Category ................... one bullet per value; hierarchies and drilldown
+. Actual (Real) .............. the bar; respects the measure's format string
+. Target ..................... vertical marker; drives the variance label
+. Forecast [Pro] ............. triangle marker for the expected end-of-period value
+. Small Multiples By [Pro] ... one panel per value of this field
+. Tooltips ................... up to 10 extra measures in the tooltip
+
+FREE VS PRO
+. Free ... actual vs target with variance, bands, IBCS mode, horizontal orientation,
+           two reference lines, a colour per category, tooltips, drilldown,
+           cross-filtering, bookmarks, keyboard navigation, high contrast
+. Pro .... Small Multiples, Forecast marker, vertical orientation
+Without a licence, a Pro feature leaves the chart as it is and Power BI shows its
+own notice with the option to buy.
+
+FORMAT PANE
+. General ................ orientation (Vertical is Pro), IBCS mode
+. Colors ................. actual, target, forecast, variance, bands, colour per category
+. Qualitative Bands ...... show, band 1 and band 2 thresholds (% of data maximum)
+. Variance ............... show label, show %, green/red threshold
+. Labels ................. category, actual value, target value, font size and family
+. Layout ................. category column width %, values panel width %, scale axis
+. Legend ................. show, top or bottom
+. Reference Lines ........ two lines: show, value, label, colour
+. Small Multiples [Pro] .. enable, columns, synced scale, titles, panel colours
+
+TIPS
+. Variance threshold: 0 for a plain above/below colour, or a tolerance such as -5.
+. Bands are a % of the largest value in the data, not of the target.
+. IBCS mode replaces your colours with the standard monochrome palette.
+. Reference lines suit a company benchmark or last year's average.
+. Small Multiples: Sync scale on to compare magnitudes, off to compare shapes.
+. Negative values switch the scale to bipolar automatically.
+. Keyboard: click the visual, arrows move, Enter selects, Escape clears.
+
+TROUBLESHOOTING
+. Values on the right disappeared ..... visual too narrow; the bar keeps 40% of the width
+. Small Multiples By does nothing ..... Pro feature; with a licence check Enable is on
+. No forecast triangle ................ Forecast is Pro; check the field is not blank
+. Vertical shows horizontal bars ...... vertical is Pro
+. Only part of the categories ......... the visual receives up to 2,000 categories
+. Panels scroll instead of fitting .... each panel needs room for its rows; make it taller
