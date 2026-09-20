@@ -95,7 +95,8 @@
       "displayName": "Colors",
       "displayNameKey": "Visual_Colors",
       "properties": {
-        "actualColor":   { "displayName": "Actual bar", "displayNameKey": "Visual_Colors_ActualColor",        "type": { "fill": { "solid": { "color": true } } } },
+        "actualColor":   { "displayName": "Actual bar", "displayNameKey": "Visual_Colors_ActualColor",        "type": { "fill": { "solid": { "color": true } } },
+          "rule": { "inputRole": "actual", "output": { "property": "actualColor", "selector": ["category"] } } },
         "targetColor":   { "displayName": "Target marker", "displayNameKey": "Visual_Colors_TargetColor",     "type": { "fill": { "solid": { "color": true } } } },
         "forecastColor": { "displayName": "Forecast marker", "displayNameKey": "Visual_Colors_ForecastColor",   "type": { "fill": { "solid": { "color": true } } } },
         "positiveColor": { "displayName": "Positive variance", "displayNameKey": "Visual_Colors_PositiveColor", "type": { "fill": { "solid": { "color": true } } } },
@@ -183,7 +184,8 @@
         "syncScale":         { "displayName": "Sync scale across panels", "displayNameKey": "Visual_Trellis_SyncScale","type": { "bool":    true } },
         "trellisShowTitle":  { "displayName": "Show panel titles", "displayNameKey": "Visual_Trellis_TrellisShowTitle",      "type": { "bool":    true } },
         "trellisPanelColor": { "displayName": "Panel background color", "displayNameKey": "Visual_Trellis_TrellisPanelColor", "type": { "fill": { "solid": { "color": true } } } },
-        "trellisBorderColor":{ "displayName": "Panel border color", "displayNameKey": "Visual_Trellis_TrellisBorderColor",     "type": { "fill": { "solid": { "color": true } } } }
+        "trellisBorderColor":{ "displayName": "Panel border color", "displayNameKey": "Visual_Trellis_TrellisBorderColor",     "type": { "fill": { "solid": { "color": true } } } },
+        "trellisTitleColor": { "displayName": "Panel title color", "displayNameKey": "Visual_Trellis_TrellisTitleColor",       "type": { "fill": { "solid": { "color": true } } } }
       }
     }
   },

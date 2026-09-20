@@ -66,6 +66,7 @@
   "Visual_Trellis_TrellisShowTitle":     "Show panel titles",
   "Visual_Trellis_TrellisPanelColor":    "Panel background color",
   "Visual_Trellis_TrellisBorderColor":   "Panel border color",
+  "Visual_Trellis_TrellisTitleColor": "Panel title color",
 
   "LicenceNotice_One":  "Bullet Chart Pro: {0} is part of the Pro plan, shown as a watermarked preview.",
   "LicenceNotice_Many": "Bullet Chart Pro: {0} are part of the Pro plan, shown as a watermarked preview."

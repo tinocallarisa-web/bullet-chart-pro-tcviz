@@ -6,6 +6,20 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 
 ---
 
+## [1.4.0.0] — 2026-09-20
+
+### Added
+- **Conditional formatting on the bar colour.** Format pane → Colors → *Actual bar* now has
+  the *fx* button: the bar colour can be driven by a rule over the Actual measure instead of
+  picking a colour per category. Precedence is rule → per-category colour → default, and the
+  per-category pickers keep working exactly as before. Free tier. None of the four bullet
+  visuals ahead of this one in AppSource — Microsoft's, OKVIZ's, xViz's or Inforiver's —
+  declares a `rule` in its capabilities.
+- **Panel title colour** for Small Multiples. The title is drawn on top of the panel border
+  colour, which the user can already change, while the title text was hard-coded to `#333`:
+  a dark border made the title unreadable with no way to fix it. In high contrast the title
+  now follows the theme foreground.
+
 ## [1.3.2.0] — 2026-09-20
 
 ### Added

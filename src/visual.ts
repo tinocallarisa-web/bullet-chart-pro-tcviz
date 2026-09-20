@@ -347,6 +347,7 @@ export class BulletChartPro implements IVisual {
             trellisShowTitle:   bool("trellis","trellisShowTitle",    d.trellisShowTitle),
             trellisPanelColor:  col( "trellis","trellisPanelColor",   d.trellisPanelColor),
             trellisBorderColor: col( "trellis","trellisBorderColor",  d.trellisBorderColor),
+            trellisTitleColor:  col( "trellis","trellisTitleColor",   d.trellisTitleColor),
         };
 
         if (s.ibcsMode) {
@@ -359,6 +360,9 @@ export class BulletChartPro implements IVisual {
             s.band1Color  = pal.background?.value ?? "#000";
             s.band2Color  = pal.backgroundLight?.value ?? "#111";
             s.band3Color  = pal.backgroundDark?.value  ?? "#222";
+            // El titulo del panel se pinta sobre el color de borde: en alto contraste
+            // ambos vienen del tema, asi que el texto tiene que seguir al primer plano.
+            s.trellisTitleColor = pal.foreground?.value ?? "#FFF";
         }
         return s;
     }
@@ -1075,7 +1079,7 @@ export class BulletChartPro implements IVisual {
                 tt.setAttribute("font-size",   String(Math.min(s.fontSize + 1, 13)));
                 tt.setAttribute("font-family", s.fontFamily);
                 tt.setAttribute("font-weight", "600");
-                tt.setAttribute("fill",        "#333");
+                tt.setAttribute("fill",        s.trellisTitleColor);
                 tt.textContent = panel.title;
                 this.rootSvg.appendChild(tt);
             }
@@ -1753,7 +1757,12 @@ export class BulletChartPro implements IVisual {
                     band1Color:    {solid:{color:s.band1Color}},
                     band2Color:    {solid:{color:s.band2Color}},
                     band3Color:    {solid:{color:s.band3Color}},
-                }});
+                },
+                // ConstantOrRule (3): Power BI muestra el boton fx junto al color de la
+                // barra. VisualEnumerationInstanceKinds es un const enum y no se puede
+                // referenciar en runtime, de ahi el literal.
+                propertyInstanceKind: { actualColor: 3 },
+                altConstantValueSelector: null } as any);
                 // Per-category actualColor only (one row per category, no duplicates).
                 // targetColor stays global — putting it here too causes Power BI to render
                 // two separate rows per category making it look duplicated.
@@ -1793,6 +1802,7 @@ export class BulletChartPro implements IVisual {
                     trellisShowTitle:s.trellisShowTitle,
                     trellisPanelColor:{solid:{color:s.trellisPanelColor}},
                     trellisBorderColor:{solid:{color:s.trellisBorderColor}},
+                    trellisTitleColor: {solid:{color:s.trellisTitleColor}},
                 }}); break;
         }
         return inst;

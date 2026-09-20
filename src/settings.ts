@@ -58,6 +58,7 @@ export interface BulletSettings {
     trellisShowTitle:   boolean;
     trellisPanelColor:  string;
     trellisBorderColor: string;
+    trellisTitleColor: string;
 }
 
 export function getDefaultSettings(): BulletSettings {
@@ -110,5 +111,6 @@ export function getDefaultSettings(): BulletSettings {
         trellisShowTitle:   true,
         trellisPanelColor:  "#FAFAFA",
         trellisBorderColor: "#E0E0E0",
+        trellisTitleColor: "#333333",
     };
 }
