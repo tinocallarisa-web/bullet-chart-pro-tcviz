@@ -6,6 +6,42 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 
 ---
 
+## [1.3.2.0] — 2026-09-20
+
+### Added
+- **Pro preview while editing.** Without a licence, in edit mode, the Pro features
+  (Small Multiples, the Forecast marker and vertical orientation) now render working under a
+  "Pro preview" watermark, as Microsoft's publishing guidelines allow for paid features.
+  In reading view, before the licence resolves, or where Power BI cannot check licences
+  (Publish to Web, embedding, export), the free result is shown with no watermark.
+- `build-test.js --free` already existed; it is the only mode that shows the preview,
+  the watermark and the purchase notices.
+
+### Certification
+- `npm audit`: **0 vulnerabilities** (was 9 high + 10 moderate). Fixed with `npm audit fix`
+  plus an `overrides` entry pinning `uuid` to ^11.1.1 — `npm audit fix --force` would have
+  downgraded `powerbi-visuals-tools` to 1.7.2.
+- **ESLint wired up as certification requires**: `eslint-plugin-powerbi-visuals` installed,
+  `eslint.config.mjs` added, and the `"eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx"`
+  script. Returns no errors.
+- **Localization now actually works.** `stringResources` was declared as `{}` and no entry
+  carried a `displayNameKey`, so the 57 strings already written in `resources.resjson` were
+  dead weight. All 55 entries (6 data roles, 9 objects, 40 properties) now carry their key,
+  the resource file is declared, and the visual calls `createLocalizationManager()` for its
+  runtime notice text.
+- `pbiviz package --certification-audit` reports no unsafe `fetch`, `XMLHttpRequest` or
+  `eval` calls.
+
+### Fixed
+- **Only one purchase notice reached the user.** `notifyLicenseRequired` and
+  `notifyFeatureBlocked` were called back to back, and Power BI shows a single notification
+  at a time, so the second replaced the first. The previous notice is now cleared first, the
+  banner names only the newly activated features, and the persistent Upgrade bar follows once
+  the banner ends (~10.5 s). Pattern verified in Risk Matrix Pro in the Power BI service.
+- Turning a Pro feature off no longer re-triggers a banner.
+
+---
+
 ## [1.3.1.0] — 2026-09-14
 
 ### Fixed

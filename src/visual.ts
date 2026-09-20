@@ -77,6 +77,8 @@ function matchesPlan(spIdentifier: unknown, planId: string): boolean {
 export class BulletChartPro implements IVisual {
 
     private host:             IVisualHost;
+    /** Localización de los textos que muestra el visual en tiempo de ejecución */
+    private localization:     powerbi.extensibility.ILocalizationManager;
     private container:        HTMLElement;
     private rootSvg:          SVGSVGElement;   // NEVER reassigned
     private events:           powerbi.extensibility.IVisualEventService;
@@ -89,6 +91,13 @@ export class BulletChartPro implements IVisual {
     private licenseInfoAvailable = true;   // false si la licencia no se pudo leer
     private licenseIconShown     = false;
     private lastBlockedNotice    = "";
+    /** Funciones Pro de las que ya se avisó en esta sesión de edición */
+    private notifiedPro: string[] = [];
+    /** Temporizador que deja la barra de Upgrade cuando termina el banner */
+    private licenseIconTimer: number | null = null;
+    /** Vista previa Pro: Free, editando, con la licencia ya resuelta y legible */
+    private proPreview = false;
+    private watermarkEl: HTMLDivElement;
     private lastOptions:      VisualUpdateOptions | null = null;
     private lastDataPoints:   BulletDataPoint[] = [];
     private focusedIndex:     number = -1;
@@ -99,6 +108,7 @@ export class BulletChartPro implements IVisual {
         this.events           = options.host.eventService;
         this.selectionManager = options.host.createSelectionManager();
         this.tooltipService   = options.host.tooltipService;
+        this.localization     = options.host.createLocalizationManager();
         this.settings         = getDefaultSettings();
         this.container        = options.element;
 
@@ -109,6 +119,19 @@ export class BulletChartPro implements IVisual {
         this.rootSvg               = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
         this.rootSvg.style.display = "block";
         this.container.appendChild(this.rootSvg);
+
+        // Marca de agua de la vista previa Pro. Blanca con contorno oscuro y opacidad 0.55:
+        // un gris translúcido desaparece sobre fondos saturados u oscuros. No intercepta
+        // clics ni entra en el recorrido del lector de pantalla.
+        this.watermarkEl = document.createElement("div");
+        this.watermarkEl.setAttribute("aria-hidden", "true");
+        this.watermarkEl.textContent = "Pro preview";
+        this.watermarkEl.style.cssText =
+            "position:absolute;left:0;top:0;right:0;bottom:0;display:none;align-items:center;" +
+            "justify-content:center;pointer-events:none;z-index:5;font:700 32px 'Segoe UI',sans-serif;" +
+            "color:#FFFFFF;opacity:0.55;transform:rotate(-20deg);" +
+            "text-shadow:0 0 2px rgba(51,51,51,0.85),0 1px 3px rgba(51,51,51,0.65);";
+        this.container.appendChild(this.watermarkEl);
 
         // Background context menu (required for Microsoft certification)
         this.rootSvg.addEventListener("contextmenu", (e: MouseEvent) => {
@@ -206,24 +229,66 @@ export class BulletChartPro implements IVisual {
         if (!this.licenseEnvSupported || !this.licenseInfoAvailable) return;
 
         const lm = (this.host as any).licenseManager;
-        if (!this.licenseIconShown) {
-            this.licenseIconShown = true;
-            // LicenseNotificationType.General es const enum: 0 en runtime
-            try { lm?.notifyLicenseRequired?.(0); } catch { /* best effort */ }
-        }
-        const sig = wanted.join("|");
-        if (sig === this.lastBlockedNotice) return;   // no repetir en cada resize o refresco
-        this.lastBlockedNotice = sig;
-        const one = wanted.length === 1;
+
+        // Power BI muestra UNA notificación a la vez y la última sustituye a la anterior
+        // (verificado en Risk Matrix, en el servicio, 2026-09-16). Llamar a
+        // notifyFeatureBlocked y notifyLicenseRequired seguidos dejaba solo una visible.
+        // Secuencia correcta: retirar lo anterior, banner con la función concreta, y al
+        // terminar el banner (~10 s) la barra de Upgrade persistente.
+        const added = wanted.filter(w => this.notifiedPro.indexOf(w) === -1);
+        this.notifiedPro = wanted.slice();
+        if (added.length === 0) return;   // quitar una función no vuelve a avisar
+        this.licenseIconShown = true;
+        this.lastBlockedNotice = wanted.join("|");
+        const one = added.length === 1;
+        // El texto sale de stringResources; el literal queda como respaldo si falta la clave.
+        const list = added.join(" and ");
+        const tpl  = this.localization?.getDisplayName(one ? "LicenceNotice_One" : "LicenceNotice_Many")
+            || `Bullet Chart Pro: {0} ${one ? "is" : "are"} part of the Pro plan, shown as a watermarked preview.`;
+        const msg  = tpl.replace("{0}", list);
+
+        const show = () => {
+            try { lm?.notifyFeatureBlocked?.(msg.slice(0, 500)); } catch { /* best effort */ }
+            this.cancelLicenseIcon();
+            this.licenseIconTimer = window.setTimeout(() => {
+                this.licenseIconTimer = null;
+                if (this.isPro || this.notifiedPro.length === 0) return;
+                // LicenseNotificationType.General es const enum: 0 en runtime
+                try { lm?.notifyLicenseRequired?.(0); } catch { /* best effort */ }
+            }, 10500);
+        };
         try {
-            lm?.notifyFeatureBlocked?.(
-                `Bullet Chart Pro: ${wanted.join(" and ")} ${one ? "is" : "are"} part of the Pro plan. ` +
-                `Get a licence to enable ${one ? "it" : "them"}.`);
-        } catch { /* best effort */ }
+            const cleared = lm?.clearLicenseNotification?.();
+            if (cleared && typeof cleared.then === "function") { cleared.then(show, show); }
+            else { show(); }
+        } catch { show(); }
+    }
+
+    /**
+     * La marca solo sale si el usuario ha pedido de verdad algo de pago, y su tamaño sigue
+     * al ancho del visual: un font-size fijo se queda ridículo a pantalla completa, que es
+     * justo donde lo mira el revisor.
+     */
+    private updateWatermark(wantsPro: boolean): void {
+        const show = this.proPreview && wantsPro;
+        this.watermarkEl.style.display = show ? "flex" : "none";
+        if (!show) { return; }
+        const width = this.container.clientWidth || 0;
+        const size  = Math.max(20, Math.min(72, Math.round(width * 0.09)));
+        this.watermarkEl.style.fontSize = `${size}px`;
+    }
+
+    private cancelLicenseIcon(): void {
+        if (this.licenseIconTimer !== null) {
+            window.clearTimeout(this.licenseIconTimer);
+            this.licenseIconTimer = null;
+        }
     }
 
     private clearLicenseNotice(): void {
         this.lastBlockedNotice = "";
+        this.notifiedPro = [];
+        this.cancelLicenseIcon();
         if (!this.licenseIconShown) return;
         this.licenseIconShown = false;
         try { (this.host as any).licenseManager?.clearLicenseNotification?.(); } catch { /* best effort */ }
@@ -371,7 +436,7 @@ export class BulletChartPro implements IVisual {
         const actual   = ac.values[i] as number | null;
         const target   = tc ? tc.values[i] as number | null : null;
         // Forecast es Pro: en Free no se dibuja, ni entra en tooltip, leyenda o escala
-        const forecast = (fc && this.isPro) ? fc.values[i] as number | null : null;
+        const forecast = (fc && (this.isPro || this.proPreview)) ? fc.values[i] as number | null : null;
         const variance    = (actual != null && target != null) ? actual - target : null;
         const variancePct = (variance != null && target != null && target !== 0)
             ? (variance / Math.abs(target)) * 100 : null;
@@ -417,15 +482,30 @@ export class BulletChartPro implements IVisual {
         try {
             const dv = options.dataViews?.[0];
             const vp = options.viewport;
-            if (!dv) { this.renderLanding(vp); this.events.renderingFinished(options); return; }
+            if (!dv) {
+                this.updateWatermark(false);   // nada que pintar: tampoco marca
+                this.renderLanding(vp);
+                this.events.renderingFinished(options);
+                return;
+            }
+
+            // Vista previa Pro: solo en edición (ViewMode View=0), con la licencia ya
+            // resuelta y en un entorno donde se puede leer. En lectura, antes de resolver,
+            // o donde no se puede leer (Publish to Web, export), se pinta el resultado
+            // gratuito sin marca: ahí un cliente que paga se leería como Free.
+            const viewMode = (options as any).viewMode;
+            const editing  = typeof viewMode === "number" && viewMode !== 0;
+            this.proPreview = !this.isPro && editing && this.licenseResolved
+                && this.licenseEnvSupported && this.licenseInfoAvailable;
 
             this.settings = this.parseSettings(dv);
             const s = this.settings;
             this.notifyProBlocked(dv);
+            this.updateWatermark(this.attemptedPro(dv).length > 0);
 
             // Small multiples: basta con poner un campo en su pozo (enabled viene true por defecto)
             const hasTrellisField = !!dv.categorical?.categories?.some(c => c.source.roles?.["trellisBy"]);
-            if (this.isPro && s.trellisEnabled && hasTrellisField) {
+            if ((this.isPro || this.proPreview) && s.trellisEnabled && hasTrellisField) {
                 const panels = this.parseTrellis(dv);
                 this.lastDataPoints = panels.flatMap(p => p.data);
                 if (!panels.length) { this.renderLanding(vp); }
@@ -447,7 +527,7 @@ export class BulletChartPro implements IVisual {
 
             // Vertical es Pro: en Free se dibuja en horizontal (el panel conserva lo elegido y
             // notifyProBlocked lanza el aviso de Power BI)
-            if (s.orientation === "vertical" && this.isPro) this.renderVertical(data, vp.width, vp.height, drillLabel);
+            if (s.orientation === "vertical" && (this.isPro || this.proPreview)) this.renderVertical(data, vp.width, vp.height, drillLabel);
             else                              this.renderHorizontal(data, vp.width, vp.height, drillLabel);
 
             this.events.renderingFinished(options);

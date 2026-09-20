@@ -3,32 +3,38 @@
     {
       "name": "category",
       "kind": "Grouping",
-      "displayName": "Category"
+      "displayName": "Category",
+      "displayNameKey": "Visual_Category"
     },
     {
       "name": "trellisBy",
       "kind": "Grouping",
-      "displayName": "Small Multiples By [Pro]"
+      "displayName": "Small Multiples By [Pro]",
+      "displayNameKey": "Visual_TrellisBy"
     },
     {
       "name": "actual",
       "kind": "Measure",
-      "displayName": "Actual (Real)"
+      "displayName": "Actual (Real)",
+      "displayNameKey": "Visual_Actual"
     },
     {
       "name": "target",
       "kind": "Measure",
-      "displayName": "Target"
+      "displayName": "Target",
+      "displayNameKey": "Visual_Target"
     },
     {
       "name": "forecast",
       "kind": "Measure",
-      "displayName": "Forecast [Pro]"
+      "displayName": "Forecast [Pro]",
+      "displayNameKey": "Visual_Forecast"
     },
     {
       "name": "tooltips",
       "kind": "Measure",
       "displayName": "Tooltips",
+      "displayNameKey": "Visual_Tooltips",
       "requiredTypes": [{ "numeric": true }, { "bool": true }]
     }
   ],
@@ -66,9 +72,11 @@
   "objects": {
     "general": {
       "displayName": "General",
+      "displayNameKey": "Visual_General",
       "properties": {
         "orientation": {
           "displayName": "Orientation",
+          "displayNameKey": "Visual_General_Orientation",
           "type": {
             "enumeration": [
               { "value": "horizontal", "displayName": "Horizontal" },
@@ -78,63 +86,71 @@
         },
         "ibcsMode": {
           "displayName": "IBCS Mode",
+          "displayNameKey": "Visual_General_IbcsMode",
           "type": { "bool": true }
         }
       }
     },
     "colors": {
       "displayName": "Colors",
+      "displayNameKey": "Visual_Colors",
       "properties": {
-        "actualColor":   { "displayName": "Actual bar",        "type": { "fill": { "solid": { "color": true } } } },
-        "targetColor":   { "displayName": "Target marker",     "type": { "fill": { "solid": { "color": true } } } },
-        "forecastColor": { "displayName": "Forecast marker",   "type": { "fill": { "solid": { "color": true } } } },
-        "positiveColor": { "displayName": "Positive variance", "type": { "fill": { "solid": { "color": true } } } },
-        "negativeColor": { "displayName": "Negative variance", "type": { "fill": { "solid": { "color": true } } } },
-        "band1Color":    { "displayName": "Band 1 (worst)",    "type": { "fill": { "solid": { "color": true } } } },
-        "band2Color":    { "displayName": "Band 2 (mid)",      "type": { "fill": { "solid": { "color": true } } } },
-        "band3Color":    { "displayName": "Band 3 (best)",     "type": { "fill": { "solid": { "color": true } } } }
+        "actualColor":   { "displayName": "Actual bar", "displayNameKey": "Visual_Colors_ActualColor",        "type": { "fill": { "solid": { "color": true } } } },
+        "targetColor":   { "displayName": "Target marker", "displayNameKey": "Visual_Colors_TargetColor",     "type": { "fill": { "solid": { "color": true } } } },
+        "forecastColor": { "displayName": "Forecast marker", "displayNameKey": "Visual_Colors_ForecastColor",   "type": { "fill": { "solid": { "color": true } } } },
+        "positiveColor": { "displayName": "Positive variance", "displayNameKey": "Visual_Colors_PositiveColor", "type": { "fill": { "solid": { "color": true } } } },
+        "negativeColor": { "displayName": "Negative variance", "displayNameKey": "Visual_Colors_NegativeColor", "type": { "fill": { "solid": { "color": true } } } },
+        "band1Color":    { "displayName": "Band 1 (worst)", "displayNameKey": "Visual_Colors_Band1Color",    "type": { "fill": { "solid": { "color": true } } } },
+        "band2Color":    { "displayName": "Band 2 (mid)", "displayNameKey": "Visual_Colors_Band2Color",      "type": { "fill": { "solid": { "color": true } } } },
+        "band3Color":    { "displayName": "Band 3 (best)", "displayNameKey": "Visual_Colors_Band3Color",     "type": { "fill": { "solid": { "color": true } } } }
       }
     },
     "bands": {
       "displayName": "Qualitative Bands",
+      "displayNameKey": "Visual_Bands",
       "properties": {
-        "showBands": { "displayName": "Show bands",          "type": { "bool":    true } },
-        "band1Pct":  { "displayName": "Band 1 threshold %", "type": { "numeric": true } },
-        "band2Pct":  { "displayName": "Band 2 threshold %", "type": { "numeric": true } }
+        "showBands": { "displayName": "Show bands", "displayNameKey": "Visual_Bands_ShowBands",          "type": { "bool":    true } },
+        "band1Pct":  { "displayName": "Band 1 threshold %", "displayNameKey": "Visual_Bands_Band1Pct", "type": { "numeric": true } },
+        "band2Pct":  { "displayName": "Band 2 threshold %", "displayNameKey": "Visual_Bands_Band2Pct", "type": { "numeric": true } }
       }
     },
     "variance": {
       "displayName": "Variance",
+      "displayNameKey": "Visual_Variance",
       "properties": {
-        "showVariance":      { "displayName": "Show variance label", "type": { "bool":    true } },
-        "showVariancePct":   { "displayName": "Show variance %",     "type": { "bool":    true } },
-        "varianceThreshold": { "displayName": "Green/red threshold", "type": { "numeric": true } }
+        "showVariance":      { "displayName": "Show variance label", "displayNameKey": "Visual_Variance_ShowVariance", "type": { "bool":    true } },
+        "showVariancePct":   { "displayName": "Show variance %", "displayNameKey": "Visual_Variance_ShowVariancePct",     "type": { "bool":    true } },
+        "varianceThreshold": { "displayName": "Green/red threshold", "displayNameKey": "Visual_Variance_VarianceThreshold", "type": { "numeric": true } }
       }
     },
     "labels": {
       "displayName": "Labels",
+      "displayNameKey": "Visual_Labels",
       "properties": {
-        "showCategoryLabel": { "displayName": "Show category",     "type": { "bool": true } },
-        "showActualValue":   { "displayName": "Show actual value", "type": { "bool": true } },
-        "showTargetValue":   { "displayName": "Show target value", "type": { "bool": true } },
-        "fontSize":          { "displayName": "Font size",         "type": { "formatting": { "fontSize":   true } } },
-        "fontFamily":        { "displayName": "Font family",       "type": { "formatting": { "fontFamily": true } } }
+        "showCategoryLabel": { "displayName": "Show category", "displayNameKey": "Visual_Labels_ShowCategoryLabel",     "type": { "bool": true } },
+        "showActualValue":   { "displayName": "Show actual value", "displayNameKey": "Visual_Labels_ShowActualValue", "type": { "bool": true } },
+        "showTargetValue":   { "displayName": "Show target value", "displayNameKey": "Visual_Labels_ShowTargetValue", "type": { "bool": true } },
+        "fontSize":          { "displayName": "Font size", "displayNameKey": "Visual_Labels_FontSize",         "type": { "formatting": { "fontSize":   true } } },
+        "fontFamily":        { "displayName": "Font family", "displayNameKey": "Visual_Labels_FontFamily",       "type": { "formatting": { "fontFamily": true } } }
       }
     },
     "layout": {
       "displayName": "Layout",
+      "displayNameKey": "Visual_Layout",
       "properties": {
-        "labelWidthPct":      { "displayName": "Category column width % (5-40)",  "type": { "numeric": true } },
-        "rightPanelWidthPct": { "displayName": "Values panel width % (10-45)",    "type": { "numeric": true } },
-        "showAxis":           { "displayName": "Show scale axis",                 "type": { "bool":    true } }
+        "labelWidthPct":      { "displayName": "Category column width % (5-40)", "displayNameKey": "Visual_Layout_LabelWidthPct",  "type": { "numeric": true } },
+        "rightPanelWidthPct": { "displayName": "Values panel width % (10-45)", "displayNameKey": "Visual_Layout_RightPanelWidthPct",    "type": { "numeric": true } },
+        "showAxis":           { "displayName": "Show scale axis", "displayNameKey": "Visual_Layout_ShowAxis",                 "type": { "bool":    true } }
       }
     },
     "legend": {
       "displayName": "Legend",
+      "displayNameKey": "Visual_Legend",
       "properties": {
-        "showLegend":     { "displayName": "Show legend", "type": { "bool": true } },
+        "showLegend":     { "displayName": "Show legend", "displayNameKey": "Visual_Legend_ShowLegend", "type": { "bool": true } },
         "legendPosition": {
           "displayName": "Position",
+          "displayNameKey": "Visual_Legend_LegendPosition",
           "type": {
             "enumeration": [
               { "value": "bottom", "displayName": "Bottom" },
@@ -146,26 +162,28 @@
     },
     "referenceLines": {
       "displayName": "Reference Lines",
+      "displayNameKey": "Visual_ReferenceLines",
       "properties": {
-        "refLine1Show":  { "displayName": "Line 1 – Show",  "type": { "bool":    true } },
-        "refLine1Value": { "displayName": "Line 1 – Value", "type": { "numeric": true } },
-        "refLine1Label": { "displayName": "Line 1 – Label", "type": { "text":    true } },
-        "refLine1Color": { "displayName": "Line 1 – Color", "type": { "fill": { "solid": { "color": true } } } },
-        "refLine2Show":  { "displayName": "Line 2 – Show",  "type": { "bool":    true } },
-        "refLine2Value": { "displayName": "Line 2 – Value", "type": { "numeric": true } },
-        "refLine2Label": { "displayName": "Line 2 – Label", "type": { "text":    true } },
-        "refLine2Color": { "displayName": "Line 2 – Color", "type": { "fill": { "solid": { "color": true } } } }
+        "refLine1Show":  { "displayName": "Line 1 – Show", "displayNameKey": "Visual_ReferenceLines_RefLine1Show",  "type": { "bool":    true } },
+        "refLine1Value": { "displayName": "Line 1 – Value", "displayNameKey": "Visual_ReferenceLines_RefLine1Value", "type": { "numeric": true } },
+        "refLine1Label": { "displayName": "Line 1 – Label", "displayNameKey": "Visual_ReferenceLines_RefLine1Label", "type": { "text":    true } },
+        "refLine1Color": { "displayName": "Line 1 – Color", "displayNameKey": "Visual_ReferenceLines_RefLine1Color", "type": { "fill": { "solid": { "color": true } } } },
+        "refLine2Show":  { "displayName": "Line 2 – Show", "displayNameKey": "Visual_ReferenceLines_RefLine2Show",  "type": { "bool":    true } },
+        "refLine2Value": { "displayName": "Line 2 – Value", "displayNameKey": "Visual_ReferenceLines_RefLine2Value", "type": { "numeric": true } },
+        "refLine2Label": { "displayName": "Line 2 – Label", "displayNameKey": "Visual_ReferenceLines_RefLine2Label", "type": { "text":    true } },
+        "refLine2Color": { "displayName": "Line 2 – Color", "displayNameKey": "Visual_ReferenceLines_RefLine2Color", "type": { "fill": { "solid": { "color": true } } } }
       }
     },
     "trellis": {
       "displayName": "Small Multiples [Pro]",
+      "displayNameKey": "Visual_Trellis",
       "properties": {
-        "enabled":           { "displayName": "Enable small multiples", "type": { "bool":    true } },
-        "columns":           { "displayName": "Columns",                "type": { "numeric": true } },
-        "syncScale":         { "displayName": "Sync scale across panels","type": { "bool":    true } },
-        "trellisShowTitle":  { "displayName": "Show panel titles",      "type": { "bool":    true } },
-        "trellisPanelColor": { "displayName": "Panel background color", "type": { "fill": { "solid": { "color": true } } } },
-        "trellisBorderColor":{ "displayName": "Panel border color",     "type": { "fill": { "solid": { "color": true } } } }
+        "enabled":           { "displayName": "Enable small multiples", "displayNameKey": "Visual_Trellis_Enabled", "type": { "bool":    true } },
+        "columns":           { "displayName": "Columns", "displayNameKey": "Visual_Trellis_Columns",                "type": { "numeric": true } },
+        "syncScale":         { "displayName": "Sync scale across panels", "displayNameKey": "Visual_Trellis_SyncScale","type": { "bool":    true } },
+        "trellisShowTitle":  { "displayName": "Show panel titles", "displayNameKey": "Visual_Trellis_TrellisShowTitle",      "type": { "bool":    true } },
+        "trellisPanelColor": { "displayName": "Panel background color", "displayNameKey": "Visual_Trellis_TrellisPanelColor", "type": { "fill": { "solid": { "color": true } } } },
+        "trellisBorderColor":{ "displayName": "Panel border color", "displayNameKey": "Visual_Trellis_TrellisBorderColor",     "type": { "fill": { "solid": { "color": true } } } }
       }
     }
   },
