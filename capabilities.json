@@ -95,8 +95,7 @@
       "displayName": "Colors",
       "displayNameKey": "Visual_Colors",
       "properties": {
-        "actualColor":   { "displayName": "Actual bar", "displayNameKey": "Visual_Colors_ActualColor",        "type": { "fill": { "solid": { "color": true } } },
-          "rule": { "inputRole": "actual", "output": { "property": "actualColor", "selector": ["category"] } } },
+        "actualColor":   { "displayName": "Actual bar", "displayNameKey": "Visual_Colors_ActualColor",        "type": { "fill": { "solid": { "color": true } } } },
         "targetColor":   { "displayName": "Target marker", "displayNameKey": "Visual_Colors_TargetColor",     "type": { "fill": { "solid": { "color": true } } } },
         "forecastColor": { "displayName": "Forecast marker", "displayNameKey": "Visual_Colors_ForecastColor",   "type": { "fill": { "solid": { "color": true } } } },
         "positiveColor": { "displayName": "Positive variance", "displayNameKey": "Visual_Colors_PositiveColor", "type": { "fill": { "solid": { "color": true } } } },

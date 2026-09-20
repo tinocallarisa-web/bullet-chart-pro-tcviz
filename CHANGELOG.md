@@ -11,8 +11,10 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 ### Added
 - **Conditional formatting on the bar colour.** Format pane → Colors → *Actual bar* now has
   the *fx* button: the bar colour can be driven by a rule over the Actual measure instead of
-  picking a colour per category. Precedence is rule → per-category colour → default, and the
-  per-category pickers keep working exactly as before. Free tier. None of the four bullet
+  picking a colour per category. The rule is defined once for the whole series (one *fx*, not
+  one per category) and applies to every bar; a colour set by hand on a category overrides the
+  rule for that category, so the general rule and the exceptions coexist. The per-category
+  pickers keep working exactly as before. Free tier. None of the four bullet
   visuals ahead of this one in AppSource — Microsoft's, OKVIZ's, xViz's or Inforiver's —
   declares a `rule` in its capabilities.
 - **Panel title colour** for Small Multiples. The title is drawn on top of the panel border

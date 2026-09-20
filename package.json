@@ -12,14 +12,15 @@
     "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "powerbi-visuals-api": "~5.10.0"
+    "powerbi-visuals-api": "~5.10.0",
+    "powerbi-visuals-utils-dataviewutils": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "eslint": "^9.11.1",
+    "eslint-plugin-powerbi-visuals": "^1.0.0",
     "powerbi-visuals-tools": "^7.1.0",
-    "typescript": "~5.0.4",
-    "eslint-plugin-powerbi-visuals": "^1.0.0"
+    "typescript": "~5.0.4"
   },
   "capabilities": "capabilities.json",
   "pbiviz": "pbiviz.json",

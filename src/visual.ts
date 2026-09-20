@@ -1,6 +1,7 @@
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
+import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
 import VisualConstructorOptions        = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions             = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual                         = powerbi.extensibility.visual.IVisual;
@@ -1748,8 +1749,17 @@ export class BulletChartPro implements IVisual {
                 // type to use (full picker with "More colors"). Must include actualColor here
                 // even though per-category overrides live below, otherwise PBI falls back to
                 // a simplified picker without hex input / "More colors".
+                // actualColor va aparte, con selector comodin: es lo que hace que Power BI
+                // materialice la regla en cada barra. Emitido una sola vez, da un unico fx.
+                inst.push({
+                    objectName: n,
+                    selector: dataViewWildcard.createDataViewWildcardSelector(
+                                dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals),
+                    altConstantValueSelector: null,
+                    properties: { actualColor: {solid:{color:s.actualColor}} },
+                    propertyInstanceKind: { actualColor: 3 },  // ConstantOrRule
+                } as any);
                 inst.push({ objectName:n, selector:null, properties:{
-                    actualColor:   {solid:{color:s.actualColor}},
                     targetColor:   {solid:{color:s.targetColor}},
                     forecastColor: {solid:{color:s.forecastColor}},
                     positiveColor: {solid:{color:s.positiveColor}},
@@ -1757,12 +1767,7 @@ export class BulletChartPro implements IVisual {
                     band1Color:    {solid:{color:s.band1Color}},
                     band2Color:    {solid:{color:s.band2Color}},
                     band3Color:    {solid:{color:s.band3Color}},
-                },
-                // ConstantOrRule (3): Power BI muestra el boton fx junto al color de la
-                // barra. VisualEnumerationInstanceKinds es un const enum y no se puede
-                // referenciar en runtime, de ahi el literal.
-                propertyInstanceKind: { actualColor: 3 },
-                altConstantValueSelector: null } as any);
+                }});
                 // Per-category actualColor only (one row per category, no duplicates).
                 // targetColor stays global — putting it here too causes Power BI to render
                 // two separate rows per category making it look duplicated.
@@ -1770,6 +1775,7 @@ export class BulletChartPro implements IVisual {
                 this.lastDataPoints.forEach(d => {
                     if (seen.has(d.category)) return;
                     seen.add(d.category);
+                    // Color fijo por categoria, sin fx: la regla vive en la fila global.
                     inst.push({
                         objectName:  n,
                         displayName: d.category,
