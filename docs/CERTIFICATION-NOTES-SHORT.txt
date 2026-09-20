@@ -1,0 +1,42 @@
+Bullet Chart Pro 1.4.0.0 - GUID bulletChartProTCViz20260001
+Repo, branch certification: https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/tree/certification
+Pages site: https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/
+  -> support.html · privacy.html · terms.html · changelog.html
+Video: https://www.youtube.com/watch?v=bDW7qly8Mdo
+
+WHY THIS SUBMISSION
+Replaces 1.3.0.0: conditional formatting on the bar colour, panel title colour, purchase
+notice fixed, watermarked Pro preview, new brand icon.
+
+PLEASE READ FIRST - PRO PREVIEW
+Without a licence, IN EDIT MODE ONLY, Pro features render working under a "Pro preview"
+watermark, which the guidelines allow for paid features. Intentional, not missing gating. In reading view, before the licence resolves, and where licences cannot be read
+(Publish to Web, embed, export) the FREE result is drawn with no watermark, so a published
+report never uses an unpaid Pro feature.
+
+TESTING - FREE (no active plan)
+1. Category + Actual + Target: bullets with variance labels and qualitative bands.
+2. Click a bar: cross-filtering. Right-click: context menu. Arrows move focus, Enter
+   selects, Escape clears.
+3. Colors > Actual bar > fx: a rule over the Actual measure colours every bar; a colour set by
+   hand on one category overrides the rule there. Free feature.
+4. In EDIT mode add Forecast, or a field to Small Multiples By, or Orientation = Vertical:
+   they render under the watermark, a banner names the feature and after ~10 s Power BI's
+   Upgrade bar appears. Switch to reading view: free result, no watermark, no notice.
+
+TESTING - PRO (active plan "bullet-chart-pro-tcviz")
+1. Small Multiples By: one panel per value, no watermark and no notice.
+2. Forecast: triangle marker, also in tooltip and legend. Orientation = Vertical: columns.
+3. Small Multiples > Panel title color: titles readable over any border colour.
+
+PRIVACY/NETWORK
+No network calls, telemetry, cookies or storage. privileges: []. No innerHTML.
+npm audit 0; ESLint (eslint-plugin-powerbi-visuals) clean.
+
+LICENSING
+IVisualLicenseManager only. Pro when the full Service ID ends in ".bullet-chart-pro-tcviz"
+and state is Active or Warning. Resolved once, never blocks render; failure stays Free with
+no prompts. No licensing UI of our own.
+
+KNOWN GAP: format pane uses enumerateObjectInstances; getFormattingModel planned.
+Full notes: docs/CERTIFICATION-NOTES.md in the repo.
