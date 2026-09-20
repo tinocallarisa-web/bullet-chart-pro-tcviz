@@ -196,7 +196,12 @@ export class BulletChartPro implements IVisual {
                 this.clearLicenseNotice();
                 if (this.lastOptions) this.update(this.lastOptions);
             } else if (!pro) {
-                this.notifyProBlocked(this.lastOptions?.dataViews?.[0]);
+                // La licencia responde despues del primer render, cuando proPreview todavia
+                // era false y las funciones Pro se resolvieron como Free. Repintar es lo que
+                // enciende la vista previa; sin esto el autor ve el resultado gratuito hasta
+                // que toca cualquier ajuste.
+                if (this.lastOptions) this.update(this.lastOptions);
+                else this.notifyProBlocked(undefined);
             }
         } catch {
             // Free, sin avisos: si no se pudo leer la licencia no sabemos si ya pagó.
