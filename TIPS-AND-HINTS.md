@@ -1,4 +1,4 @@
-# Bullet Chart Pro — Tips & Hints (v1.3.1.0)
+# Bullet Chart Pro — Tips & Hints (v1.4.0.0)
 
 ## Getting started
 
@@ -6,6 +6,7 @@
 2. Drag your measure into **Actual (Real)**. The bullets render straight away.
 3. Drag the goal into **Target**. Variance — absolute and % — is calculated by the visual. No DAX.
 4. Qualitative bands (poor / OK / good) are on by default. Set their thresholds in **Format → Qualitative Bands**.
+5. To colour the bars by a rule rather than one by one, use the **fx** button next to *Format → Colors → Actual bar*.
 
 ## Field wells
 
@@ -22,24 +23,30 @@
 
 - **Free:** actual vs target with automatic variance, qualitative bands, IBCS mode, horizontal orientation, two reference lines, a colour per category, tooltips, drilldown, cross-filtering, bookmarks, keyboard navigation, high contrast.
 - **Pro:** Small Multiples, the Forecast marker and vertical orientation.
-- Without a licence, using a Pro feature leaves the chart as it is and Power BI shows its own notice with the option to buy.
+- **Without a licence, while you are editing the report**, a Pro feature renders working under a
+  *Pro preview* watermark, and Power BI shows its own notice with the option to buy. In reading view,
+  and wherever Power BI cannot check licences (Publish to Web, embedding, export), the free result is
+  shown with no watermark — so a published report never uses a Pro feature you have not paid for.
 
 ## Format pane — quick reference
 
 | Card | Settings |
 |---|---|
 | General | Orientation (Vertical is Pro), IBCS mode |
-| Colors | Actual, target, forecast, positive / negative variance, three band colours, one colour per category |
+| Colors | Actual, target, forecast, positive / negative variance, three band colours, one colour per category, and **conditional formatting (fx) on the bar colour** |
 | Qualitative Bands | Show, band 1 and band 2 thresholds (% of the data maximum) |
 | Variance | Show label, show %, green / red threshold |
 | Labels | Category, actual value, target value, font size and family |
 | Layout | Category column width %, values panel width %, scale axis |
 | Legend | Show, top or bottom |
 | Reference Lines | Two lines: show, value, label, colour |
-| Small Multiples [Pro] | Enable, columns, synced scale, panel titles, panel background and border |
+| Small Multiples [Pro] | Enable, columns, synced scale, panel titles, panel background, border and **title colour** |
 
 ## Tips & best practices
 
+- **Colour by rule:** *Colors → Actual bar → fx* drives the bar colour from a measure — red below target,
+  green above, for instance. The rule applies to every bar; a colour you then set by hand on a single
+  category overrides the rule just for that one, so the general rule and the exceptions coexist.
 - **Variance threshold:** set it to 0 for a plain above/below target colour, or to a tolerance (e.g. -5) to only flag real misses.
 - **Bands** are a percentage of the largest value in the data, not of the target. Use them for "how good is this", and the target marker for "did we hit it".
 - **IBCS mode** replaces your colours with the standard monochrome palette — switch it on for finance packs that follow IBCS.
@@ -55,4 +62,5 @@
 - **No forecast triangle** — Forecast is Pro. With a licence, check the Forecast field is not blank for that category.
 - **Vertical orientation shows horizontal bars** — vertical is Pro.
 - **Only part of the categories** — the visual receives up to 2,000 categories. Filter or aggregate larger lists.
+- **The panel titles are unreadable** — the title sits on the panel border colour. Set *Small Multiples → Panel title colour* to something that contrasts with the border you chose. In high contrast mode it follows the theme automatically.
 - **Panels scroll instead of fitting** — each panel needs room for its rows; on a short visual the chart scrolls rather than overlapping. Make the visual taller or use fewer categories per panel.

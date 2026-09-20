@@ -1,10 +1,12 @@
-BULLET CHART PRO -- TIPS & HINTS (v1.3.1.0)
+BULLET CHART PRO -- TIPS & HINTS (v1.4.0.0)
 
 GETTING STARTED
 1. Drag a category (region, product, KPI name) into Category.
 2. Drag your measure into Actual (Real). The bullets render straight away.
 3. Drag the goal into Target. Variance (absolute and %) is calculated by the visual. No DAX.
 4. Qualitative bands are on by default. Set their thresholds in Format > Qualitative Bands.
+5. To colour the bars by a rule instead of one by one, use the fx button next to
+   Format > Colors > Actual bar.
 
 FIELD WELLS
 . Category ................... one bullet per value; hierarchies and drilldown
@@ -16,22 +18,27 @@ FIELD WELLS
 
 FREE VS PRO
 . Free ... actual vs target with variance, bands, IBCS mode, horizontal orientation,
-           two reference lines, a colour per category, tooltips, drilldown,
-           cross-filtering, bookmarks, keyboard navigation, high contrast
+           two reference lines, a colour per category, conditional formatting (fx)
+           on the bar colour, tooltips, drilldown, cross-filtering, bookmarks,
+           keyboard navigation, high contrast
 . Pro .... Small Multiples, Forecast marker, vertical orientation
-Without a licence, a Pro feature leaves the chart as it is and Power BI shows its
-own notice with the option to buy.
+Without a licence, while you are EDITING the report, a Pro feature renders working
+under a "Pro preview" watermark and Power BI shows its own notice with the option
+to buy. In reading view, and wherever Power BI cannot check licences (Publish to
+Web, embedding, export), the free result is shown with no watermark.
 
 FORMAT PANE
 . General ................ orientation (Vertical is Pro), IBCS mode
-. Colors ................. actual, target, forecast, variance, bands, colour per category
+. Colors ................. actual, target, forecast, variance, bands, colour per
+                           category, and conditional formatting (fx) on the bar
 . Qualitative Bands ...... show, band 1 and band 2 thresholds (% of data maximum)
 . Variance ............... show label, show %, green/red threshold
 . Labels ................. category, actual value, target value, font size and family
 . Layout ................. category column width %, values panel width %, scale axis
 . Legend ................. show, top or bottom
 . Reference Lines ........ two lines: show, value, label, colour
-. Small Multiples [Pro] .. enable, columns, synced scale, titles, panel colours
+. Small Multiples [Pro] .. enable, columns, synced scale, titles, panel colours,
+                           panel title colour
 
 TIPS
 . Variance threshold: 0 for a plain above/below colour, or a tolerance such as -5.
