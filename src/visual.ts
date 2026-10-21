@@ -15,6 +15,10 @@ import { BulletSettings, getDefaultSettings } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { STRINGS } from "./strings";
+import {
+    HtmlSubSelectableClass, HtmlSubSelectionHelper, SubSelectableDisplayNameAttribute,
+    SubSelectableObjectNameAttribute, SubSelectableTypeAttribute,
+} from "powerbi-visuals-utils-onobjectutils";
 import { buildFormattingCards, CategoryColor, COLOR_FIXED_SLICES } from "./formatting";
 import "./../style/visual.less";
 
@@ -111,6 +115,9 @@ export class BulletChartPro implements IVisual {
     private lastDataPoints:   BulletDataPoint[] = [];
     /** Margen izquierdo del modo vertical: VERT_PAD_LR más el ancho de las etiquetas del eje (antes salían fuera). */
     private vPadL = VERT_PAD_LR;
+    private formatMode = false;
+    private subSelectionHelper: HtmlSubSelectionHelper;
+    public visualOnObjectFormatting: powerbi.extensibility.visual.VisualOnObjectFormatting;
     /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
     private sel:              ISelectionId[] = [];
     /** Nombres de las medidas en los pozos: leyenda y tooltip hablan como el modelo, en su idioma. */
@@ -132,6 +139,17 @@ export class BulletChartPro implements IVisual {
         this.container.style.overflow = "auto";
         this.container.style.position = "relative";
         this.container.tabIndex       = 0;
+
+        this.subSelectionHelper = HtmlSubSelectionHelper.createHtmlSubselectionHelper({
+            hostElement: options.element,
+            subSelectionService: options.host.subSelectionService,
+            selectionIdCallback: () => undefined,
+        });
+        this.visualOnObjectFormatting = {
+            getSubSelectionStyles: (subs) => this.getSubSelectionStyles(subs),
+            getSubSelectionShortcuts: (subs) => this.getSubSelectionShortcuts(subs),
+            getSubSelectables: (filter) => this.subSelectionHelper.getAllSubSelectables(filter),
+        };
 
         this.rootSvg               = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
         this.rootSvg.style.display = "block";
@@ -548,7 +566,12 @@ export class BulletChartPro implements IVisual {
         this.lastOptions = options;
         this.events.renderingStarted(options);
         try {
+            this.formatMode = !!(options as any).formatMode;
+            this.subSelectionHelper.setFormatMode(this.formatMode);
+            this.container.classList.toggle("fmt", this.formatMode);
             this.render(options);
+            this.markSubSelectables();
+            if (this.formatMode) this.subSelectionHelper.updateOutlinesFromSubSelections((options as any).subSelections ?? [], true);
             this.events.renderingFinished(options);
         } catch (e) {
             this.events.renderingFailed(options, String(e));
@@ -564,6 +587,7 @@ export class BulletChartPro implements IVisual {
         if (!this.lastOptions) return;
         try {
             this.render(this.lastOptions);
+            this.markSubSelectables();
             if (this.focusedIndex >= 0) this.updateFocusRing();
         } catch (e) { console.error("[BulletChartPro]", e); }
     }
@@ -735,6 +759,7 @@ export class BulletChartPro implements IVisual {
             t.setAttribute("fill",        textPrimary);
             t.setAttribute("clip-path",   `url(#${cid})`);
             t.textContent = d.category;
+            t.setAttribute("data-o", "labels");
             g.appendChild(t);
         }
 
@@ -769,6 +794,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("width",  String(barW));
             r.setAttribute("height", String(actualBarH));
             r.setAttribute("fill",   d.colorActual ?? s.actualColor);
+            r.setAttribute("data-o", "actual");
             r.setAttribute("rx",     "1");
             g.appendChild(r);
         }
@@ -783,6 +809,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("width",  String(TARGET_W));
             r.setAttribute("height", String(mH));
             r.setAttribute("fill",   d.colorTarget ?? s.targetColor);
+            r.setAttribute("data-o", "target");
             g.appendChild(r);
         }
 
@@ -797,6 +824,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("height",       String(mH));
             r.setAttribute("fill",         "none");
             r.setAttribute("stroke",       s.target2Color);
+            r.setAttribute("data-o", "target2");
             r.setAttribute("stroke-width", "1.5");
             g.appendChild(r);
         }
@@ -809,6 +837,7 @@ export class BulletChartPro implements IVisual {
             tri.setAttribute("points",
                 `${fx},${fy} ${fx-FORECAST_SIZE},${fy-FORECAST_SIZE*1.5} ${fx+FORECAST_SIZE},${fy-FORECAST_SIZE*1.5}`);
             tri.setAttribute("fill",    s.forecastColor);
+            tri.setAttribute("data-o", "forecast");
             tri.setAttribute("opacity", "0.85");
             g.appendChild(tri);
         }
@@ -832,6 +861,7 @@ export class BulletChartPro implements IVisual {
                 t.setAttribute("fill",        textPrimary);
                 t.setAttribute("clip-path",   `url(#${rcid})`);
                 t.textContent = fmtd;
+                t.setAttribute("data-o", "labels");
                 g.appendChild(t);
                 rx += Math.ceil(fmtd.length * fs * 0.62 + 8);
             }
@@ -846,6 +876,7 @@ export class BulletChartPro implements IVisual {
                 t.setAttribute("fill",        textSecondary);
                 t.setAttribute("clip-path",   `url(#${rcid})`);
                 t.textContent = label;
+                t.setAttribute("data-o", "labels");
                 g.appendChild(t);
                 rx += Math.ceil(label.length * fs * 0.62 + 8);
             }
@@ -864,6 +895,7 @@ export class BulletChartPro implements IVisual {
                 t.setAttribute("fill",        pos ? s.positiveColor : s.negativeColor);
                 t.setAttribute("clip-path",   `url(#${rcid})`);
                 t.textContent = txt;
+                t.setAttribute("data-o", "variance");
                 g.appendChild(t);
             }
         }
@@ -1023,6 +1055,7 @@ export class BulletChartPro implements IVisual {
                     r.setAttribute("x", String(barXOff)); r.setAttribute("y", String(yv));
                     r.setAttribute("width", String(barW)); r.setAttribute("height", String(Math.max(0, baseline - yv)));
                     r.setAttribute("fill", c as string); r.setAttribute("rx", "2");
+                    r.setAttribute("data-o", "bands");
                     g.appendChild(r);
                 });
             } else if (s.showBands) {
@@ -1036,6 +1069,7 @@ export class BulletChartPro implements IVisual {
                         r.setAttribute("width",  String(barW));
                         r.setAttribute("height", String(h as number));
                         r.setAttribute("fill",   c as string); r.setAttribute("rx","2");
+                        r.setAttribute("data-o", "bands");
                         g.appendChild(r);
                     });
             } else {
@@ -1043,6 +1077,7 @@ export class BulletChartPro implements IVisual {
                 bg.setAttribute("x",String(barXOff)); bg.setAttribute("y",String(topY));
                 bg.setAttribute("width",String(barW)); bg.setAttribute("height",String(chartH));
                 bg.setAttribute("fill","#E8E8E8"); bg.setAttribute("rx","2");
+                bg.setAttribute("data-o", "bands");
                 g.appendChild(bg);
             }
 
@@ -1055,6 +1090,7 @@ export class BulletChartPro implements IVisual {
                 r.setAttribute("x",String(aX)); r.setAttribute("y",String(aY));
                 r.setAttribute("width",String(aW)); r.setAttribute("height",String(aH));
                 r.setAttribute("fill", d.colorActual ?? s.actualColor); r.setAttribute("rx","1");
+                r.setAttribute("data-o", "actual");
                 g.appendChild(r);
 
                 if (s.showActualValue) {
@@ -1068,6 +1104,7 @@ export class BulletChartPro implements IVisual {
                     t.setAttribute("paint-order","stroke"); t.setAttribute("stroke", isHCV ? this.hcColors().bg : "#FFFFFF");
                     t.setAttribute("stroke-width","3"); t.setAttribute("stroke-linejoin","round");
                     t.textContent = vtxt; g.appendChild(t);
+                    t.setAttribute("data-o", "labels");
                 }
             }
 
@@ -1078,6 +1115,7 @@ export class BulletChartPro implements IVisual {
                 r.setAttribute("x",String(mX)); r.setAttribute("y",String(ty - TARGET_W / 2));
                 r.setAttribute("width",String(mW)); r.setAttribute("height",String(TARGET_W));
                 r.setAttribute("fill", d.colorTarget ?? s.targetColor); g.appendChild(r);
+                r.setAttribute("data-o", "target");
 
                 if (s.showTargetValue) {
                     const tv = this.mkEl("text");
@@ -1088,6 +1126,7 @@ export class BulletChartPro implements IVisual {
                     tv.setAttribute("font-family", ff);
                     tv.setAttribute("fill",        textSecondaryV);
                     tv.textContent = this.formatValue(d.target, d.formatTarget);
+                    tv.setAttribute("data-o", "labels");
                     g.appendChild(tv);
                 }
             }
@@ -1099,6 +1138,7 @@ export class BulletChartPro implements IVisual {
                 r2.setAttribute("x", String(mX2)); r2.setAttribute("y", String(ty2 - 2.5));
                 r2.setAttribute("width", String(mW2)); r2.setAttribute("height", "5");
                 r2.setAttribute("fill", "none"); r2.setAttribute("stroke", s.target2Color); r2.setAttribute("stroke-width", "1.5");
+                r2.setAttribute("data-o", "target2");
                 g.appendChild(r2);
             }
 
@@ -1108,6 +1148,7 @@ export class BulletChartPro implements IVisual {
                 const dia = this.mkEl("polygon");
                 dia.setAttribute("points",`${fc},${fy-sz} ${fc+sz},${fy} ${fc},${fy+sz} ${fc-sz},${fy}`);
                 dia.setAttribute("fill",s.forecastColor); dia.setAttribute("opacity","0.85");
+                dia.setAttribute("data-o", "forecast");
                 g.appendChild(dia);
             }
 
@@ -1120,6 +1161,7 @@ export class BulletChartPro implements IVisual {
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        textSecondaryV);
                 t.textContent = d.category;
+                t.setAttribute("data-o", "labels");
                 g.appendChild(t);
             }
 
@@ -1139,6 +1181,7 @@ export class BulletChartPro implements IVisual {
                     t.setAttribute("font-family", ff);
                     t.setAttribute("fill",        pos ? s.positiveColor : s.negativeColor);
                     t.textContent = l; g.appendChild(t);
+                    t.setAttribute("data-o", "variance");
                 });
             }
 
@@ -1235,6 +1278,7 @@ export class BulletChartPro implements IVisual {
                 tt.setAttribute("font-weight", "600");
                 tt.setAttribute("fill",        s.trellisTitleColor);
                 tt.textContent = panel.title;
+                tt.setAttribute("data-o", "trellis");
                 this.rootSvg.appendChild(tt);
             }
 
@@ -1337,6 +1381,7 @@ export class BulletChartPro implements IVisual {
     // Shows items for: Actual bar, Target marker, Forecast marker (if data present),
     // and qualitative bands (if enabled). Items are drawn left-to-right.
     private renderLegend(vpW: number, yPos: number): void {
+        const n0 = this.rootSvg.childNodes.length;
         const s   = this.settings;
         const ff  = s.fontFamily;
         const fs  = 10;
@@ -1426,6 +1471,7 @@ export class BulletChartPro implements IVisual {
             this.rootSvg.appendChild(t);
             x += it.label.length * LABEL_PX + ITEM_GAP;
         });
+        this.tagFrom(n0, "legend", false);
     }
 
     // Returns nicely-rounded tick values for a 0-to-maxValue scale.
@@ -1444,6 +1490,7 @@ export class BulletChartPro implements IVisual {
     // Horizontal axis: baseline + vertical guide lines + tick labels below bars.
     // Drawn after rows so guide lines appear above bars (light dashed, pointer-events:none).
     private renderHAxis(labelW: number, chartW: number, yBase: number, maxV: number, formatStr?: string, minV: number = 0): void {
+        const n0 = this.rootSvg.childNodes.length;
         const ff          = this.settings.fontFamily;
         const totalDomain = maxV - minV;
         const xOf         = (v: number) => labelW + ((v - minV) / totalDomain) * chartW;
@@ -1496,10 +1543,12 @@ export class BulletChartPro implements IVisual {
             t.textContent = this.formatValue(v, formatStr);
             this.rootSvg.appendChild(t);
         });
+        this.tagFrom(n0, "axis", true);
     }
 
     // Vertical axis: Y-axis line + horizontal guide lines + labels on the left.
     private renderVAxis(xLeft: number, baseline: number, chartH: number, maxV: number, formatStr?: string, minV: number = 0): void {
+        const n0 = this.rootSvg.childNodes.length;
         const ff          = this.settings.fontFamily;
         const totalDomain = maxV - minV;
         // baseline = y position for value=0 (passed in)
@@ -1555,6 +1604,7 @@ export class BulletChartPro implements IVisual {
             t.textContent = this.formatValue(v, formatStr);
             this.rootSvg.appendChild(t);
         });
+        this.tagFrom(n0, "axis", true);
     }
 
     // Draws a subtle scroll indicator badge when content overflows the viewport.
@@ -1612,6 +1662,7 @@ export class BulletChartPro implements IVisual {
         labelW: number, chartW: number, chartTop: number, chartBot: number,
         totalDomain: number, domainMin: number, formatStr?: string
     ): void {
+        const n0 = this.rootSvg.childNodes.length;
         const s   = this.settings;
         const ff  = s.fontFamily;
         const xOf = (v: number) => labelW + ((v - domainMin) / totalDomain) * chartW;
@@ -1646,12 +1697,14 @@ export class BulletChartPro implements IVisual {
                 this.rootSvg.appendChild(t);
             }
         });
+        this.tagFrom(n0, "refs", false);
     }
 
     private renderRefLinesV(
         xLeft: number, xRight: number, chartTop: number, chartBot: number,
         totalDomain: number, domainMin: number, formatStr?: string
     ): void {
+        const n0 = this.rootSvg.childNodes.length;
         const s   = this.settings;
         const ff  = s.fontFamily;
         // In vertical mode baseline is at zeroY, top is chartTop
@@ -1688,6 +1741,7 @@ export class BulletChartPro implements IVisual {
                 this.rootSvg.appendChild(t);
             }
         });
+        this.tagFrom(n0, "refs", false);
     }
 
     private drawBands(
@@ -1710,6 +1764,7 @@ export class BulletChartPro implements IVisual {
                 r.setAttribute("width",  String(Math.max(0, xOf(Math.max(0, v as number)) - cx)));
                 r.setAttribute("height", String(h));
                 r.setAttribute("fill",   c as string);
+                r.setAttribute("data-o", "bands");
                 r.setAttribute("rx",     "2");
                 g.appendChild(r);
             });
@@ -1730,6 +1785,7 @@ export class BulletChartPro implements IVisual {
                     r.setAttribute("width",  String(Math.max(0, bw as number)));
                     r.setAttribute("height", String(h));
                     r.setAttribute("fill",   c as string);
+                    r.setAttribute("data-o", "bands");
                     r.setAttribute("rx",     "2");
                     g.appendChild(r);
                 });
@@ -1738,6 +1794,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("x",String(cx)); r.setAttribute("y",String(y));
             r.setAttribute("width",String(chartW)); r.setAttribute("height",String(h));
             r.setAttribute("fill","#E8E8E8"); r.setAttribute("rx","2");
+            r.setAttribute("data-o", "bands");
             g.appendChild(r);
         }
     }
@@ -1813,6 +1870,7 @@ export class BulletChartPro implements IVisual {
 
     private attachClearClick(): void {
         this.rootSvg.onclick = () => {
+            if (this.formatMode) return;
             this.clearSelection();
             this.focusedIndex = -1;
             this.removeFocusRing();
@@ -1897,7 +1955,19 @@ export class BulletChartPro implements IVisual {
         return !this.sel.some(id => id.equals(d.selectionId));
     }
 
+    /** Etiqueta (data-o) los nodos añadidos al SVG desde n0. Las guías discontinuas no: tapan las barras. */
+    private tagFrom(n0: number, obj: string, skipDashed: boolean): void {
+        const nodes = this.rootSvg.childNodes;
+        for (let i = n0; i < nodes.length; i++) {
+            const el = nodes[i] as SVGElement;
+            if (el.nodeType !== 1 || el.tagName === "clipPath") continue;
+            if (skipDashed && el.getAttribute("stroke-dasharray")) continue;
+            el.setAttribute("data-o", obj);
+        }
+    }
+
     private canInteract(): boolean {
+        if (this.formatMode) return false;   // en modo formato el clic elige qué formatear, no filtra
         const h = this.host as any;
         return (h?.hostCapabilities?.allowInteractions ?? h?.allowInteractions) !== false;
     }
@@ -1952,6 +2022,100 @@ export class BulletChartPro implements IVisual {
         while (this.rootSvg.firstChild) this.rootSvg.removeChild(this.rootSvg.firstChild);
         this.rootSvg.setAttribute("width",  String(w));
         this.rootSvg.setAttribute("height", String(h));
+    }
+
+    // ── Formato sobre el lienzo ─────────────────────────────────────
+
+    /** Pieza → [tarjeta del panel, clave del nombre, nombre en inglés]. */
+    private static readonly SUB: Record<string, [string, string, string]> = {
+        actual:   ["colors",         "Visual_Colors_ActualColor",   "Actual bar"],
+        target:   ["colors",         "Visual_Colors_TargetColor",   "Target marker"],
+        target2:  ["colors",         "Visual_Colors_Target2Color",  "Second target marker (Pro)"],
+        forecast: ["colors",         "Visual_Colors_ForecastColor", "Forecast marker"],
+        bands:    ["bands",          "Visual_Bands",                "Qualitative Bands"],
+        labels:   ["labels",         "Visual_Labels",               "Labels"],
+        variance: ["variance",       "Visual_Variance",             "Variance"],
+        legend:   ["legend",         "Visual_Legend",               "Legend"],
+        axis:     ["layout",         "Visual_Layout_ShowAxis",      "Show scale axis"],
+        refs:     ["referenceLines", "Visual_ReferenceLines",       "Reference Lines"],
+        trellis:  ["trellis",        "Visual_Trellis",              "Small Multiples [Pro]"],
+    };
+
+    /** Marca lo que se puede elegir en modo formato. Fuera de él, no deja rastro. */
+    private markSubSelectables(): void {
+        this.rootSvg.querySelectorAll("[data-o]").forEach(el => {
+            if (!this.formatMode) { el.classList.remove(HtmlSubSelectableClass); return; }
+            const o = el.getAttribute("data-o");
+            const info = BulletChartPro.SUB[o];
+            if (!info) return;
+            const shape = ["actual", "target", "target2", "forecast", "bands", "refs"].indexOf(o) >= 0;
+            el.classList.add(HtmlSubSelectableClass);
+            el.setAttribute(SubSelectableObjectNameAttribute, o);
+            el.setAttribute(SubSelectableDisplayNameAttribute, this.t(info[1], info[2]));
+            el.setAttribute(SubSelectableTypeAttribute, String(shape ? powerbi.visuals.SubSelectionStylesType.Shape : powerbi.visuals.SubSelectionStylesType.Text));
+        });
+    }
+
+    private getSubSelectionStyles(subs: powerbi.visuals.CustomVisualSubSelection[]): powerbi.visuals.SubSelectionStyles | undefined {
+        const o = subs[0]?.customVisualObjects[0]?.objectName;
+        const ref = (obj: string, prop: string, key: string, def: string) => ({ reference: { objectName: obj, propertyName: prop }, label: this.t(key, def) });
+        const Shape = powerbi.visuals.SubSelectionStylesType.Shape, Text = powerbi.visuals.SubSelectionStylesType.Text;
+        switch (o) {
+            case "actual":   return { type: Shape, fill: ref("colors", "actualColor",   "Visual_Colors_ActualColor",   "Actual bar") } as any;
+            case "target":   return { type: Shape, fill: ref("colors", "targetColor",   "Visual_Colors_TargetColor",   "Target marker") } as any;
+            case "target2":  return { type: Shape, fill: ref("colors", "target2Color",  "Visual_Colors_Target2Color",  "Second target marker (Pro)") } as any;
+            case "forecast": return { type: Shape, fill: ref("colors", "forecastColor", "Visual_Colors_ForecastColor", "Forecast marker") } as any;
+            case "bands":    return { type: Shape, fill: ref("colors", "band3Color",    "Visual_Colors_Band3Color",    "Band 3 (best)") } as any;
+            case "refs":     return { type: Shape, stroke: ref("referenceLines", "refLine1Color", "Visual_ReferenceLines_RefLine1Color", "Line 1 – Color") } as any;
+            case "labels":
+            case "axis":     return { type: Text, fontSize: ref("labels", "fontSize", "Visual_Labels_FontSize", "Font size"),
+                                      fontFamily: ref("labels", "fontFamily", "Visual_Labels_FontFamily", "Font family") } as any;
+            case "variance": return { type: Text, fontColor: ref("colors", "positiveColor", "Visual_Colors_PositiveColor", "Positive variance") } as any;
+            case "legend":   return { type: Text, fontFamily: ref("labels", "fontFamily", "Visual_Labels_FontFamily", "Font family") } as any;
+            case "trellis":  return { type: Text, fontColor: ref("trellis", "trellisTitleColor", "Visual_Trellis_TrellisTitleColor", "Panel title color") } as any;
+        }
+        return undefined;
+    }
+
+    private getSubSelectionShortcuts(subs: powerbi.visuals.CustomVisualSubSelection[]): powerbi.visuals.VisualSubSelectionShortcuts | undefined {
+        const o = subs[0]?.customVisualObjects[0]?.objectName;
+        const info = BulletChartPro.SUB[o];
+        if (!info) return undefined;
+        const id = (obj: string, prop: string) => ({ objectName: obj, propertyName: prop });
+        const toggle = (obj: string, prop: string, key: string, def: string) => ({ type: powerbi.visuals.VisualShortcutType.Toggle, ...id(obj, prop),
+            relatedToggledFormattingIds: [id(obj, prop)], disabledLabel: this.t(key, def), enabledLabel: this.t(key, def) });
+        const reset = (obj: string, props: string[]) => ({ type: powerbi.visuals.VisualShortcutType.Reset, relatedResetFormattingIds: props.map(p => id(obj, p)) });
+        // FormattingSettingsService forma el uid "<objeto>-card" y Power BI lo publica como "Visual-<objeto>-card"
+        // (comprobado en KPI Card 2.2): el atajo tiene que usar el segundo.
+        const nav = { type: powerbi.visuals.VisualShortcutType.Navigate, destinationInfo: { cardUid: "Visual-" + info[0] + "-card" }, label: this.t(info[1], info[2]) };
+        const div = { type: powerbi.visuals.VisualShortcutType.Divider };
+        switch (o) {
+            case "actual": case "target": case "target2": case "forecast":
+                return [reset("colors", [{ actual: "actualColor", target: "targetColor", target2: "target2Color", forecast: "forecastColor" }[o]]), nav] as any;
+            case "bands":
+                return [toggle("bands", "showBands", "Visual_Bands_ShowBands", "Show bands"), div, reset("colors", ["band1Color", "band2Color", "band3Color"]), nav] as any;
+            case "labels":
+                return [toggle("labels", "showCategoryLabel", "Visual_Labels_ShowCategoryLabel", "Show category"),
+                    toggle("labels", "showActualValue", "Visual_Labels_ShowActualValue", "Show actual value"),
+                    toggle("labels", "showTargetValue", "Visual_Labels_ShowTargetValue", "Show target value"), div,
+                    reset("labels", ["fontSize", "fontFamily"]), nav] as any;
+            case "variance":
+                return [toggle("variance", "showVariance", "Visual_Variance_ShowVariance", "Show variance label"),
+                    toggle("variance", "showVariancePct", "Visual_Variance_ShowVariancePct", "Show variance %"), div,
+                    reset("colors", ["positiveColor", "negativeColor"]), nav] as any;
+            case "legend":
+                return [{ type: powerbi.visuals.VisualShortcutType.Picker, ...id("legend", "legendPosition"), label: this.t("Visual_Legend_LegendPosition", "Position") },
+                    toggle("legend", "showLegend", "Visual_Legend_ShowLegend", "Show legend"), div, nav] as any;
+            case "axis":
+                return [toggle("layout", "showAxis", "Visual_Layout_ShowAxis", "Show scale axis"), div, nav] as any;
+            case "refs":
+                return [toggle("referenceLines", "refLine1Show", "Visual_ReferenceLines_RefLine1Show", "Line 1 – Show"),
+                    toggle("referenceLines", "refLine2Show", "Visual_ReferenceLines_RefLine2Show", "Line 2 – Show"), div, nav] as any;
+            case "trellis":
+                return [toggle("trellis", "trellisShowTitle", "Visual_Trellis_TrellisShowTitle", "Show panel titles"), div,
+                    reset("trellis", ["trellisPanelColor", "trellisBorderColor", "trellisTitleColor"]), nav] as any;
+        }
+        return undefined;
     }
 
     // ── Format panel ─────────────────────────────────────────────────

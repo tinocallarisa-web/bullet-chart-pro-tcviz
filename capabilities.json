@@ -633,5 +633,7 @@
   "supportsLandingPage": true,
   "supportsKeyboardFocus": true,
   "supportsMultiVisualSelection": true,
-  "supportsSynchronizingFilterState": true
+  "supportsSynchronizingFilterState": true,
+  "supportsOnObjectFormatting": true,
+  "enablePointerEventsFormatMode": true
 }
