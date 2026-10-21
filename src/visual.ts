@@ -1705,12 +1705,15 @@ export class BulletChartPro implements IVisual {
         // que seguir visible. yPos es relativo a la vista; stickLegend la mueve con el scroll.
         const lg = this.mkEl("g");
         lg.setAttribute("class", "bc-legend-g");
+        // Modo formato: toda la franja de la leyenda elige la leyenda, no solo sus iconos y textos pequeños.
+        if (this.formatMode) lg.appendChild(this.hitRect(0, yPos, vpW, this.legendH(), "legend"));
         const svgH = Number(this.rootSvg.getAttribute("height")) || 0;
         if (svgH > (this.lastOptions?.viewport?.height ?? svgH)) {
             const bgr = this.mkEl("rect");
             bgr.setAttribute("x", "0"); bgr.setAttribute("y", String(yPos));
             bgr.setAttribute("width", String(vpW)); bgr.setAttribute("height", String(this.legendH()));
             bgr.setAttribute("fill", this.hcColors().isHC ? this.hcColors().bg : "#FFFFFF");
+            bgr.setAttribute("data-o", "legend");   // el fondo también elige la leyenda en modo formato
             lg.appendChild(bgr);
         }
         const nodes = Array.prototype.slice.call(this.rootSvg.childNodes, n0) as Node[];
@@ -2086,7 +2089,7 @@ export class BulletChartPro implements IVisual {
     private attachTooltipEvents(el: SVGElement, d: BulletDataPoint): void {
         const svc = this.tooltipService;
         el.addEventListener("mouseenter", (e: MouseEvent) => {
-            if (!svc.enabled()) return;
+            if (!svc.enabled() || this.formatMode) return;
             svc.show({
                 dataItems:    this.buildTooltipItems(d),
                 identities:   [d.selectionId],
@@ -2095,7 +2098,7 @@ export class BulletChartPro implements IVisual {
             });
         });
         el.addEventListener("mousemove", (e: MouseEvent) => {
-            if (!svc.enabled()) return;
+            if (!svc.enabled() || this.formatMode) return;
             svc.move({
                 dataItems:    this.buildTooltipItems(d),
                 identities:   [d.selectionId],
