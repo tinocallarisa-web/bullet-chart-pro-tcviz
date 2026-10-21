@@ -138,6 +138,8 @@ export class BulletChartPro implements IVisual {
     private lastDataPoints:   BulletDataPoint[] = [];
     /** Margen izquierdo del modo vertical: VERT_PAD_LR más el ancho de las etiquetas del eje (antes salían fuera). */
     private vPadL = VERT_PAD_LR;
+    /** Qué entra en la columna de valores, igual para todas las filas: un mosaico estrecho no mezcla filas con y sin texto. */
+    private rp: { value: boolean; target: boolean; variance: "full" | "pct" | "none" } = { value: true, target: true, variance: "full" };
     private formatMode = false;
     private editing = false;
     /** Última plantilla vista: al cambiarla editando se aplica de verdad (aplicarPlantilla). */
@@ -184,6 +186,9 @@ export class BulletChartPro implements IVisual {
 
         this.rootSvg               = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
         this.rootSvg.style.display = "block";
+        // El lector de pantalla recorre las filas como una lista; cada fila dice su lectura completa (ariaOf).
+        this.rootSvg.setAttribute("role", "list");
+        this.rootSvg.setAttribute("aria-label", "Bullet Chart Pro");
         this.container.appendChild(this.rootSvg);
 
         // Marca de agua de la vista previa Pro. Blanca con contorno oscuro y opacidad 0.55:
@@ -832,6 +837,7 @@ export class BulletChartPro implements IVisual {
         const targetRowH = Math.min(MAX_ROW_H, Math.floor(chartH / data.length));
         const autoRightW = this.estimateRightW(data, s, s.fontSize);
         const L       = this.hLayout(s, vpW, targetRowH, autoRightW);
+        this.rp = this.rightPanelMode(data, s, L.rightW);
         const rowsH   = L.rowH * data.length;
         const totalH  = rowsH + legendH + axisH;
 
@@ -889,6 +895,7 @@ export class BulletChartPro implements IVisual {
         const g = this.mkEl("g");
         g.setAttribute("transform", `translate(0,${gy})`);
         g.setAttribute("role",      "listitem");
+        g.setAttribute("aria-label", this.ariaOf(d));
         if (ki >= 0) g.setAttribute("data-ki", String(ki));
         g.style.opacity = this.dimmed(d) ? "0.25" : "1";
         if (allow) g.style.cursor = "pointer";
@@ -905,7 +912,7 @@ export class BulletChartPro implements IVisual {
             t.setAttribute("font-family", ff);
             t.setAttribute("fill",        textPrimary);
             t.setAttribute("clip-path",   `url(#${cid})`);
-            t.textContent = d.category;
+            t.textContent = this.ellipsis(d.category, labelW - 10, fs);
             t.setAttribute("data-o", "labels");
             g.appendChild(t);
         }
@@ -997,7 +1004,7 @@ export class BulletChartPro implements IVisual {
             let   rx   = rx0;
             const ry   = rowH / 2 + fs * 0.38;
 
-            if (s.showActualValue && d.actual != null) {
+            if (s.showActualValue && d.actual != null && this.rp.value) {
                 const fmtd = this.formatValue(d.actual, d.formatActual);
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(rx));
@@ -1013,7 +1020,7 @@ export class BulletChartPro implements IVisual {
                 rx += Math.ceil(fmtd.length * fs * 0.62 + 8);
             }
 
-            if (s.showTargetValue && d.target != null) {
+            if (s.showTargetValue && d.target != null && this.rp.target) {
                 const label = `${this.t("UI_TargetShort", "T:")} ${this.formatValue(d.target, d.formatTarget)}`;
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(rx));
@@ -1032,8 +1039,11 @@ export class BulletChartPro implements IVisual {
                 const pos  = d.variance >= s.varianceThreshold;
                 const absV = this.formatValue(Math.abs(d.variance), d.formatActual);
                 let   txt  = (pos ? "▲ +" : "▼ ") + absV;
-                if (s.showVariancePct && d.variancePct != null)
-                    txt += ` (${this.pctText(d.variancePct)})`;
+                // Sin sitio para el importe y el %, se queda el % (la lectura que importa en un mosaico); sin sitio
+                // para nada, se omite: el tooltip lo sigue diciendo.
+                if (this.rp.variance === "full" && s.showVariancePct && d.variancePct != null) txt += ` (${this.pctText(d.variancePct)})`;
+                else if (this.rp.variance === "pct") txt = d.variancePct != null ? (pos ? "▲ " : "▼ ") + this.pctText(d.variancePct) : "";
+                else if (this.rp.variance === "none") txt = "";
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(rx));
                 t.setAttribute("y",           String(ry));
@@ -1131,6 +1141,50 @@ export class BulletChartPro implements IVisual {
         return s.showCategoryLabel ? Math.max(VERT_PAD_BOT, Math.ceil(s.fontSize * 1.6)) : 0;
     }
 
+    /**
+     * Qué cabe en la columna de valores, mirando la fila más larga: primero cae el importe de la desviación (queda el %),
+     * luego la desviación, luego el objetivo. Lo omitido sigue en el tooltip.
+     */
+    private rightPanelMode(data: BulletDataPoint[], s: BulletSettings, rightW: number) {
+        const fs = s.fontSize, w = (txt: string) => Math.ceil(txt.length * fs * 0.6 + 8);
+        let wv = 0, wt = 0, wFull = 0, wPct = 0;
+        data.forEach(d => {
+            if (s.showActualValue && d.actual != null) wv = Math.max(wv, w(this.formatValue(d.actual, d.formatActual)));
+            if (s.showTargetValue && d.target != null) wt = Math.max(wt, w(`${this.t("UI_TargetShort", "T:")} ${this.formatValue(d.target, d.formatTarget)}`));
+            if (s.showVariance && d.variance != null) {
+                const base = "▲ +" + this.formatValue(Math.abs(d.variance), d.formatActual);
+                const pct = d.variancePct != null ? this.pctText(d.variancePct) : "";
+                wFull = Math.max(wFull, w(s.showVariancePct && pct ? `${base} (${pct})` : base));
+                wPct = Math.max(wPct, w("▲ " + pct));
+            }
+        });
+        const value = wv <= rightW;
+        let used = value ? wv : 0;
+        const variance: "full" | "pct" | "none" = !s.showVariance ? "none"
+            : used + wFull <= rightW ? "full" : (s.showVariancePct && used + wPct <= rightW) ? "pct" : "none";
+        used += variance === "full" ? wFull : variance === "pct" ? wPct : 0;
+        const target = used + wt <= rightW;
+        return { value, target, variance };
+    }
+
+    /** Lo que el lector de pantalla dice de una fila: categoría, real, objetivo y desviación, con sus formatos. */
+    private ariaOf(d: BulletDataPoint): string {
+        const parts = [d.category];
+        if (d.actual != null) parts.push(`${this.names.actual} ${this.formatValue(d.actual, d.formatActual)}`);
+        if (d.target != null) parts.push(`${this.names.target} ${this.formatValue(d.target, d.formatTarget)}`);
+        if (d.variance != null) parts.push(`${this.t("UI_Variance", "Variance")} ${d.variance >= 0 ? "+" : "−"}${this.formatValue(Math.abs(d.variance), d.formatActual)}` +
+            (d.variancePct != null ? ` (${this.pctText(d.variancePct)})` : ""));
+        if (d.target2 != null) parts.push(`${this.names.target2} ${this.formatValue(d.target2, d.formatTarget2)}`);
+        return parts.join(", ");
+    }
+
+    /** Recorta con "…" lo que no cabe en el ancho dado (estimación por carácter). */
+    private ellipsis(text: string, maxW: number, fs: number): string {
+        const max = Math.floor(maxW / (fs * 0.58));
+        if (text.length <= max) return text;
+        return max <= 1 ? "" : text.slice(0, max - 1).trimEnd() + "…";
+    }
+
     /** Fuente que hace caber el texto en el ancho dado (estimación por carácter), sin pasar de la elegida ni bajar de 8. */
     private fitFs(text: string, maxW: number, fs: number): number {
         const need = text.length * 0.6;
@@ -1194,6 +1248,8 @@ export class BulletChartPro implements IVisual {
             const g = this.mkEl("g");
             g.setAttribute("transform", `translate(${colX},0)`);
             g.setAttribute("data-ki", String(i));
+            g.setAttribute("role", "listitem");
+            g.setAttribute("aria-label", this.ariaOf(d));
             g.style.opacity = this.dimmed(d) ? "0.25" : "1";
             if (allow) g.style.cursor = "pointer";
 
@@ -1378,6 +1434,7 @@ export class BulletChartPro implements IVisual {
         const allData     = panels.flatMap(p => p.data);
         const autoRightW  = this.estimateRightW(allData, s, s.fontSize);
         const L           = this.hLayout(s, panelW, targetRowH, autoRightW);
+        this.rp = this.rightPanelMode(allData, s, L.rightW);
         // Cada panel mide al menos lo que ocupan sus filas (rowH nunca baja de 28). Antes el alto
         // salía solo del reparto del viewport y las filas se dibujaban encima del panel siguiente
         // y de la leyenda. Si no caben, el SVG crece y el contenedor hace scroll.
@@ -1608,6 +1665,7 @@ export class BulletChartPro implements IVisual {
         let x = Math.max(4, (vpW - totalW) / 2);
 
         items.forEach(it => {
+            if (x + 18 + it.label.length * LABEL_PX > vpW) return;   // no cabe: fuera, mejor que cortado
             const iconW = it.draw(x);
             x += iconW + 4;
 
@@ -1660,7 +1718,7 @@ export class BulletChartPro implements IVisual {
         this.rootSvg.appendChild(bl);
 
         // Build tick set: positive ticks + mirrored negative ticks when minV < 0
-        const positiveTicks = this.niceTicks(maxV);
+        const positiveTicks = this.niceTicks(maxV, Math.max(1, Math.min(4, Math.floor(chartW / 70))));
         const allTicks: number[] = [...positiveTicks];
         if (minV < 0) {
             positiveTicks.forEach(v => { if (v > 0) allTicks.push(-v); });
@@ -1721,7 +1779,7 @@ export class BulletChartPro implements IVisual {
         this.rootSvg.appendChild(vl);
 
         // Ticks: positive + mirrored negatives when minV < 0
-        const posTicks = this.niceTicks(maxV);
+        const posTicks = this.niceTicks(maxV, Math.max(1, Math.min(4, Math.floor(chartH / 28))));
         const allTicks: number[] = [...posTicks];
         if (minV < 0) {
             posTicks.forEach(v => { if (v > 0) allTicks.push(-v); });
@@ -2209,6 +2267,9 @@ export class BulletChartPro implements IVisual {
         el.style.display = "none";
         const s = this.settings;
         if (!this.editing || this.formatMode || !s?.guide || this.landingEl || !this.lastDataPoints.length || !this.canInteract()) return;
+        // En un mosaico pequeño la guía taparía el gráfico entero: Bullet vive a menudo en mosaicos de tarjeta.
+        const vp = this.lastOptions?.viewport;
+        if (vp && (vp.width < 360 || vp.height < 220)) return;
         const objs: any = this.lastOptions?.dataViews?.[0]?.metadata?.objects ?? {};
         const pal: any = this.host.colorPalette;
         const hc = !!pal?.isHighContrast;
