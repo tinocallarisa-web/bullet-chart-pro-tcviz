@@ -924,6 +924,14 @@ export class BulletChartPro implements IVisual {
         const xOf = (v: number): number => cx + ((v - domainMin) / totalDomain) * chartW;
         const zeroX = xOf(0);
 
+        // Modo formato: zonas invisibles por columna de la fila, debajo de las piezas. Pinchar en cualquier punto de la
+        // fila elige algo con sentido; las piezas dibujadas encima siguen ganando donde están.
+        if (this.formatMode) {
+            if (labelW > 0) g.appendChild(this.hitRect(0, 0, labelW, rowH, "labels"));
+            g.appendChild(this.hitRect(cx, 0, chartW, rowH, "bands"));
+            if (rightW > 0) g.appendChild(this.hitRect(cx + chartW + CHART_PAD_R, 0, rightW, rowH, "labels"));
+        }
+
         // 2. Bands — thresholds relative to rMax (data max, not padded domain)
         this.drawBands(g, s, cx, barY, chartW, barH, rMax, totalDomain, domainMin, d);
 
@@ -953,6 +961,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("data-o", "actual");
             r.setAttribute("rx",     "1");
             g.appendChild(r);
+            if (this.formatMode) g.appendChild(this.hitRect(barX, barY, barW, barH, "actual"));
         }
 
         // 4. Target marker
@@ -967,6 +976,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("fill",   d.colorTarget ?? s.targetColor);
             r.setAttribute("data-o", "target"); r.classList.add("bc-hit");
             g.appendChild(r);
+            if (this.formatMode) g.appendChild(this.hitRect(tx - 5, 0, 10, rowH, "target"));
         }
 
         // 4b. Segundo objetivo (Pro): marcador hueco, para no confundirlo con el primero.
@@ -1255,6 +1265,7 @@ export class BulletChartPro implements IVisual {
             g.setAttribute("aria-label", this.ariaOf(d));
             g.style.opacity = this.dimmed(d) ? "0.25" : "1";
             if (allow) g.style.cursor = "pointer";
+            if (this.formatMode) g.appendChild(this.hitRect(0, topY, colW, Math.max(0, baseline - topY), "bands"));
 
             if (s.showBands && (d.band1Limit != null || d.band2Limit != null || d.bandMax != null)) {
                 // Pro: límites de banda de la columna, desde cero.
@@ -1327,6 +1338,7 @@ export class BulletChartPro implements IVisual {
                 r.setAttribute("width",String(mW)); r.setAttribute("height",String(TARGET_W));
                 r.setAttribute("fill", d.colorTarget ?? s.targetColor); g.appendChild(r);
                 r.setAttribute("data-o", "target"); r.classList.add("bc-hit");
+                if (this.formatMode) g.appendChild(this.hitRect(0, ty - 5, colW, 10, "target"));
 
                 if (s.showTargetValue) {
                     const tv = this.mkEl("text");
@@ -2192,6 +2204,16 @@ export class BulletChartPro implements IVisual {
         if (!d.isHighlighted) return true;
         if (!this.sel.length) return false;
         return !this.sel.some(id => id.equals(d.selectionId));
+    }
+
+    /** Zona de clic invisible (solo en modo formato): un rectángulo transparente que elige la pieza `obj`. */
+    private hitRect(x: number, y: number, w: number, h: number, obj: string): SVGElement {
+        const r = this.mkEl("rect");
+        r.setAttribute("x", String(x)); r.setAttribute("y", String(y));
+        r.setAttribute("width", String(Math.max(0, w))); r.setAttribute("height", String(Math.max(0, h)));
+        r.setAttribute("fill", "transparent");
+        r.setAttribute("data-o", obj);
+        return r;
     }
 
     /** Etiqueta (data-o) los nodos añadidos al SVG desde n0. Las guías discontinuas no: tapan las barras. */
