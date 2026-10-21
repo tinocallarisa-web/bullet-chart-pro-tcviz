@@ -42,6 +42,9 @@ export interface BulletSettings {
     // ── Legend ────────────────────────────────────────────────────────
     showLegend:         boolean;
     legendPosition:     "top" | "bottom";
+    legendFontSize:     number;
+    legendFontFamily:   string;
+    legendColor:        string;
 
     // ── Reference Lines ───────────────────────────────────────────────
     refLine1Show:       boolean;
@@ -99,6 +102,9 @@ export function getDefaultSettings(): BulletSettings {
 
         showLegend:         true,
         legendPosition:     "bottom",
+        legendFontSize:     10,
+        legendFontFamily:   "Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
+        legendColor:        "#333333",
 
         refLine1Show:       false,
         refLine1Value:      0,

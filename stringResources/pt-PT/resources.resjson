@@ -85,5 +85,8 @@
   "Feat_bands": "faixas a partir de medidas",
   "Feat_target2": "uma segunda meta",
   "UI_Target2": "Segunda meta",
-  "UI_VarianceVs": "Desvio vs {0}"
+  "UI_VarianceVs": "Desvio vs {0}",
+  "Visual_Legend_FontSize": "Tamanho da fonte",
+  "Visual_Legend_FontFamily": "Família da fonte",
+  "Visual_Legend_Color": "Cor do texto"
 }

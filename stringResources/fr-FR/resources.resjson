@@ -85,5 +85,8 @@
   "Feat_bands": "les bandes issues de mesures",
   "Feat_target2": "une seconde cible",
   "UI_Target2": "Seconde cible",
-  "UI_VarianceVs": "Écart vs {0}"
+  "UI_VarianceVs": "Écart vs {0}",
+  "Visual_Legend_FontSize": "Taille de police",
+  "Visual_Legend_FontFamily": "Famille de police",
+  "Visual_Legend_Color": "Couleur du texte"
 }

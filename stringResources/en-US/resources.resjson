@@ -85,5 +85,8 @@
   "Feat_bands": "bands from measures",
   "Feat_target2": "a second target",
   "UI_Target2": "Second target",
-  "UI_VarianceVs": "Variance vs {0}"
+  "UI_VarianceVs": "Variance vs {0}",
+  "Visual_Legend_FontSize": "Font size",
+  "Visual_Legend_FontFamily": "Font family",
+  "Visual_Legend_Color": "Text color"
 }

@@ -85,5 +85,8 @@
   "Feat_bands": "Bänder aus Measures",
   "Feat_target2": "ein zweites Ziel",
   "UI_Target2": "Zweites Ziel",
-  "UI_VarianceVs": "Abweichung zu {0}"
+  "UI_VarianceVs": "Abweichung zu {0}",
+  "Visual_Legend_FontSize": "Schriftgröße",
+  "Visual_Legend_FontFamily": "Schriftfamilie",
+  "Visual_Legend_Color": "Textfarbe"
 }

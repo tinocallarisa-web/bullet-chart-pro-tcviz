@@ -470,6 +470,35 @@
               }
             ]
           }
+        },
+        "fontSize": {
+          "displayName": "Font size",
+          "displayNameKey": "Visual_Legend_FontSize",
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "fontFamily": {
+          "displayName": "Font family",
+          "displayNameKey": "Visual_Legend_FontFamily",
+          "type": {
+            "formatting": {
+              "fontFamily": true
+            }
+          }
+        },
+        "color": {
+          "displayName": "Text color",
+          "displayNameKey": "Visual_Legend_Color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
         }
       }
     },

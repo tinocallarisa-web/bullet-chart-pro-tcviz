@@ -395,6 +395,9 @@ export class BulletChartPro implements IVisual {
             showAxis:           bool("layout", "showAxis",           d.showAxis),
             showLegend:         bool("legend", "showLegend",         d.showLegend),
             legendPosition:     str( "legend", "legendPosition",     d.legendPosition) as any,
+            legendFontSize:     Math.max(6, num("legend", "fontSize", d.legendFontSize)),
+            legendFontFamily:   str( "legend", "fontFamily",         d.legendFontFamily),
+            legendColor:        col( "legend", "color",              d.legendColor),
             refLine1Show:       bool("referenceLines","refLine1Show",  d.refLine1Show),
             refLine1Value:      num( "referenceLines","refLine1Value", d.refLine1Value),
             refLine1Label:      str( "referenceLines","refLine1Label", d.refLine1Label),
@@ -672,7 +675,7 @@ export class BulletChartPro implements IVisual {
 
     private renderHorizontal(data: BulletDataPoint[], vpW: number, vpH: number, drillLabel: string = ""): void {
         const s       = this.settings;
-        const legendH = s.showLegend ? LEGEND_H : 0;
+        const legendH = s.showLegend ? this.legendH() : 0;
         const axisH   = s.showAxis   ? AXIS_H   : 0;
         const isTop   = s.legendPosition === "top";
         const chartY  = isTop ? legendH : 0;
@@ -924,7 +927,7 @@ export class BulletChartPro implements IVisual {
 
     private renderVertical(data: BulletDataPoint[], vpW: number, vpH: number, drillLabel: string = ""): void {
         const s       = this.settings;
-        const legendH = s.showLegend ? LEGEND_H : 0;
+        const legendH = s.showLegend ? this.legendH() : 0;
         const isTop   = s.legendPosition === "top";
         const chartY  = isTop ? legendH : 0;
         const chartH  = vpH - legendH;
@@ -988,6 +991,11 @@ export class BulletChartPro implements IVisual {
     private fitFs(text: string, maxW: number, fs: number): number {
         const need = text.length * 0.6;
         return need <= 0 ? fs : Math.max(8, Math.min(fs, Math.floor(maxW / need)));
+    }
+
+    /** Alto de la franja de la leyenda: crece con su fuente (antes fijo en 22 px). */
+    private legendH(): number {
+        return Math.max(LEGEND_H, Math.ceil((this.settings?.legendFontSize ?? 10) * 2.2));
     }
 
     /** Fuente de las etiquetas de los ejes: dos puntos menos que la de las etiquetas, nunca menos de 9. */
@@ -1210,7 +1218,7 @@ export class BulletChartPro implements IVisual {
         const titleH = s.trellisShowTitle ? TRELLIS_TITLE_H : 0;
 
         // Reserve space for legend before computing panel heights
-        const legendH    = s.showLegend ? LEGEND_H : 0;
+        const legendH    = s.showLegend ? this.legendH() : 0;
         const isTop      = s.legendPosition === "top";
         const availH     = Math.max(0, vpH - legendH);
         const panelOffY  = isTop ? legendH : 0; // panels shift down when legend is on top
@@ -1383,9 +1391,9 @@ export class BulletChartPro implements IVisual {
     private renderLegend(vpW: number, yPos: number): void {
         const n0 = this.rootSvg.childNodes.length;
         const s   = this.settings;
-        const ff  = s.fontFamily;
-        const fs  = 10;
-        const mid = yPos + LEGEND_H / 2;
+        const ff  = s.legendFontFamily;
+        const fs  = s.legendFontSize;
+        const mid = yPos + this.legendH() / 2;
 
         const hasTarget   = this.lastDataPoints.some(d => d.target   != null);
         const hasForecast = this.lastDataPoints.some(d => d.forecast != null);
@@ -1459,13 +1467,13 @@ export class BulletChartPro implements IVisual {
             const iconW = it.draw(x);
             x += iconW + 4;
 
-            const { fg } = this.hcColors();
+            const { fg, isHC } = this.hcColors();
             const t = this.mkEl("text");
             t.setAttribute("x",           String(x));
             t.setAttribute("y",           String(mid + fs * 0.38));
             t.setAttribute("font-size",   String(fs));
             t.setAttribute("font-family", ff);
-            t.setAttribute("fill",        fg);
+            t.setAttribute("fill",        isHC ? fg : s.legendColor);
             t.setAttribute("pointer-events", "none");
             t.textContent = it.label;
             this.rootSvg.appendChild(t);
@@ -2071,7 +2079,9 @@ export class BulletChartPro implements IVisual {
             case "axis":     return { type: Text, fontSize: ref("labels", "fontSize", "Visual_Labels_FontSize", "Font size"),
                                       fontFamily: ref("labels", "fontFamily", "Visual_Labels_FontFamily", "Font family") } as any;
             case "variance": return { type: Text, fontColor: ref("colors", "positiveColor", "Visual_Colors_PositiveColor", "Positive variance") } as any;
-            case "legend":   return { type: Text, fontFamily: ref("labels", "fontFamily", "Visual_Labels_FontFamily", "Font family") } as any;
+            case "legend":   return { type: Text, fontSize: ref("legend", "fontSize", "Visual_Legend_FontSize", "Font size"),
+                                      fontFamily: ref("legend", "fontFamily", "Visual_Legend_FontFamily", "Font family"),
+                                      fontColor: ref("legend", "color", "Visual_Legend_Color", "Text color") } as any;
             case "trellis":  return { type: Text, fontColor: ref("trellis", "trellisTitleColor", "Visual_Trellis_TrellisTitleColor", "Panel title color") } as any;
         }
         return undefined;
@@ -2105,7 +2115,8 @@ export class BulletChartPro implements IVisual {
                     reset("colors", ["positiveColor", "negativeColor"]), nav] as any;
             case "legend":
                 return [{ type: powerbi.visuals.VisualShortcutType.Picker, ...id("legend", "legendPosition"), label: this.t("Visual_Legend_LegendPosition", "Position") },
-                    toggle("legend", "showLegend", "Visual_Legend_ShowLegend", "Show legend"), div, nav] as any;
+                    toggle("legend", "showLegend", "Visual_Legend_ShowLegend", "Show legend"), div,
+                    reset("legend", ["fontSize", "fontFamily", "color"]), nav] as any;
             case "axis":
                 return [toggle("layout", "showAxis", "Visual_Layout_ShowAxis", "Show scale axis"), div, nav] as any;
             case "refs":

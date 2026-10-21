@@ -85,5 +85,8 @@
   "Feat_bands": "측정값 기반 구간",
   "Feat_target2": "두 번째 목표",
   "UI_Target2": "두 번째 목표",
-  "UI_VarianceVs": "{0} 대비 차이"
+  "UI_VarianceVs": "{0} 대비 차이",
+  "Visual_Legend_FontSize": "글꼴 크기",
+  "Visual_Legend_FontFamily": "글꼴 패밀리",
+  "Visual_Legend_Color": "텍스트 색"
 }

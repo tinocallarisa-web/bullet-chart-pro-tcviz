@@ -131,3 +131,7 @@ P.update({
 "Variance vs {0}": ["Desvio vs {0}", "Écart vs {0}", "Abweichung zu {0}", "Scostamento vs {0}", "Afwijking t.o.v. {0}", "Odchylenie vs {0}", "{0} との差異", "与 {0} 的偏差", "{0} 대비 차이", "Desviación vs {0}"],
 "Second target": ["Segunda meta", "Seconde cible", "Zweites Ziel", "Secondo obiettivo", "Tweede doel", "Drugi cel", "第 2 目標", "第二目标", "두 번째 목표", "Segundo objetivo"],
 })
+
+P.update({
+"Text color": ["Cor do texto", "Couleur du texte", "Textfarbe", "Colore del testo", "Tekstkleur", "Kolor tekstu", "テキストの色", "文本颜色", "텍스트 색", "Color del texto"],
+})

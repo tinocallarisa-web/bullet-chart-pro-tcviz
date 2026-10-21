@@ -85,5 +85,8 @@
   "Feat_bands": "las bandas desde medidas",
   "Feat_target2": "un segundo objetivo",
   "UI_Target2": "Segundo objetivo",
-  "UI_VarianceVs": "Desviación vs {0}"
+  "UI_VarianceVs": "Desviación vs {0}",
+  "Visual_Legend_FontSize": "Tamaño de fuente",
+  "Visual_Legend_FontFamily": "Familia de fuentes",
+  "Visual_Legend_Color": "Color del texto"
 }

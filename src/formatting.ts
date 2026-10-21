@@ -96,6 +96,9 @@ export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): 
     const legend = card("legend", "Visual_Legend", "Legend", [
         new ToggleSwitch({ name: "showLegend",     displayName: "Show legend", displayNameKey: "Visual_Legend_ShowLegend",     value: s.showLegend }),
         new AutoDropdown({ name: "legendPosition", displayName: "Position",    displayNameKey: "Visual_Legend_LegendPosition", value: s.legendPosition }),
+        new NumUpDown({    name: "fontSize",       displayName: "Font size",   displayNameKey: "Visual_Legend_FontSize",       value: s.legendFontSize }),
+        new FontPicker({   name: "fontFamily",     displayName: "Font family", displayNameKey: "Visual_Legend_FontFamily",     value: s.legendFontFamily }),
+        new ColorPicker({  name: "color",          displayName: "Text color",  displayNameKey: "Visual_Legend_Color",          value: col(s.legendColor) }),
     ]);
 
     const ref = card("referenceLines", "Visual_ReferenceLines", "Reference Lines", [

@@ -85,5 +85,8 @@
   "Feat_bands": "le fasce da misure",
   "Feat_target2": "un secondo obiettivo",
   "UI_Target2": "Secondo obiettivo",
-  "UI_VarianceVs": "Scostamento vs {0}"
+  "UI_VarianceVs": "Scostamento vs {0}",
+  "Visual_Legend_FontSize": "Dimensione carattere",
+  "Visual_Legend_FontFamily": "Famiglia di caratteri",
+  "Visual_Legend_Color": "Colore del testo"
 }

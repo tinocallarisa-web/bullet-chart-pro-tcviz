@@ -85,5 +85,8 @@
   "Feat_bands": "pasma z miar",
   "Feat_target2": "drugi cel",
   "UI_Target2": "Drugi cel",
-  "UI_VarianceVs": "Odchylenie vs {0}"
+  "UI_VarianceVs": "Odchylenie vs {0}",
+  "Visual_Legend_FontSize": "Rozmiar czcionki",
+  "Visual_Legend_FontFamily": "Rodzina czcionek",
+  "Visual_Legend_Color": "Kolor tekstu"
 }

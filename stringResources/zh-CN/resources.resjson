@@ -85,5 +85,8 @@
   "Feat_bands": "来自度量值的区间",
   "Feat_target2": "第二目标",
   "UI_Target2": "第二目标",
-  "UI_VarianceVs": "与 {0} 的偏差"
+  "UI_VarianceVs": "与 {0} 的偏差",
+  "Visual_Legend_FontSize": "字号",
+  "Visual_Legend_FontFamily": "字体系列",
+  "Visual_Legend_Color": "文本颜色"
 }

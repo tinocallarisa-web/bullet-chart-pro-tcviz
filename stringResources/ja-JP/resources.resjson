@@ -85,5 +85,8 @@
   "Feat_bands": "メジャーによる帯",
   "Feat_target2": "第 2 目標",
   "UI_Target2": "第 2 目標",
-  "UI_VarianceVs": "{0} との差異"
+  "UI_VarianceVs": "{0} との差異",
+  "Visual_Legend_FontSize": "フォント サイズ",
+  "Visual_Legend_FontFamily": "フォント ファミリ",
+  "Visual_Legend_Color": "テキストの色"
 }

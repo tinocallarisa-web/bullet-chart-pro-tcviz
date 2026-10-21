@@ -85,5 +85,8 @@
   "Feat_bands": "banden uit metingen",
   "Feat_target2": "een tweede doel",
   "UI_Target2": "Tweede doel",
-  "UI_VarianceVs": "Afwijking t.o.v. {0}"
+  "UI_VarianceVs": "Afwijking t.o.v. {0}",
+  "Visual_Legend_FontSize": "Tekengrootte",
+  "Visual_Legend_FontFamily": "Lettertypefamilie",
+  "Visual_Legend_Color": "Tekstkleur"
 }
