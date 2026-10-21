@@ -181,3 +181,8 @@ P.update({
 "the measure you track": ["a medida que você acompanha", "la mesure que vous suivez", "das Measure, das Sie verfolgen", "la misura che segui", "de meting die u volgt", "miara, którą śledzisz", "追跡するメジャー", "您跟踪的度量值", "추적하는 측정값", "la medida que sigues"],
 "the measure you track: sales, margin, tickets": ["a medida que você acompanha: vendas, margem, chamados", "la mesure que vous suivez : ventes, marge, tickets", "das Measure, das Sie verfolgen: Umsatz, Marge, Tickets", "la misura che segui: vendite, margine, ticket", "de meting die u volgt: omzet, marge, tickets", "miara, którą śledzisz: sprzedaż, marża, zgłoszenia", "追跡するメジャー: 売上、利益、チケット", "您跟踪的度量值：销售额、利润、工单", "추적하는 측정값: 매출, 마진, 티켓", "la medida que sigues: ventas, margen, incidencias"],
 })
+
+# 1.5: en portugués, "múltiplos pequenos" (como el panel de Power BI), no el término inglés.
+for _k, _v in list(P.items()):
+    if len(_v) >= 1 and isinstance(_v[0], str):
+        _v[0] = _v[0].replace("Small multiples", "Múltiplos pequenos").replace("small multiples", "múltiplos pequenos")

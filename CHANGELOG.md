@@ -226,7 +226,7 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 - Actual vs Target comparison with automatic variance (no DAX required)
 - Variance label: absolute value + percentage, color-coded green/red
 - Qualitative performance bands (3 zones: poor / satisfactory / good)
-- IBCS-compliant mode (monochrome palette)
+- IBCS mode, a monochrome style inspired by IBCS notation
 - Conditional formatting per category for bar color
 - `supportsHighlight`, `supportsSynchronizingFilterState`, `supportsLandingPage`, `supportsKeyboardFocus`, `supportsMultiVisualSelection` declared
 - Rendering events: `renderingStarted / renderingFinished / renderingFailed`

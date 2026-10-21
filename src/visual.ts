@@ -570,10 +570,14 @@ export class BulletChartPro implements IVisual {
             : this.host.createSelectionIdBuilder().createSelectionId();
 
         // Extra tooltip fields dragged by the user into the Tooltips well
-        const tooltipFields: VisualTooltipDataItem[] = ttip.map(col => ({
-            displayName: col.source.displayName,
-            value:       col.values[i] != null ? String(col.values[i]) : "–",
-        }));
+        // Con el formato de la medida en el modelo y el idioma del informe (antes salían como número en bruto).
+        const tooltipFields: VisualTooltipDataItem[] = ttip.map(col => {
+            const v = col.values[i];
+            return {
+                displayName: col.source.displayName,
+                value: v == null ? "–" : typeof v === "number" ? this.formatValue(v, this.fmtOf(col, i)) : String(v),
+            };
+        });
 
         // Per-data-point colors from conditional formatting rules.
         // Use cfIndex (first-panel row) so CF stored in panel-1 propagates to all panels.
@@ -2060,7 +2064,8 @@ export class BulletChartPro implements IVisual {
         if (d.target != null)
             items.push({ displayName: this.names.target,   value: this.formatValue(d.target, d.formatTarget) });
         if (d.variance != null) {
-            const sign = d.variance >= 0 ? "+" : "";
+            // El importe va en valor absoluto: el signo hay que ponerlo en los dos sentidos (antes "10 (-10 %)").
+            const sign = d.variance >= 0 ? "+" : "−";
             let varStr = `${sign}${this.formatValue(Math.abs(d.variance), d.formatActual)}`;
             if (d.variancePct != null)
                 varStr += ` (${this.pctText(d.variancePct)})`;
@@ -2124,7 +2129,7 @@ export class BulletChartPro implements IVisual {
 
     private attachClearClick(): void {
         this.rootSvg.onclick = () => {
-            if (this.formatMode) return;
+            if (this.formatMode || !this.canInteract()) return;
             this.clearSelection();
             this.focusedIndex = -1;
             this.removeFocusRing();
