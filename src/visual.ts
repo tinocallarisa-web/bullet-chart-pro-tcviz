@@ -102,7 +102,8 @@ export class BulletChartPro implements IVisual {
     private watermarkEl: HTMLDivElement;
     private lastOptions:      VisualUpdateOptions | null = null;
     private lastDataPoints:   BulletDataPoint[] = [];
-    private restoredSel:      ISelectionId[] = [];
+    /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
+    private sel:              ISelectionId[] = [];
     private focusedIndex:     number = -1;
     private isDrilled:        boolean = false;
 
@@ -149,7 +150,7 @@ export class BulletChartPro implements IVisual {
         // the correct highlights for the restored bookmark at that point.
         // Se repinta sin pasar por update(): los eventos de render van uno a uno con cada update().
         // Un marcador restaura la selección por aquí; los ids llegan en el callback (getSelectionIds puede no tenerlos).
-        this.selectionManager.registerOnSelectCallback((ids: ISelectionId[]) => { this.restoredSel = ids ?? []; this.redraw(); });
+        this.selectionManager.registerOnSelectCallback((ids: ISelectionId[]) => { this.sel = ids ?? []; this.redraw(); });
 
         // Keyboard navigation (supportsKeyboardFocus declared in capabilities.json)
         this.container.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -167,12 +168,12 @@ export class BulletChartPro implements IVisual {
                 e.preventDefault();
                 if (this.focusedIndex >= 0 && this.focusedIndex < n) {
                     const d = this.lastDataPoints[this.focusedIndex];
-                    this.selectionManager.select(d.selectionId, false).then(() => { this.restoredSel = []; this.redraw(); });
+                    this.selectPoint(d, false);
                 }
             } else if (e.key === "Escape") {
                 this.focusedIndex = -1;
                 this.removeFocusRing();
-                this.selectionManager.clear().then(() => { this.restoredSel = []; this.redraw(); });
+                this.clearSelection();
             }
         });
 
@@ -802,7 +803,7 @@ export class BulletChartPro implements IVisual {
         if (allow) {
             g.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
-                this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey).then(() => { this.restoredSel = []; this.redraw(); });
+                this.selectPoint(d, e.ctrlKey || e.metaKey);
             });
         }
 
@@ -1021,7 +1022,7 @@ export class BulletChartPro implements IVisual {
             if (allow) {
                 g.addEventListener("click", (e: MouseEvent) => {
                     e.stopPropagation();
-                    this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey).then(() => { this.restoredSel = []; this.redraw(); });
+                    this.selectPoint(d, e.ctrlKey || e.metaKey);
                 });
             }
             appendTo.appendChild(g);
@@ -1640,7 +1641,7 @@ export class BulletChartPro implements IVisual {
 
     private attachClearClick(): void {
         this.rootSvg.onclick = () => {
-            this.selectionManager.clear().then(() => { this.restoredSel = []; this.redraw(); });
+            this.clearSelection();
             this.focusedIndex = -1;
             this.removeFocusRing();
         };
@@ -1695,16 +1696,30 @@ export class BulletChartPro implements IVisual {
 
     // allowInteractions vive en hostCapabilities; host.allowInteractions solo existe en APIs antiguas
     // (casi siempre undefined, y el clic filtraba aunque el autor apagara las interacciones).
+    /** Clic en una barra: misma lógica que Power BI (un clic sobre la única seleccionada la quita; Ctrl alterna). */
+    private selectPoint(d: BulletDataPoint, multi: boolean): void {
+        const has = this.sel.some(id => id.equals(d.selectionId));
+        if (multi) this.sel = has ? this.sel.filter(id => !id.equals(d.selectionId)) : [...this.sel, d.selectionId];
+        else       this.sel = (has && this.sel.length === 1) ? [] : [d.selectionId];
+        this.redraw();
+        this.selectionManager.select(d.selectionId, multi)
+            .then((ids: ISelectionId[]) => { if (Array.isArray(ids)) { this.sel = ids; this.redraw(); } }, () => { /* sin cambio */ });
+    }
+
+    private clearSelection(): void {
+        this.sel = [];
+        this.redraw();
+        this.selectionManager.clear();
+    }
+
     /**
      * Atenuada si otro visual resalta y esta fila no entra, o si hay barras seleccionadas en este visual y esta no
      * es una de ellas. Una categoría repetida en small multiples comparte identidad: se marcan todas sus barras.
      */
     private dimmed(d: BulletDataPoint): boolean {
         if (!d.isHighlighted) return true;
-        const own = this.selectionManager.getSelectionIds() as ISelectionId[];
-        const sel = own?.length ? own : this.restoredSel;
-        if (!sel?.length) return false;
-        return !sel.some(id => id.equals(d.selectionId));
+        if (!this.sel.length) return false;
+        return !this.sel.some(id => id.equals(d.selectionId));
     }
 
     private canInteract(): boolean {
