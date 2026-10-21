@@ -1,0 +1,98 @@
+════════════════════════════════════════════════════════════════
+BULLET CHART PRO 1.5.0.0 — YOUTUBE
+════════════════════════════════════════════════════════════════
+
+TITLE (the first one is the recommendation)
+1. Budget vs actual in Power BI: is it good, or just a number? Bullet chart, no DAX
+2. Bullet chart in Power BI: actual vs target, variance and bands in one line — no DAX
+3. KPI vs target in Power BI: bands from your own measures, a stretch goal and small multiples
+
+Why the first: it opens with the question a manager asks ("is it good?"), carries "budget vs
+actual" and "Power BI" (what people search for), and fits the list view. No version number: it ages.
+
+
+════════════════════════════════════════════════════════════════
+MAIN DESCRIPTION — paste from here
+════════════════════════════════════════════════════════════════
+
+A number next to its target does not tell you whether it is good. 92,500 against a target of
+78,000 — is that a great month or just an ordinary one? The native way in Power BI is a
+clustered bar, a variance measure in DAX and a rule for the colours, and it still does not say
+how far you are from "good".
+
+This walkthrough builds it with Bullet Chart Pro: actual against target on one line, the
+variance and its percentage calculated for you, qualitative bands behind every bar — no DAX.
+
+WHAT YOU'LL SEE
+• Category + Actual + Target: the variance and % appear on every row, green or red
+• Qualitative bands: what "poor", "fair" and "good" look like behind each bar
+• Bands from your own measures (Pro): every row with its own thresholds, calculated in DAX
+• A second target (Pro): the budget and the stretch goal side by side, each with its variance
+• Small multiples (Pro): one panel per country or year, on a shared scale
+• The setup guide inside the visual: try the Pro features on your own data
+• Style templates — Clean, Minimal, Contrast, Soft, Compact and an IBCS style — and the legend
+• Format on the canvas: click the bar, the target or the legend to format it
+• Small tiles, vertical bars and the visual in 12 languages
+
+CHAPTERS
+0:00 [adjust] Is it good, or just a number?
+0:00 [adjust] Three fields, no DAX
+0:00 [adjust] Variance and qualitative bands
+0:00 [adjust] Bands from your own measures
+0:00 [adjust] A second target: budget and stretch
+0:00 [adjust] Small multiples by country
+0:00 [adjust] The setup guide: try Pro on your data
+0:00 [adjust] Style templates, legend, format on the canvas
+0:00 [adjust] Small tiles, vertical bars and languages
+0:00 [adjust] Free and Pro
+
+FREE AND PRO
+The free version is a complete bullet chart: variance and %, qualitative bands, conditional
+formatting on the bar, reference lines, labels, legend, drilldown and cross-filtering, style
+templates, the setup guide, format on the canvas and 12 languages. Pro adds bands from your own
+measures, a second target, small multiples, the forecast marker and vertical bars — and the
+setup guide lets you try them on your own data before buying, under a "Pro preview" watermark
+while you edit.
+
+PRIVACY
+No network requests, no telemetry: everything is calculated inside Power BI. The links on the
+start screen open only when you click them.
+
+LINKS
+Get it on AppSource: https://appsource.microsoft.com/product/power-bi-visuals/tino_callarisa.bullet-chart-pro-tcviz
+Documentation & FAQ:  https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html
+Product page:         https://tcviz.com/product/bullet-chart-pro/?ref=youtube
+Source & issues:      https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz
+
+Questions, bugs or feature requests: open an issue on GitHub, or email support@tcviz.com
+
+#PowerBI #BulletChart #BudgetVsActual
+
+════════════════════════════════════════════════════════════════
+paste up to here
+════════════════════════════════════════════════════════════════
+
+
+Before publishing:
+- Chapters: the first must be 0:00, at least three, each at least 10 seconds, or YouTube does
+  not show them. Delete the ones the video does not show.
+- Check every figure said in the video against the screen.
+- Export 2K (1440p) with a high bitrate: YouTube compresses 1080p uploads hard and the thin
+  target markers blur.
+- Partner Center video field: only https://www.youtube.com/watch?v=<id>. Then send me the URL:
+  it goes into the start screen (URL_VIDEO in src/visual.ts), the certification notes, the
+  listing and support.html.
+
+
+════════════════════════════════════════════════════════════════
+SHORT VERSION — LinkedIn, Shorts, X
+════════════════════════════════════════════════════════════════
+
+92,500 against a target of 78,000. Good month, or just a number?
+
+A bullet chart answers it on one line: the variance and its %, and bands that show how far you
+are from "good". In Power BI, with three fields and no DAX — and with Pro, every row with its
+own thresholds and a stretch goal next to the budget.
+
+Full walkthrough: https://www.youtube.com/watch?v=<NEW_ID>
+#PowerBI #BudgetVsActual #DataVisualization

@@ -1,0 +1,23 @@
+MAIN TAG BLOCK (paste as-is — under YouTube's 500 limit)
+
+bullet chart power bi,budget vs actual power bi,actual vs target power bi,kpi vs target power bi,power bi variance analysis,power bi bullet chart tutorial,power bi custom visual,plan vs actual,power bi kpi visual,qualitative bands,power bi small multiples,stretch goal,ibcs power bi,power bi tutorial,tcviz
+
+
+VARIANTS, depending on the angle you lead with
+
+If leading on "no DAX":
+power bi variance without dax,budget vs actual no dax,power bi variance percentage,dax variance measure alternative
+
+If leading on finance / controlling:
+budget vs actual report,financial kpi dashboard,controlling power bi,management reporting power bi,ibcs style
+
+If leading on operations KPIs:
+kpi thresholds power bi,service level target,sales target tracking,operational kpi dashboard
+
+
+NOTES
+- Keep "tcviz" last. Brand tags do nothing for discovery; they only help people who already
+  know the name find you again.
+- "ibcs power bi" is a style tag: the visual has an IBCS style, it does not claim compliance
+  with the IBCS standard.
+- Numbers and versions in tags date badly: none here on purpose.
