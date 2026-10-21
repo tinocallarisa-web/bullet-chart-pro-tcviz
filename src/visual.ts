@@ -109,6 +109,8 @@ export class BulletChartPro implements IVisual {
     private watermarkEl: HTMLDivElement;
     private lastOptions:      VisualUpdateOptions | null = null;
     private lastDataPoints:   BulletDataPoint[] = [];
+    /** Margen izquierdo del modo vertical: VERT_PAD_LR más el ancho de las etiquetas del eje (antes salían fuera). */
+    private vPadL = VERT_PAD_LR;
     /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
     private sel:              ISelectionId[] = [];
     /** Nombres de las medidas en los pozos: leyenda y tooltip hablan como el modelo, en su idioma. */
@@ -900,8 +902,15 @@ export class BulletChartPro implements IVisual {
         const totalDomainV = domainMaxV - domainMinV;
         const allow   = this.canInteract();
 
+        // Las etiquetas del eje se dibujan a la izquierda de vPadL: hay que medirlas antes de colocar las columnas.
+        this.vPadL = VERT_PAD_LR;
+        if (s.showAxis) {
+            const longest = Math.max(...this.niceTicks(domainMaxV).map(v => this.formatValue(v, data[0]?.formatActual).length), 1);
+            this.vPadL = VERT_PAD_LR + Math.ceil(longest * this.axisFs() * 0.6) + 8;
+        }
+
         // Enforce minimum column width — if too many categories, widen SVG and let container H-scroll
-        const minContentW = data.length * MIN_COL_W + VERT_PAD_LR * 2;
+        const minContentW = data.length * MIN_COL_W + this.vPadL + VERT_PAD_LR;
         const svgW        = Math.max(vpW, minContentW);
         const needsHScroll = svgW > vpW;
 
@@ -917,25 +926,41 @@ export class BulletChartPro implements IVisual {
         // Y-axis (drawn into rootSvg so guide lines span full width)
         if (s.showAxis) {
             const varH   = s.showVariance ? s.fontSize * 2.0 : 0;
-            const labH   = s.showCategoryLabel ? VERT_PAD_BOT : 0;
+            const labH   = this.vLabH(s);
             const innerH = Math.max(20, chartH - VERT_PAD_TOP - labH - varH);
             const baseline = chartY + VERT_PAD_TOP + innerH;
-            this.renderVAxis(VERT_PAD_LR, baseline, innerH, domainMaxV, data[0]?.formatActual, domainMinV);
+            this.renderVAxis(this.vPadL, baseline, innerH, domainMaxV, data[0]?.formatActual, domainMinV);
         }
 
         // Reference lines for vertical mode
         if (s.refLine1Show || s.refLine2Show) {
             const varH2   = s.showVariance ? s.fontSize * 2.0 : 0;
-            const labH2   = s.showCategoryLabel ? VERT_PAD_BOT : 0;
+            const labH2   = this.vLabH(s);
             const innerH2 = Math.max(20, chartH - VERT_PAD_TOP - labH2 - varH2);
             const topY    = chartY + VERT_PAD_TOP;
             const botY    = chartY + VERT_PAD_TOP + innerH2;
-            this.renderRefLinesV(VERT_PAD_LR, svgW - VERT_PAD_LR, topY, botY, totalDomainV, domainMinV, data[0]?.formatActual);
+            this.renderRefLinesV(this.vPadL, svgW - VERT_PAD_LR, topY, botY, totalDomainV, domainMinV, data[0]?.formatActual);
         }
 
         if (s.showLegend) this.renderLegend(svgW, isTop ? 0 : vpH - legendH);
         this.renderDrillLabel(drillLabel, svgW);
         if (needsHScroll) this.renderScrollHint(vpW, vpH, "horizontal");
+    }
+
+    /** Alto bajo la línea base para el nombre de la categoría, según la fuente (antes fijo en 20 px). */
+    private vLabH(s: BulletSettings): number {
+        return s.showCategoryLabel ? Math.max(VERT_PAD_BOT, Math.ceil(s.fontSize * 1.6)) : 0;
+    }
+
+    /** Fuente que hace caber el texto en el ancho dado (estimación por carácter), sin pasar de la elegida ni bajar de 8. */
+    private fitFs(text: string, maxW: number, fs: number): number {
+        const need = text.length * 0.6;
+        return need <= 0 ? fs : Math.max(8, Math.min(fs, Math.floor(maxW / need)));
+    }
+
+    /** Fuente de las etiquetas de los ejes: dos puntos menos que la de las etiquetas, nunca menos de 9. */
+    private axisFs(): number {
+        return Math.max(9, (this.settings?.fontSize ?? 11) - 2);
     }
 
     private drawVerticalContent(
@@ -957,9 +982,9 @@ export class BulletChartPro implements IVisual {
         const textSecondaryV = isHCV ? hcFgV : "#555";
 
         const varH   = s.showVariance ? fs * 2.0 : 0;
-        const labH   = s.showCategoryLabel ? VERT_PAD_BOT : 0;
+        const labH   = this.vLabH(s);
         const chartH = Math.max(20, panelH - VERT_PAD_TOP - labH - varH);
-        const colW   = Math.max(16, (panelW - VERT_PAD_LR * 2) / n);
+        const colW   = Math.max(16, (panelW - this.vPadL - VERT_PAD_LR) / n);
         // baseline = y position corresponding to domain's max (top) and min (bottom)
         // zeroY = y position of value 0
         const topY     = VERT_PAD_TOP;
@@ -972,8 +997,8 @@ export class BulletChartPro implements IVisual {
 
         // Zero baseline
         const axis = this.mkEl("line");
-        axis.setAttribute("x1",           String(VERT_PAD_LR));
-        axis.setAttribute("x2",           String(VERT_PAD_LR + colW * n));
+        axis.setAttribute("x1",           String(this.vPadL));
+        axis.setAttribute("x2",           String(this.vPadL + colW * n));
         axis.setAttribute("y1",           String(baseline));
         axis.setAttribute("y2",           String(baseline));
         axis.setAttribute("stroke",       "#CCC");
@@ -981,7 +1006,7 @@ export class BulletChartPro implements IVisual {
         appendTo.appendChild(axis);
 
         data.forEach((d, i) => {
-            const colX = VERT_PAD_LR + i * colW;
+            const colX = this.vPadL + i * colW;
             const g = this.mkEl("g");
             g.setAttribute("transform", `translate(${colX},0)`);
             g.setAttribute("data-ki", String(i));
@@ -1036,9 +1061,13 @@ export class BulletChartPro implements IVisual {
                     const t = this.mkEl("text");
                     const labelY = d.actual >= 0 ? Math.max(topY + fs, valY - 3) : valY + fs + 3;
                     t.setAttribute("x",String(colW / 2)); t.setAttribute("y",String(labelY));
-                    t.setAttribute("text-anchor","middle"); t.setAttribute("font-size",String(Math.min(fs, 10)));
+                    const vtxt = this.formatValue(d.actual, d.formatActual);
+                    t.setAttribute("text-anchor","middle"); t.setAttribute("font-size",String(this.fitFs(vtxt, colW - 2, fs)));
                     t.setAttribute("font-family",ff); t.setAttribute("font-weight","600"); t.setAttribute("fill",textPrimaryV);
-                    t.textContent = this.formatValue(d.actual, d.formatActual); g.appendChild(t);
+                    // Halo del fondo: la etiqueta cae sobre las bandas y los marcadores de objetivo.
+                    t.setAttribute("paint-order","stroke"); t.setAttribute("stroke", isHCV ? this.hcColors().bg : "#FFFFFF");
+                    t.setAttribute("stroke-width","3"); t.setAttribute("stroke-linejoin","round");
+                    t.textContent = vtxt; g.appendChild(t);
                 }
             }
 
@@ -1055,7 +1084,7 @@ export class BulletChartPro implements IVisual {
                     tv.setAttribute("x",           String(colW / 2));
                     tv.setAttribute("y",           String(Math.max(topY + fs, ty - TARGET_W - 2)));
                     tv.setAttribute("text-anchor", "middle");
-                    tv.setAttribute("font-size",   String(Math.min(fs, 10)));
+                    tv.setAttribute("font-size",   String(fs));
                     tv.setAttribute("font-family", ff);
                     tv.setAttribute("fill",        textSecondaryV);
                     tv.textContent = this.formatValue(d.target, d.formatTarget);
@@ -1087,7 +1116,7 @@ export class BulletChartPro implements IVisual {
                 t.setAttribute("x",           String(colW / 2));
                 t.setAttribute("y",           String(baseline + fs * 1.1));
                 t.setAttribute("text-anchor", "middle");
-                t.setAttribute("font-size",   String(Math.min(fs, 11)));
+                t.setAttribute("font-size",   String(fs));
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        textSecondaryV);
                 t.textContent = d.category;
@@ -1097,16 +1126,20 @@ export class BulletChartPro implements IVisual {
             if (s.showVariance && d.variance != null) {
                 const pos = d.variance >= s.varianceThreshold;
                 let txt = (pos ? "▲+" : "▼") + this.formatValue(Math.abs(d.variance), d.formatActual);
-                if (s.showVariancePct && d.variancePct != null)
-                    txt += ` ${this.pctText(d.variancePct, false)}`;
-                const t = this.mkEl("text");
-                t.setAttribute("x",           String(colW / 2));
-                t.setAttribute("y",           String(baseline + labH + fs * 0.9));
-                t.setAttribute("text-anchor", "middle");
-                t.setAttribute("font-size",   String(Math.min(fs, 10)));
-                t.setAttribute("font-family", ff);
-                t.setAttribute("fill",        pos ? s.positiveColor : s.negativeColor);
-                t.textContent = txt; g.appendChild(t);
+                // Importe y porcentaje en dos líneas: en una sola, con columnas estrechas, se montaban sobre las vecinas.
+                const lines = [txt];
+                if (s.showVariancePct && d.variancePct != null) lines.push(this.pctText(d.variancePct));
+                const vfs = Math.min(...lines.map(l => this.fitFs(l, colW - 4, fs)));
+                lines.forEach((l, k) => {
+                    const t = this.mkEl("text");
+                    t.setAttribute("x",           String(colW / 2));
+                    t.setAttribute("y",           String(baseline + labH + vfs * (0.9 + k * 1.05)));
+                    t.setAttribute("text-anchor", "middle");
+                    t.setAttribute("font-size",   String(vfs));
+                    t.setAttribute("font-family", ff);
+                    t.setAttribute("fill",        pos ? s.positiveColor : s.negativeColor);
+                    t.textContent = l; g.appendChild(t);
+                });
             }
 
             this.attachTooltipEvents(g, d);
@@ -1210,11 +1243,12 @@ export class BulletChartPro implements IVisual {
             this.rootSvg.appendChild(panelG);
 
             if (s.orientation === "vertical") {
+                this.vPadL = VERT_PAD_LR;
                 this.drawVerticalContent(panel.data, panelG, panelW, contentH, pTotalDomain, pDomainMin, s, allow, `tv${pi}`);
                 // Reference lines — absolute coords within rootSvg
                 if (s.refLine1Show || s.refLine2Show) {
                     const varH2 = s.showVariance ? s.fontSize * 2.0 : 0;
-                    const labH2 = s.showCategoryLabel ? VERT_PAD_BOT : 0;
+                    const labH2 = this.vLabH(s);
                     const innerH2 = Math.max(20, contentH - VERT_PAD_TOP - labH2 - varH2);
                     this.renderRefLinesV(
                         px + VERT_PAD_LR, px + panelW - VERT_PAD_LR,
@@ -1455,7 +1489,7 @@ export class BulletChartPro implements IVisual {
             t.setAttribute("x",           String(x));
             t.setAttribute("y",           String(yBase + 13));
             t.setAttribute("text-anchor", "middle");
-            t.setAttribute("font-size",   "9");
+            t.setAttribute("font-size",   String(this.axisFs()));
             t.setAttribute("font-family", ff);
             t.setAttribute("fill",        labelColor);
             t.setAttribute("pointer-events", "none");
@@ -1514,7 +1548,7 @@ export class BulletChartPro implements IVisual {
             t.setAttribute("x",           String(xLeft - 5));
             t.setAttribute("y",           String(y + 3));
             t.setAttribute("text-anchor", "end");
-            t.setAttribute("font-size",   "9");
+            t.setAttribute("font-size",   String(this.axisFs()));
             t.setAttribute("font-family", ff);
             t.setAttribute("fill",        labelColor);
             t.setAttribute("pointer-events", "none");
