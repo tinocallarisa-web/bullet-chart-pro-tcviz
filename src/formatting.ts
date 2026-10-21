@@ -33,7 +33,7 @@ function card(name: string, key: string, displayName: string, slices: formatting
 }
 
 /** Porciones fijas de la tarjeta Colors antes de las de cada categoría. */
-export const COLOR_FIXED_SLICES = 8;
+export const COLOR_FIXED_SLICES = 9;
 
 export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): Model {
     const general = card("general", "Visual_General", "General", [
@@ -53,6 +53,7 @@ export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): 
             altConstantSelector: null as any,
         }),
         new ColorPicker({ name: "targetColor",   displayName: "Target marker",     displayNameKey: "Visual_Colors_TargetColor",   value: col(s.targetColor) }),
+        new ColorPicker({ name: "target2Color",  displayName: "Second target marker (Pro)", displayNameKey: "Visual_Colors_Target2Color", value: col(s.target2Color) }),
         new ColorPicker({ name: "forecastColor", displayName: "Forecast marker",   displayNameKey: "Visual_Colors_ForecastColor", value: col(s.forecastColor) }),
         new ColorPicker({ name: "positiveColor", displayName: "Positive variance", displayNameKey: "Visual_Colors_PositiveColor", value: col(s.positiveColor) }),
         new ColorPicker({ name: "negativeColor", displayName: "Negative variance", displayNameKey: "Visual_Colors_NegativeColor", value: col(s.negativeColor) }),

@@ -76,5 +76,14 @@
   "UI_TargetShort": "C:",
   "UI_Bands": "Pasma",
   "UI_Scroll": "przewiń",
-  "UI_Variance": "Odchylenie"
+  "UI_Variance": "Odchylenie",
+  "Visual_Target2": "Drugi cel [Pro]",
+  "Visual_Band1Limit": "Granica pasma 1 [Pro]",
+  "Visual_Band2Limit": "Granica pasma 2 [Pro]",
+  "Visual_BandMax": "Maksimum pasm [Pro]",
+  "Visual_Colors_Target2Color": "Znacznik drugiego celu (Pro)",
+  "Feat_bands": "pasma z miar",
+  "Feat_target2": "drugi cel",
+  "UI_Target2": "Drugi cel",
+  "UI_VarianceVs": "Odchylenie vs {0}"
 }

@@ -76,5 +76,14 @@
   "UI_TargetShort": "目标:",
   "UI_Bands": "区间",
   "UI_Scroll": "滚动",
-  "UI_Variance": "偏差"
+  "UI_Variance": "偏差",
+  "Visual_Target2": "第二目标 [Pro]",
+  "Visual_Band1Limit": "区间 1 上限 [Pro]",
+  "Visual_Band2Limit": "区间 2 上限 [Pro]",
+  "Visual_BandMax": "区间最大值 [Pro]",
+  "Visual_Colors_Target2Color": "第二目标标记 (Pro)",
+  "Feat_bands": "来自度量值的区间",
+  "Feat_target2": "第二目标",
+  "UI_Target2": "第二目标",
+  "UI_VarianceVs": "与 {0} 的偏差"
 }

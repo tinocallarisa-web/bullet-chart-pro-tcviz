@@ -76,5 +76,14 @@
   "UI_TargetShort": "D:",
   "UI_Bands": "Banden",
   "UI_Scroll": "scrollen",
-  "UI_Variance": "Afwijking"
+  "UI_Variance": "Afwijking",
+  "Visual_Target2": "Tweede doel [Pro]",
+  "Visual_Band1Limit": "Grens band 1 [Pro]",
+  "Visual_Band2Limit": "Grens band 2 [Pro]",
+  "Visual_BandMax": "Maximum banden [Pro]",
+  "Visual_Colors_Target2Color": "Markering tweede doel (Pro)",
+  "Feat_bands": "banden uit metingen",
+  "Feat_target2": "een tweede doel",
+  "UI_Target2": "Tweede doel",
+  "UI_VarianceVs": "Afwijking t.o.v. {0}"
 }

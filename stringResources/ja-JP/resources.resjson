@@ -76,5 +76,14 @@
   "UI_TargetShort": "目標:",
   "UI_Bands": "帯",
   "UI_Scroll": "スクロール",
-  "UI_Variance": "差異"
+  "UI_Variance": "差異",
+  "Visual_Target2": "第 2 目標 [Pro]",
+  "Visual_Band1Limit": "帯 1 の上限 [Pro]",
+  "Visual_Band2Limit": "帯 2 の上限 [Pro]",
+  "Visual_BandMax": "帯の最大値 [Pro]",
+  "Visual_Colors_Target2Color": "第 2 目標のマーカー (Pro)",
+  "Feat_bands": "メジャーによる帯",
+  "Feat_target2": "第 2 目標",
+  "UI_Target2": "第 2 目標",
+  "UI_VarianceVs": "{0} との差異"
 }

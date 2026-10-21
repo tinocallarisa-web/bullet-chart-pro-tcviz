@@ -31,6 +31,30 @@
       "displayNameKey": "Visual_Forecast"
     },
     {
+      "name": "target2",
+      "kind": "Measure",
+      "displayName": "Second target [Pro]",
+      "displayNameKey": "Visual_Target2"
+    },
+    {
+      "name": "band1Limit",
+      "kind": "Measure",
+      "displayName": "Band 1 limit [Pro]",
+      "displayNameKey": "Visual_Band1Limit"
+    },
+    {
+      "name": "band2Limit",
+      "kind": "Measure",
+      "displayName": "Band 2 limit [Pro]",
+      "displayNameKey": "Visual_Band2Limit"
+    },
+    {
+      "name": "bandMax",
+      "kind": "Measure",
+      "displayName": "Band maximum [Pro]",
+      "displayNameKey": "Visual_BandMax"
+    },
+    {
       "name": "tooltips",
       "kind": "Measure",
       "displayName": "Tooltips",
@@ -66,6 +90,18 @@
           },
           "tooltips": {
             "max": 10
+          },
+          "target2": {
+            "max": 1
+          },
+          "band1Limit": {
+            "max": 1
+          },
+          "band2Limit": {
+            "max": 1
+          },
+          "bandMax": {
+            "max": 1
           }
         }
       ],
@@ -104,6 +140,26 @@
             {
               "bind": {
                 "to": "forecast"
+              }
+            },
+            {
+              "bind": {
+                "to": "target2"
+              }
+            },
+            {
+              "bind": {
+                "to": "band1Limit"
+              }
+            },
+            {
+              "bind": {
+                "to": "band2Limit"
+              }
+            },
+            {
+              "bind": {
+                "to": "bandMax"
               }
             },
             {
@@ -173,6 +229,17 @@
         "targetColor": {
           "displayName": "Target marker",
           "displayNameKey": "Visual_Colors_TargetColor",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "target2Color": {
+          "displayName": "Second target marker (Pro)",
+          "displayNameKey": "Visual_Colors_Target2Color",
           "type": {
             "fill": {
               "solid": {

@@ -76,5 +76,14 @@
   "UI_TargetShort": "O:",
   "UI_Bands": "Bandas",
   "UI_Scroll": "desplazar",
-  "UI_Variance": "Desviación"
+  "UI_Variance": "Desviación",
+  "Visual_Target2": "Segundo objetivo [Pro]",
+  "Visual_Band1Limit": "Límite de la banda 1 [Pro]",
+  "Visual_Band2Limit": "Límite de la banda 2 [Pro]",
+  "Visual_BandMax": "Máximo de las bandas [Pro]",
+  "Visual_Colors_Target2Color": "Marca del segundo objetivo (Pro)",
+  "Feat_bands": "las bandas desde medidas",
+  "Feat_target2": "un segundo objetivo",
+  "UI_Target2": "Segundo objetivo",
+  "UI_VarianceVs": "Desviación vs {0}"
 }

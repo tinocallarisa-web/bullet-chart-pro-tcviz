@@ -76,5 +76,14 @@
   "UI_TargetShort": "Z:",
   "UI_Bands": "Bänder",
   "UI_Scroll": "scrollen",
-  "UI_Variance": "Abweichung"
+  "UI_Variance": "Abweichung",
+  "Visual_Target2": "Zweites Ziel [Pro]",
+  "Visual_Band1Limit": "Grenze Band 1 [Pro]",
+  "Visual_Band2Limit": "Grenze Band 2 [Pro]",
+  "Visual_BandMax": "Bandmaximum [Pro]",
+  "Visual_Colors_Target2Color": "Markierung zweites Ziel (Pro)",
+  "Feat_bands": "Bänder aus Measures",
+  "Feat_target2": "ein zweites Ziel",
+  "UI_Target2": "Zweites Ziel",
+  "UI_VarianceVs": "Abweichung zu {0}"
 }

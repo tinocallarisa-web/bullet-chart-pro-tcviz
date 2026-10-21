@@ -76,5 +76,14 @@
   "UI_TargetShort": "T:",
   "UI_Bands": "Bands",
   "UI_Scroll": "scroll",
-  "UI_Variance": "Variance"
+  "UI_Variance": "Variance",
+  "Visual_Target2": "Second target [Pro]",
+  "Visual_Band1Limit": "Band 1 limit [Pro]",
+  "Visual_Band2Limit": "Band 2 limit [Pro]",
+  "Visual_BandMax": "Band maximum [Pro]",
+  "Visual_Colors_Target2Color": "Second target marker (Pro)",
+  "Feat_bands": "bands from measures",
+  "Feat_target2": "a second target",
+  "UI_Target2": "Second target",
+  "UI_VarianceVs": "Variance vs {0}"
 }

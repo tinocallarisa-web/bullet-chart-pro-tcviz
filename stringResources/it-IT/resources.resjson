@@ -76,5 +76,14 @@
   "UI_TargetShort": "O:",
   "UI_Bands": "Fasce",
   "UI_Scroll": "scorri",
-  "UI_Variance": "Scostamento"
+  "UI_Variance": "Scostamento",
+  "Visual_Target2": "Secondo obiettivo [Pro]",
+  "Visual_Band1Limit": "Limite fascia 1 [Pro]",
+  "Visual_Band2Limit": "Limite fascia 2 [Pro]",
+  "Visual_BandMax": "Massimo delle fasce [Pro]",
+  "Visual_Colors_Target2Color": "Indicatore del secondo obiettivo (Pro)",
+  "Feat_bands": "le fasce da misure",
+  "Feat_target2": "un secondo obiettivo",
+  "UI_Target2": "Secondo obiettivo",
+  "UI_VarianceVs": "Scostamento vs {0}"
 }

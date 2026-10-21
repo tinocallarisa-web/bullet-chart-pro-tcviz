@@ -8,6 +8,7 @@ export interface BulletSettings {
     // ── Colors ───────────────────────────────────────────────────────
     actualColor:        string;
     targetColor:        string;
+    target2Color:       string;
     forecastColor:      string;
     positiveColor:      string;
     negativeColor:      string;
@@ -68,6 +69,7 @@ export function getDefaultSettings(): BulletSettings {
 
         actualColor:        "#2196F3",
         targetColor:        "#212121",
+        target2Color:       "#6D6D6D",
         forecastColor:      "#FF9800",
         positiveColor:      "#4CAF50",
         negativeColor:      "#F44336",

@@ -37,6 +37,12 @@ interface BulletDataPoint {
     formatActual?:   string;    // format string from the Actual measure (supports calc groups)
     formatTarget?:   string;
     formatForecast?: string;
+    // Pro (1.5): bandas por medida y segundo objetivo. null si no hay campo o sin Pro.
+    band1Limit:      number | null;
+    band2Limit:      number | null;
+    bandMax:         number | null;
+    target2:         number | null;
+    formatTarget2?:  string;
 }
 
 interface TrellisPanel { title: string; data: BulletDataPoint[]; }
@@ -106,7 +112,7 @@ export class BulletChartPro implements IVisual {
     /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
     private sel:              ISelectionId[] = [];
     /** Nombres de las medidas en los pozos: leyenda y tooltip hablan como el modelo, en su idioma. */
-    private names = { actual: "Actual", target: "Target", forecast: "Forecast" };
+    private names = { actual: "Actual", target: "Target", forecast: "Forecast", target2: "Second target" };
     private focusedIndex:     number = -1;
     private isDrilled:        boolean = false;
 
@@ -245,6 +251,8 @@ export class BulletChartPro implements IVisual {
         if (trellisOn || cat?.categories?.some(c => c.source.roles?.["trellisBy"])) wanted.push(this.t("Feat_trellis", "small multiples"));
         if (cat?.values?.some(v => v.source.roles?.["forecast"])) wanted.push(this.t("Feat_forecast", "the Forecast marker"));
         if ((dv?.metadata?.objects as any)?.general?.orientation === "vertical") wanted.push(this.t("Feat_vertical", "vertical orientation"));
+        if (cat?.values?.some(v => ["band1Limit", "band2Limit", "bandMax"].some(r => v.source.roles?.[r]))) wanted.push(this.t("Feat_bands", "bands from measures"));
+        if (cat?.values?.some(v => v.source.roles?.["target2"])) wanted.push(this.t("Feat_target2", "a second target"));
         return wanted;
     }
 
@@ -343,6 +351,7 @@ export class BulletChartPro implements IVisual {
             ibcsMode:           bool("general","ibcsMode",           d.ibcsMode),
             actualColor:        col( "colors", "actualColor",        d.actualColor),
             targetColor:        col( "colors", "targetColor",        d.targetColor),
+            target2Color:       col( "colors", "target2Color",       d.target2Color),
             forecastColor:      col( "colors", "forecastColor",      d.forecastColor),
             positiveColor:      col( "colors", "positiveColor",      d.positiveColor),
             negativeColor:      col( "colors", "negativeColor",      d.negativeColor),
@@ -388,7 +397,7 @@ export class BulletChartPro implements IVisual {
         }
         const pal = this.host.colorPalette as any;
         if (pal?.isHighContrast) {
-            s.actualColor = s.targetColor = s.positiveColor = s.negativeColor = pal.foreground?.value ?? "#FFF";
+            s.actualColor = s.targetColor = s.target2Color = s.positiveColor = s.negativeColor = pal.foreground?.value ?? "#FFF";
             s.band1Color  = pal.background?.value ?? "#000";
             s.band2Color  = pal.backgroundLight?.value ?? "#111";
             s.band3Color  = pal.backgroundDark?.value  ?? "#222";
@@ -423,6 +432,7 @@ export class BulletChartPro implements IVisual {
         const fstCol   = cat.values.find(v => v.source.roles?.["forecast"]);
         const ttipCols = cat.values.filter(v => v.source.roles?.["tooltips"]);
         if (!actCol) return [];
+        this.readExtraCols(cat.values);
         const n   = mainCat ? mainCat.values.length : actCol.values.length;
         const hl  = actCol.highlights != null;
         return Array.from({length: n}, (_, i) => this.buildPoint(i, mainCat, actCol, tgtCol, fstCol, ttipCols, hl));
@@ -437,6 +447,7 @@ export class BulletChartPro implements IVisual {
         const fstCol   = cat.values.find(v => v.source.roles?.["forecast"]);
         const ttipCols = cat.values.filter(v => v.source.roles?.["tooltips"]);
         if (!actCol) return [];
+        this.readExtraCols(cat.values);
         const n  = mainCat ? mainCat.values.length : actCol.values.length;
         const hl = actCol.highlights != null;
 
@@ -459,6 +470,15 @@ export class BulletChartPro implements IVisual {
         return order.map(title => ({ title, data: map.get(title)! }));
     }
 
+    /** Bandas por medida y segundo objetivo (Pro). Fuera de Pro y de la vista previa no se leen. */
+    private xc: { b1?: powerbi.DataViewValueColumn; b2?: powerbi.DataViewValueColumn; bm?: powerbi.DataViewValueColumn; t2?: powerbi.DataViewValueColumn } = {};
+
+    private readExtraCols(vals: powerbi.DataViewValueColumns): void {
+        const pro = this.isPro || this.proPreview;
+        const f = (r: string) => pro ? vals.find(v => v.source.roles?.[r]) : undefined;
+        this.xc = { b1: f("band1Limit"), b2: f("band2Limit"), bm: f("bandMax"), t2: f("target2") };
+    }
+
     private buildPoint(
         i: number,
         mc:      powerbi.DataViewCategoryColumn | undefined,
@@ -470,6 +490,10 @@ export class BulletChartPro implements IVisual {
         cfIndex?: number   // canonical row index for reading mc.objects (trellis: first-panel index)
     ): BulletDataPoint {
         const actual   = ac.values[i] as number | null;
+        const num = (c?: powerbi.DataViewValueColumn): number | null => {
+            const v = c?.values?.[i];
+            return typeof v === "number" && isFinite(v) ? v : null;
+        };
         const target   = tc ? tc.values[i] as number | null : null;
         // Forecast es Pro: en Free no se dibuja, ni entra en tooltip, leyenda o escala
         const forecast = (fc && (this.isPro || this.proPreview)) ? fc.values[i] as number | null : null;
@@ -507,6 +531,11 @@ export class BulletChartPro implements IVisual {
             formatActual:   this.fmtOf(ac, i),
             formatTarget:   this.fmtOf(tc, i),
             formatForecast: this.fmtOf(fc, i),
+            band1Limit:     num(this.xc.b1),
+            band2Limit:     num(this.xc.b2),
+            bandMax:        num(this.xc.bm),
+            target2:        num(this.xc.t2),
+            formatTarget2:  this.fmtOf(this.xc.t2, i),
         };
     }
 
@@ -562,6 +591,7 @@ export class BulletChartPro implements IVisual {
             actual:   nameOf("actual",   this.t("UI_Actual", "Actual")),
             target:   nameOf("target",   this.t("UI_Target", "Target")),
             forecast: nameOf("forecast", this.t("UI_Forecast", "Forecast")),
+            target2:  nameOf("target2",  this.t("UI_Target2", "Second target")),
         };
         this.notifyProBlocked(dv);
         this.updateWatermark(this.attemptedPro(dv).length > 0);
@@ -711,7 +741,7 @@ export class BulletChartPro implements IVisual {
         const zeroX = xOf(0);
 
         // 2. Bands — thresholds relative to rMax (data max, not padded domain)
-        this.drawBands(g, s, cx, barY, chartW, barH, rMax, totalDomain, domainMin);
+        this.drawBands(g, s, cx, barY, chartW, barH, rMax, totalDomain, domainMin, d);
 
         // Zero baseline when we have negative values
         if (domainMin < 0) {
@@ -750,6 +780,21 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("width",  String(TARGET_W));
             r.setAttribute("height", String(mH));
             r.setAttribute("fill",   d.colorTarget ?? s.targetColor);
+            g.appendChild(r);
+        }
+
+        // 4b. Segundo objetivo (Pro): marcador hueco, para no confundirlo con el primero.
+        if (d.target2 != null) {
+            const tx = xOf(d.target2);
+            const mH = barH * TARGET_H_RATIO; const mY = barY + (barH - mH) / 2;
+            const r = this.mkEl("rect");
+            r.setAttribute("x",            String(tx - 2.5));
+            r.setAttribute("y",            String(mY));
+            r.setAttribute("width",        "5");
+            r.setAttribute("height",       String(mH));
+            r.setAttribute("fill",         "none");
+            r.setAttribute("stroke",       s.target2Color);
+            r.setAttribute("stroke-width", "1.5");
             g.appendChild(r);
         }
 
@@ -942,7 +987,19 @@ export class BulletChartPro implements IVisual {
             g.style.opacity = this.dimmed(d) ? "0.25" : "1";
             if (allow) g.style.cursor = "pointer";
 
-            if (s.showBands) {
+            if (s.showBands && (d.band1Limit != null || d.band2Limit != null || d.bandMax != null)) {
+                // Pro: límites de banda de la columna, desde cero.
+                const top = d.bandMax ?? Math.max(0, domainMin + totalDomain / 1.1);
+                [[top, s.band3Color], [d.band2Limit, s.band2Color], [d.band1Limit, s.band1Color]].forEach(([v, c]) => {
+                    if (v == null) return;
+                    const yv = yOf(Math.max(0, v as number));
+                    const r = this.mkEl("rect");
+                    r.setAttribute("x", String(barXOff)); r.setAttribute("y", String(yv));
+                    r.setAttribute("width", String(barW)); r.setAttribute("height", String(Math.max(0, baseline - yv)));
+                    r.setAttribute("fill", c as string); r.setAttribute("rx", "2");
+                    g.appendChild(r);
+                });
+            } else if (s.showBands) {
                 // Bands span from zero upward (positive region only)
                 const posH = baseline - topY;
                 [[posH, s.band3Color],[posH * Math.min(s.band2Pct,100)/100, s.band2Color],[posH * Math.min(s.band1Pct,100)/100, s.band1Color]]
@@ -1003,6 +1060,16 @@ export class BulletChartPro implements IVisual {
                     tv.textContent = this.formatValue(d.target, d.formatTarget);
                     g.appendChild(tv);
                 }
+            }
+
+            if (d.target2 != null) {
+                const ty2 = yOf(d.target2);
+                const mW2 = barW * TARGET_H_RATIO; const mX2 = barXOff + (barW - mW2) / 2;
+                const r2 = this.mkEl("rect");
+                r2.setAttribute("x", String(mX2)); r2.setAttribute("y", String(ty2 - 2.5));
+                r2.setAttribute("width", String(mW2)); r2.setAttribute("height", "5");
+                r2.setAttribute("fill", "none"); r2.setAttribute("stroke", s.target2Color); r2.setAttribute("stroke-width", "1.5");
+                g.appendChild(r2);
             }
 
             if (d.forecast != null) {
@@ -1241,6 +1308,7 @@ export class BulletChartPro implements IVisual {
 
         const hasTarget   = this.lastDataPoints.some(d => d.target   != null);
         const hasForecast = this.lastDataPoints.some(d => d.forecast != null);
+        const hasTarget2  = this.lastDataPoints.some(d => d.target2  != null);
 
         // Legend items: [icon-draw-fn, label]
         type Item = { label: string; draw: (x: number) => number /* returns icon width */ };
@@ -1262,6 +1330,16 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("x",      String(x + 5)); r.setAttribute("y",      String(mid - 7));
             r.setAttribute("width",  String(TARGET_W)); r.setAttribute("height", "14");
             r.setAttribute("fill",   s.targetColor);
+            this.rootSvg.appendChild(r);
+            return 14;
+        }});
+
+        // Segundo objetivo — marcador hueco
+        if (hasTarget2) items.push({ label: this.names.target2, draw: (x) => {
+            const r = this.mkEl("rect");
+            r.setAttribute("x", String(x + 4)); r.setAttribute("y", String(mid - 7));
+            r.setAttribute("width", "5"); r.setAttribute("height", "14");
+            r.setAttribute("fill", "none"); r.setAttribute("stroke", s.target2Color); r.setAttribute("stroke-width", "1.5");
             this.rootSvg.appendChild(r);
             return 14;
         }});
@@ -1579,11 +1657,28 @@ export class BulletChartPro implements IVisual {
     private drawBands(
         g: SVGElement, s: BulletSettings,
         cx: number, y: number, chartW: number, h: number,
-        rMax: number, totalDomain: number, domainMin: number
+        rMax: number, totalDomain: number, domainMin: number, d?: BulletDataPoint
     ): void {
         // Map a data value to a pixel width from cx
         const xOf = (v: number) => cx + Math.max(0, ((v - domainMin) / totalDomain) * chartW);
         const bMax = Math.max(rMax, 0);
+
+        // Pro: límites de banda de la fila, calculados en el modelo. Sin el máximo, la banda 3 llega al máximo de los datos.
+        if (s.showBands && d && (d.band1Limit != null || d.band2Limit != null || d.bandMax != null)) {
+            const top = d.bandMax ?? bMax;
+            [[top, s.band3Color], [d.band2Limit, s.band2Color], [d.band1Limit, s.band1Color]].forEach(([v, c]) => {
+                if (v == null) return;
+                const r = this.mkEl("rect");
+                r.setAttribute("x",      String(cx));
+                r.setAttribute("y",      String(y));
+                r.setAttribute("width",  String(Math.max(0, xOf(Math.max(0, v as number)) - cx)));
+                r.setAttribute("height", String(h));
+                r.setAttribute("fill",   c as string);
+                r.setAttribute("rx",     "2");
+                g.appendChild(r);
+            });
+            return;
+        }
 
         if (s.showBands) {
             // Band widths are thresholds of the actual data max (rMax), NOT chartW.
@@ -1623,6 +1718,19 @@ export class BulletChartPro implements IVisual {
             if (d.variancePct != null)
                 varStr += ` (${this.pctText(d.variancePct)})`;
             items.push({ displayName: this.t("UI_Variance", "Variance"), value: varStr });
+        }
+        if (d.target2 != null) {
+            items.push({ displayName: this.names.target2, value: this.formatValue(d.target2, d.formatTarget2) });
+            if (d.actual != null) {
+                const v2 = d.actual - d.target2;
+                let s2 = `${v2 >= 0 ? "+" : "−"}${this.formatValue(Math.abs(v2), d.formatActual)}`;
+                if (d.target2 !== 0) s2 += ` (${this.pctText(v2 / Math.abs(d.target2) * 100)})`;
+                items.push({ displayName: this.tf("UI_VarianceVs", "Variance vs {0}", this.names.target2), value: s2 });
+            }
+        }
+        if (d.band1Limit != null || d.band2Limit != null || d.bandMax != null) {
+            const lims = [d.band1Limit, d.band2Limit, d.bandMax].filter(v => v != null).map(v => this.formatValue(v as number, d.formatActual));
+            items.push({ displayName: this.t("UI_Bands", "Bands"), value: lims.join(" · ") });
         }
         if (d.forecast != null)
             items.push({ displayName: this.names.forecast, value: this.formatValue(d.forecast, d.formatForecast) });
@@ -1713,6 +1821,9 @@ export class BulletChartPro implements IVisual {
             if (d.actual   != null) { lo = Math.min(lo, d.actual);   hi = Math.max(hi, d.actual); }
             if (d.target   != null) { hi = Math.max(hi, d.target);  }
             if (d.forecast != null) { hi = Math.max(hi, d.forecast); }
+            for (const v of [d.target2, d.bandMax, d.band2Limit, d.band1Limit]) {
+                if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+            }
         });
         return { min: lo, max: hi };
     }

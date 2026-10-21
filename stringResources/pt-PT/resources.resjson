@@ -76,5 +76,14 @@
   "UI_TargetShort": "M:",
   "UI_Bands": "Faixas",
   "UI_Scroll": "rolar",
-  "UI_Variance": "Desvio"
+  "UI_Variance": "Desvio",
+  "Visual_Target2": "Segunda meta [Pro]",
+  "Visual_Band1Limit": "Limite da faixa 1 [Pro]",
+  "Visual_Band2Limit": "Limite da faixa 2 [Pro]",
+  "Visual_BandMax": "Máximo das faixas [Pro]",
+  "Visual_Colors_Target2Color": "Marcador da segunda meta (Pro)",
+  "Feat_bands": "faixas a partir de medidas",
+  "Feat_target2": "uma segunda meta",
+  "UI_Target2": "Segunda meta",
+  "UI_VarianceVs": "Desvio vs {0}"
 }

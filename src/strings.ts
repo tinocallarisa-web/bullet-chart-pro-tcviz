@@ -4,7 +4,9 @@
  */
 export const STRINGS: Record<string, Record<string, string>> = {
     "es-ES": {
+        "Feat_bands": "las bandas desde medidas",
         "Feat_forecast": "la marca de previsión",
+        "Feat_target2": "un segundo objetivo",
         "Feat_trellis": "los múltiplos pequeños",
         "Feat_vertical": "la orientación vertical",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} forman parte del plan Pro y se muestran como vista previa con marca de agua.",
@@ -18,11 +20,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Vista previa Pro",
         "UI_Scroll": "desplazar",
         "UI_Target": "Objetivo",
+        "UI_Target2": "Segundo objetivo",
         "UI_TargetShort": "O:",
-        "UI_Variance": "Desviación"
+        "UI_Variance": "Desviación",
+        "UI_VarianceVs": "Desviación vs {0}"
     },
     "pt-BR": {
+        "Feat_bands": "faixas a partir de medidas",
         "Feat_forecast": "o marcador de previsão",
+        "Feat_target2": "uma segunda meta",
         "Feat_vertical": "a orientação vertical",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} fazem parte do plano Pro e aparecem como prévia com marca-d’água.",
         "LicenceNotice_One": "Bullet Chart Pro: {0} faz parte do plano Pro e aparece como prévia com marca-d’água.",
@@ -35,11 +41,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Prévia Pro",
         "UI_Scroll": "rolar",
         "UI_Target": "Meta",
+        "UI_Target2": "Segunda meta",
         "UI_TargetShort": "M:",
-        "UI_Variance": "Desvio"
+        "UI_Variance": "Desvio",
+        "UI_VarianceVs": "Desvio vs {0}"
     },
     "pt-PT": {
+        "Feat_bands": "faixas a partir de medidas",
         "Feat_forecast": "o marcador de previsão",
+        "Feat_target2": "uma segunda meta",
         "Feat_vertical": "a orientação vertical",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} fazem parte do plano Pro e aparecem como prévia com marca-d’água.",
         "LicenceNotice_One": "Bullet Chart Pro: {0} faz parte do plano Pro e aparece como prévia com marca-d’água.",
@@ -52,11 +62,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Prévia Pro",
         "UI_Scroll": "rolar",
         "UI_Target": "Meta",
+        "UI_Target2": "Segunda meta",
         "UI_TargetShort": "M:",
-        "UI_Variance": "Desvio"
+        "UI_Variance": "Desvio",
+        "UI_VarianceVs": "Desvio vs {0}"
     },
     "fr-FR": {
+        "Feat_bands": "les bandes issues de mesures",
         "Feat_forecast": "le marqueur de prévision",
+        "Feat_target2": "une seconde cible",
         "Feat_trellis": "les petits multiples",
         "Feat_vertical": "l’orientation verticale",
         "LicenceNotice_Many": "Bullet Chart Pro : {0} font partie du plan Pro et s’affichent en aperçu avec filigrane.",
@@ -70,11 +84,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Aperçu Pro",
         "UI_Scroll": "défiler",
         "UI_Target": "Cible",
+        "UI_Target2": "Seconde cible",
         "UI_TargetShort": "C :",
-        "UI_Variance": "Écart"
+        "UI_Variance": "Écart",
+        "UI_VarianceVs": "Écart vs {0}"
     },
     "de-DE": {
+        "Feat_bands": "Bänder aus Measures",
         "Feat_forecast": "die Prognosemarkierung",
+        "Feat_target2": "ein zweites Ziel",
         "Feat_trellis": "kleine Vielfache",
         "Feat_vertical": "die vertikale Ausrichtung",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} gehören zum Pro-Plan und werden als Vorschau mit Wasserzeichen angezeigt.",
@@ -88,11 +106,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Pro-Vorschau",
         "UI_Scroll": "scrollen",
         "UI_Target": "Ziel",
+        "UI_Target2": "Zweites Ziel",
         "UI_TargetShort": "Z:",
-        "UI_Variance": "Abweichung"
+        "UI_Variance": "Abweichung",
+        "UI_VarianceVs": "Abweichung zu {0}"
     },
     "it-IT": {
+        "Feat_bands": "le fasce da misure",
         "Feat_forecast": "l’indicatore della previsione",
+        "Feat_target2": "un secondo obiettivo",
         "Feat_trellis": "i multipli piccoli",
         "Feat_vertical": "l’orientamento verticale",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} fanno parte del piano Pro e sono mostrati come anteprima con filigrana.",
@@ -106,11 +128,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Anteprima Pro",
         "UI_Scroll": "scorri",
         "UI_Target": "Obiettivo",
+        "UI_Target2": "Secondo obiettivo",
         "UI_TargetShort": "O:",
-        "UI_Variance": "Scostamento"
+        "UI_Variance": "Scostamento",
+        "UI_VarianceVs": "Scostamento vs {0}"
     },
     "nl-NL": {
+        "Feat_bands": "banden uit metingen",
         "Feat_forecast": "de prognosemarkering",
+        "Feat_target2": "een tweede doel",
         "Feat_trellis": "kleine veelvouden",
         "Feat_vertical": "de verticale afdrukstand",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} horen bij het Pro-abonnement en worden getoond als voorbeeld met watermerk.",
@@ -124,11 +150,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Pro-voorbeeld",
         "UI_Scroll": "scrollen",
         "UI_Target": "Doel",
+        "UI_Target2": "Tweede doel",
         "UI_TargetShort": "D:",
-        "UI_Variance": "Afwijking"
+        "UI_Variance": "Afwijking",
+        "UI_VarianceVs": "Afwijking t.o.v. {0}"
     },
     "pl-PL": {
+        "Feat_bands": "pasma z miar",
         "Feat_forecast": "znacznik prognozy",
+        "Feat_target2": "drugi cel",
         "Feat_trellis": "małe wielokrotności",
         "Feat_vertical": "orientacja pionowa",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} należą do planu Pro i są wyświetlane jako podgląd ze znakiem wodnym.",
@@ -142,11 +172,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Podgląd Pro",
         "UI_Scroll": "przewiń",
         "UI_Target": "Cel",
+        "UI_Target2": "Drugi cel",
         "UI_TargetShort": "C:",
-        "UI_Variance": "Odchylenie"
+        "UI_Variance": "Odchylenie",
+        "UI_VarianceVs": "Odchylenie vs {0}"
     },
     "ja-JP": {
+        "Feat_bands": "メジャーによる帯",
         "Feat_forecast": "予測マーカー",
+        "Feat_target2": "第 2 目標",
         "Feat_trellis": "スモール マルチプル",
         "Feat_vertical": "縦方向",
         "LicenceNotice_Many": "Bullet Chart Pro: {0} は Pro プランの機能です。透かし付きのプレビューで表示しています。",
@@ -160,11 +194,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Pro プレビュー",
         "UI_Scroll": "スクロール",
         "UI_Target": "目標",
+        "UI_Target2": "第 2 目標",
         "UI_TargetShort": "目標:",
-        "UI_Variance": "差異"
+        "UI_Variance": "差異",
+        "UI_VarianceVs": "{0} との差異"
     },
     "zh-CN": {
+        "Feat_bands": "来自度量值的区间",
         "Feat_forecast": "预测标记",
+        "Feat_target2": "第二目标",
         "Feat_trellis": "小型序列图",
         "Feat_vertical": "垂直方向",
         "LicenceNotice_Many": "Bullet Chart Pro：{0} 属于 Pro 计划，以带水印的预览显示。",
@@ -178,11 +216,15 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Pro 预览",
         "UI_Scroll": "滚动",
         "UI_Target": "目标",
+        "UI_Target2": "第二目标",
         "UI_TargetShort": "目标:",
-        "UI_Variance": "偏差"
+        "UI_Variance": "偏差",
+        "UI_VarianceVs": "与 {0} 的偏差"
     },
     "ko-KR": {
+        "Feat_bands": "측정값 기반 구간",
         "Feat_forecast": "예측 표식",
+        "Feat_target2": "두 번째 목표",
         "Feat_trellis": "작은 배수",
         "Feat_vertical": "세로 방향",
         "LicenceNotice_Many": "Bullet Chart Pro: {0}은(는) Pro 요금제 기능이며 워터마크가 있는 미리 보기로 표시됩니다.",
@@ -196,7 +238,9 @@ export const STRINGS: Record<string, Record<string, string>> = {
         "UI_ProPreview": "Pro 미리 보기",
         "UI_Scroll": "스크롤",
         "UI_Target": "목표",
+        "UI_Target2": "두 번째 목표",
         "UI_TargetShort": "목표:",
-        "UI_Variance": "차이"
+        "UI_Variance": "차이",
+        "UI_VarianceVs": "{0} 대비 차이"
     }
 };

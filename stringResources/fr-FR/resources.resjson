@@ -76,5 +76,14 @@
   "UI_TargetShort": "C :",
   "UI_Bands": "Bandes",
   "UI_Scroll": "défiler",
-  "UI_Variance": "Écart"
+  "UI_Variance": "Écart",
+  "Visual_Target2": "Seconde cible [Pro]",
+  "Visual_Band1Limit": "Limite de la bande 1 [Pro]",
+  "Visual_Band2Limit": "Limite de la bande 2 [Pro]",
+  "Visual_BandMax": "Maximum des bandes [Pro]",
+  "Visual_Colors_Target2Color": "Marqueur de la seconde cible (Pro)",
+  "Feat_bands": "les bandes issues de mesures",
+  "Feat_target2": "une seconde cible",
+  "UI_Target2": "Seconde cible",
+  "UI_VarianceVs": "Écart vs {0}"
 }

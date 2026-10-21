@@ -76,5 +76,14 @@
   "UI_TargetShort": "목표:",
   "UI_Bands": "구간",
   "UI_Scroll": "스크롤",
-  "UI_Variance": "차이"
+  "UI_Variance": "차이",
+  "Visual_Target2": "두 번째 목표 [Pro]",
+  "Visual_Band1Limit": "구간 1 한계 [Pro]",
+  "Visual_Band2Limit": "구간 2 한계 [Pro]",
+  "Visual_BandMax": "구간 최대값 [Pro]",
+  "Visual_Colors_Target2Color": "두 번째 목표 표식(Pro)",
+  "Feat_bands": "측정값 기반 구간",
+  "Feat_target2": "두 번째 목표",
+  "UI_Target2": "두 번째 목표",
+  "UI_VarianceVs": "{0} 대비 차이"
 }

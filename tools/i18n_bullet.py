@@ -119,3 +119,15 @@ P = {
 "Actual": ["Real", "Réel", "Ist", "Effettivo", "Werkelijk", "Rzeczywiste", "実績", "实际", "실적", "Real"],
 "Forecast": ["Previsão", "Prévision", "Prognose", "Previsione", "Prognose", "Prognoza", "予測", "预测", "예측", "Previsión"],
 }
+
+P.update({
+"Second target [Pro]": ["Segunda meta [Pro]", "Seconde cible [Pro]", "Zweites Ziel [Pro]", "Secondo obiettivo [Pro]", "Tweede doel [Pro]", "Drugi cel [Pro]", "第 2 目標 [Pro]", "第二目标 [Pro]", "두 번째 목표 [Pro]", "Segundo objetivo [Pro]"],
+"Band 1 limit [Pro]": ["Limite da faixa 1 [Pro]", "Limite de la bande 1 [Pro]", "Grenze Band 1 [Pro]", "Limite fascia 1 [Pro]", "Grens band 1 [Pro]", "Granica pasma 1 [Pro]", "帯 1 の上限 [Pro]", "区间 1 上限 [Pro]", "구간 1 한계 [Pro]", "Límite de la banda 1 [Pro]"],
+"Band 2 limit [Pro]": ["Limite da faixa 2 [Pro]", "Limite de la bande 2 [Pro]", "Grenze Band 2 [Pro]", "Limite fascia 2 [Pro]", "Grens band 2 [Pro]", "Granica pasma 2 [Pro]", "帯 2 の上限 [Pro]", "区间 2 上限 [Pro]", "구간 2 한계 [Pro]", "Límite de la banda 2 [Pro]"],
+"Band maximum [Pro]": ["Máximo das faixas [Pro]", "Maximum des bandes [Pro]", "Bandmaximum [Pro]", "Massimo delle fasce [Pro]", "Maximum banden [Pro]", "Maksimum pasm [Pro]", "帯の最大値 [Pro]", "区间最大值 [Pro]", "구간 최대값 [Pro]", "Máximo de las bandas [Pro]"],
+"Second target marker (Pro)": ["Marcador da segunda meta (Pro)", "Marqueur de la seconde cible (Pro)", "Markierung zweites Ziel (Pro)", "Indicatore del secondo obiettivo (Pro)", "Markering tweede doel (Pro)", "Znacznik drugiego celu (Pro)", "第 2 目標のマーカー (Pro)", "第二目标标记 (Pro)", "두 번째 목표 표식(Pro)", "Marca del segundo objetivo (Pro)"],
+"bands from measures": ["faixas a partir de medidas", "les bandes issues de mesures", "Bänder aus Measures", "le fasce da misure", "banden uit metingen", "pasma z miar", "メジャーによる帯", "来自度量值的区间", "측정값 기반 구간", "las bandas desde medidas"],
+"a second target": ["uma segunda meta", "une seconde cible", "ein zweites Ziel", "un secondo obiettivo", "een tweede doel", "drugi cel", "第 2 目標", "第二目标", "두 번째 목표", "un segundo objetivo"],
+"Variance vs {0}": ["Desvio vs {0}", "Écart vs {0}", "Abweichung zu {0}", "Scostamento vs {0}", "Afwijking t.o.v. {0}", "Odchylenie vs {0}", "{0} との差異", "与 {0} 的偏差", "{0} 대비 차이", "Desviación vs {0}"],
+"Second target": ["Segunda meta", "Seconde cible", "Zweites Ziel", "Secondo obiettivo", "Tweede doel", "Drugi cel", "第 2 目標", "第二目标", "두 번째 목표", "Segundo objetivo"],
+})
