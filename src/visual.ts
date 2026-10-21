@@ -16,6 +16,7 @@ import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 
 import { BulletSettings, getDefaultSettings } from "./settings";
+import "./../style/visual.less";
 
 // ═══════════════════════════════════════════════════════════════════
 //  Data models
@@ -112,6 +113,7 @@ export class BulletChartPro implements IVisual {
         this.localization     = options.host.createLocalizationManager();
         this.settings         = getDefaultSettings();
         this.container        = options.element;
+        this.container.classList.add("bullet-chart-pro");
 
         this.container.style.overflow = "auto";
         this.container.style.position = "relative";
@@ -143,9 +145,8 @@ export class BulletChartPro implements IVisual {
         // Bookmark support: Power BI calls this when restoring a saved selection state.
         // Re-rendering with lastOptions is enough because the dataView already contains
         // the correct highlights for the restored bookmark at that point.
-        this.selectionManager.registerOnSelectCallback(() => {
-            if (this.lastOptions) this.update(this.lastOptions);
-        });
+        // Se repinta sin pasar por update(): los eventos de render van uno a uno con cada update().
+        this.selectionManager.registerOnSelectCallback(() => this.redraw());
 
         // Keyboard navigation (supportsKeyboardFocus declared in capabilities.json)
         this.container.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -194,13 +195,13 @@ export class BulletChartPro implements IVisual {
             if (pro && !this.isPro) {
                 this.isPro = true;
                 this.clearLicenseNotice();
-                if (this.lastOptions) this.update(this.lastOptions);
+                this.redraw();
             } else if (!pro) {
                 // La licencia responde despues del primer render, cuando proPreview todavia
                 // era false y las funciones Pro se resolvieron como Free. Repintar es lo que
                 // enciende la vista previa; sin esto el autor ve el resultado gratuito hasta
                 // que toca cualquier ajuste.
-                if (this.lastOptions) this.update(this.lastOptions);
+                if (this.lastOptions) this.redraw();
                 else this.notifyProBlocked(undefined);
             }
         } catch {
@@ -490,61 +491,73 @@ export class BulletChartPro implements IVisual {
         this.lastOptions = options;
         this.events.renderingStarted(options);
         try {
-            const dv = options.dataViews?.[0];
-            const vp = options.viewport;
-            if (!dv) {
-                this.updateWatermark(false);   // nada que pintar: tampoco marca
-                this.renderLanding(vp);
-                this.events.renderingFinished(options);
-                return;
-            }
-
-            // Vista previa Pro: solo en edición (ViewMode View=0), con la licencia ya
-            // resuelta y en un entorno donde se puede leer. En lectura, antes de resolver,
-            // o donde no se puede leer (Publish to Web, export), se pinta el resultado
-            // gratuito sin marca: ahí un cliente que paga se leería como Free.
-            const viewMode = (options as any).viewMode;
-            const editing  = typeof viewMode === "number" && viewMode !== 0;
-            this.proPreview = !this.isPro && editing && this.licenseResolved
-                && this.licenseEnvSupported && this.licenseInfoAvailable;
-
-            this.settings = this.parseSettings(dv);
-            const s = this.settings;
-            this.notifyProBlocked(dv);
-            this.updateWatermark(this.attemptedPro(dv).length > 0);
-
-            // Small multiples: basta con poner un campo en su pozo (enabled viene true por defecto)
-            const hasTrellisField = !!dv.categorical?.categories?.some(c => c.source.roles?.["trellisBy"]);
-            if ((this.isPro || this.proPreview) && s.trellisEnabled && hasTrellisField) {
-                const panels = this.parseTrellis(dv);
-                this.lastDataPoints = panels.flatMap(p => p.data);
-                if (!panels.length) { this.renderLanding(vp); }
-                else { this.renderTrellis(panels, vp.width, vp.height); }
-                this.events.renderingFinished(options); return;
-            }
-
-            const data = this.parseData(dv);
-            this.lastDataPoints = data;
-            if (!data.length) { this.renderLanding(vp); this.events.renderingFinished(options); return; }
-
-            // Show drill label only when user has actually drilled into a hierarchy level.
-            // options.type is a bitmask; bit 4 (value 4) = Resize, bit 2 = Data refresh.
-            // Power BI sets the Drilldown flag (64) when a drill action triggered the update.
-            const isDrillUpdate = !!(options.type & 64);
-            if (isDrillUpdate) this.isDrilled = true;
-            const catCol = dv.categorical?.categories?.find(c => c.source.roles?.["category"]);
-            const drillLabel = this.isDrilled ? (catCol?.source.displayName ?? "") : "";
-
-            // Vertical es Pro: en Free se dibuja en horizontal (el panel conserva lo elegido y
-            // notifyProBlocked lanza el aviso de Power BI)
-            if (s.orientation === "vertical" && (this.isPro || this.proPreview)) this.renderVertical(data, vp.width, vp.height, drillLabel);
-            else                              this.renderHorizontal(data, vp.width, vp.height, drillLabel);
-
+            this.render(options);
             this.events.renderingFinished(options);
         } catch (e) {
             this.events.renderingFailed(options, String(e));
             console.error("[BulletChartPro]", e);
         }
+    }
+
+    /**
+     * Repintado fuera de update() (licencia resuelta, selección restaurada por un marcador). No emite
+     * eventos de render: Microsoft exige un renderingStarted y un Finished/Failed por cada update().
+     */
+    private redraw(): void {
+        if (!this.lastOptions) return;
+        try { this.render(this.lastOptions); }
+        catch (e) { console.error("[BulletChartPro]", e); }
+    }
+
+    private render(options: VisualUpdateOptions): void {
+        const dv = options.dataViews?.[0];
+        const vp = options.viewport;
+        if (!dv) {
+            this.updateWatermark(false);   // nada que pintar: tampoco marca
+            this.renderLanding(vp);
+            return;
+        }
+
+        // Vista previa Pro: solo en edición (ViewMode View=0), con la licencia ya
+        // resuelta y en un entorno donde se puede leer. En lectura, antes de resolver,
+        // o donde no se puede leer (Publish to Web, export), se pinta el resultado
+        // gratuito sin marca: ahí un cliente que paga se leería como Free.
+        const viewMode = (options as any).viewMode;
+        const editing  = typeof viewMode === "number" && viewMode !== 0;
+        this.proPreview = !this.isPro && editing && this.licenseResolved
+            && this.licenseEnvSupported && this.licenseInfoAvailable;
+
+        this.settings = this.parseSettings(dv);
+        const s = this.settings;
+        this.notifyProBlocked(dv);
+        this.updateWatermark(this.attemptedPro(dv).length > 0);
+
+        // Small multiples: basta con poner un campo en su pozo (enabled viene true por defecto)
+        const hasTrellisField = !!dv.categorical?.categories?.some(c => c.source.roles?.["trellisBy"]);
+        if ((this.isPro || this.proPreview) && s.trellisEnabled && hasTrellisField) {
+            const panels = this.parseTrellis(dv);
+            this.lastDataPoints = panels.flatMap(p => p.data);
+            if (!panels.length) { this.renderLanding(vp); }
+            else { this.renderTrellis(panels, vp.width, vp.height); }
+            return;
+        }
+
+        const data = this.parseData(dv);
+        this.lastDataPoints = data;
+        if (!data.length) { this.renderLanding(vp); return; }
+
+        // Show drill label only when user has actually drilled into a hierarchy level.
+        // options.type is a bitmask; bit 4 (value 4) = Resize, bit 2 = Data refresh.
+        // Power BI sets the Drilldown flag (64) when a drill action triggered the update.
+        const isDrillUpdate = !!(options.type & 64);
+        if (isDrillUpdate) this.isDrilled = true;
+        const catCol = dv.categorical?.categories?.find(c => c.source.roles?.["category"]);
+        const drillLabel = this.isDrilled ? (catCol?.source.displayName ?? "") : "";
+
+        // Vertical es Pro: en Free se dibuja en horizontal (el panel conserva lo elegido y
+        // notifyProBlocked lanza el aviso de Power BI)
+        if (s.orientation === "vertical" && (this.isPro || this.proPreview)) this.renderVertical(data, vp.width, vp.height, drillLabel);
+        else                              this.renderHorizontal(data, vp.width, vp.height, drillLabel);
     }
 
     // ── Landing ───────────────────────────────────────────────────────
@@ -1675,7 +1688,12 @@ export class BulletChartPro implements IVisual {
         return this.calcRange(data).max;
     }
 
-    private canInteract(): boolean { return (this.host as any).allowInteractions !== false; }
+    // allowInteractions vive en hostCapabilities; host.allowInteractions solo existe en APIs antiguas
+    // (casi siempre undefined, y el clic filtraba aunque el autor apagara las interacciones).
+    private canInteract(): boolean {
+        const h = this.host as any;
+        return (h?.hostCapabilities?.allowInteractions ?? h?.allowInteractions) !== false;
+    }
 
     // Applies a Power BI format string (from the measure's metadata) to a value.
     // Handles: percentages, currency symbols, K/M/B/T scale suffixes, decimal precision,
