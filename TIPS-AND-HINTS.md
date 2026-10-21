@@ -1,4 +1,16 @@
-# Bullet Chart Pro — Tips & Hints (v1.4.0.0)
+# Bullet Chart Pro — Tips & Hints (v1.5.0.0)
+
+## New in 1.5.0.0
+
+- **Second target [Pro]** — a hollow marker next to the target for a stretch goal or last year. It is in the legend and in the tooltip, with its own variance.
+- **Bands from measures [Pro]** — *Band 1 limit*, *Band 2 limit* and *Band maximum*: each row gets its own thresholds, calculated in DAX (e.g. `SUM(T[Target]) * 0.9`). Without these fields the bands stay as percentages, as in Free.
+- **Setup guide** — opens over the chart while you edit (not in tiles under 360×220 px): fields, Pro on your own data, style. Close it with ✕ or *Finish*; reopen it in *Format → Style template → Setup guide*.
+- **Style templates** — Clean, Minimal, Contrast, Soft, Compact and IBCS style. Picking one replaces the settings it defines; the rest stays as you set it. *IBCS style* is a style, not a statement of IBCS compliance.
+- **On-object formatting** — click a bar, a marker, the bands, the legend, the axis or a reference line on the canvas and format it there. In Desktop: first click selects the visual, second click the element.
+- **Legend** with its own font, size and colour.
+- **12 languages** and number formats from your model, including dynamic format strings, in the report language.
+- **Selection** dims the other bars, also when a bookmark restores it.
+- **Fixes**: vertical font size and axis, *Values panel width %* now applied, small multiples that fit, small tiles, interactions turned off by Power BI respected.
 
 ## Getting started
 
@@ -17,12 +29,27 @@
 | Target | Measure | Vertical marker; drives the variance label and colour. |
 | Forecast [Pro] | Measure | Triangle marker for the expected end-of-period value. |
 | Small Multiples By [Pro] | Grouping | One panel per value of this field. |
+| Second target [Pro] | Measure | Hollow marker; legend and tooltip with its own variance. |
+| Band 1 limit / Band 2 limit / Band maximum [Pro] | Measure | Per-row band thresholds from DAX. Band 3 runs to the data maximum if *Band maximum* is empty. |
 | Tooltips | Measure | Up to 10 extra measures in the tooltip. |
 
 ## Free vs Pro
 
-- **Free:** actual vs target with automatic variance, qualitative bands, IBCS mode, horizontal orientation, two reference lines, a colour per category, tooltips, drilldown, cross-filtering, bookmarks, keyboard navigation, high contrast.
-- **Pro:** Small Multiples, the Forecast marker and vertical orientation.
+| | Free | Pro |
+|---|---|---|
+| Actual vs target, automatic variance (absolute + %) | ✓ | ✓ |
+| Qualitative bands as % of the data maximum | ✓ | ✓ |
+| IBCS mode and the six style templates | ✓ | ✓ |
+| Colour per category and conditional formatting (fx) on the bar | ✓ | ✓ |
+| Reference lines, legend, axis, tooltips, drilldown | ✓ | ✓ |
+| Cross-filtering, bookmarks, keyboard, high contrast, screen reader | ✓ | ✓ |
+| On-object formatting, setup guide, 12 languages | ✓ | ✓ |
+| Small Multiples | — | ✓ |
+| Forecast marker | — | ✓ |
+| Vertical orientation | — | ✓ |
+| Second target | — | ✓ |
+| Bands from measures | — | ✓ |
+
 - **Without a licence, while you are editing the report**, a Pro feature renders working under a
   *Pro preview* watermark, and Power BI shows its own notice with the option to buy. In reading view,
   and wherever Power BI cannot check licences (Publish to Web, embedding, export), the free result is
@@ -32,13 +59,14 @@
 
 | Card | Settings |
 |---|---|
+| Style template | Template (Clean, Minimal, Contrast, Soft, Compact, IBCS style), Setup guide |
 | General | Orientation (Vertical is Pro), IBCS mode |
-| Colors | Actual, target, forecast, positive / negative variance, three band colours, one colour per category, and **conditional formatting (fx) on the bar colour** |
-| Qualitative Bands | Show, band 1 and band 2 thresholds (% of the data maximum) |
+| Colors | Actual, target, second target (Pro), forecast, positive / negative variance, three band colours, one colour per category, and **conditional formatting (fx) on the bar colour** |
+| Qualitative Bands | Show, band 1 and band 2 thresholds (% of the data maximum; rows with band measures use those) |
 | Variance | Show label, show %, green / red threshold |
 | Labels | Category, actual value, target value, font size and family |
-| Layout | Category column width %, values panel width %, scale axis |
-| Legend | Show, top or bottom |
+| Layout | Category column width %, values panel width % (horizontal only; applied once you set it), scale axis |
+| Legend | Show, top or bottom, font size, font family, text colour |
 | Reference Lines | Two lines: show, value, label, colour |
 | Small Multiples [Pro] | Enable, columns, synced scale, panel titles, panel background, border and **title colour** |
 
@@ -49,18 +77,26 @@
   category overrides the rule just for that one, so the general rule and the exceptions coexist.
 - **Variance threshold:** set it to 0 for a plain above/below target colour, or to a tolerance (e.g. -5) to only flag real misses.
 - **Bands** are a percentage of the largest value in the data, not of the target. Use them for "how good is this", and the target marker for "did we hit it".
-- **IBCS mode** replaces your colours with the standard monochrome palette — switch it on for finance packs that follow IBCS.
+- **IBCS mode** replaces the bar, target and band colours with a monochrome palette inspired by IBCS notation. It is a style; IBCS compliance depends on the whole report.
 - **Reference lines** work well for a company-wide benchmark or last year's average; in Small Multiples they appear in every panel.
 - **Small Multiples:** use **Sync scale** on to compare magnitudes across panels, off to compare shapes within each panel. Two or three columns read best.
 - **Negative values** switch the scale to bipolar automatically, with a zero baseline.
+- **Thresholds that differ per row** (one KPI tolerates 5%, another 20%): use bands from measures (Pro) instead of the percentage bands.
+- **Target and stretch:** put the stretch goal or last year in *Second target*; the tooltip gives the variance against both.
+- **Small tiles:** the values column keeps what fits for the whole column (value, then variance %, then the full variance, then the target). What does not fit is still in the tooltip.
 - **Keyboard:** click the visual, then arrow keys move between bars, Enter selects, Escape clears.
 
 ## Troubleshooting
 
+- **The variance is missing in a small tile** — there is no room in the values column; hover over the bar, the tooltip has it. Widen the visual or set *Values panel width %*.
+- **The setup guide is gone** — *Format → Style template → Setup guide* = On. It shows only while editing and in tiles of at least 360×220 px.
+- **My colours changed when I picked a template** — a template replaces the settings it defines. Pick *Clean* for the usual look.
+- **Band measures do nothing** — they are Pro; without a licence the bands stay as percentages (with a watermarked preview while editing).
 - **The values on the right disappeared** — the visual is too narrow. The bar always keeps at least 40% of the width, so the values column hides first. Widen the visual or reduce *Category column width %*.
 - **Small Multiples By does nothing** — Small Multiples is a Pro feature; without a licence Power BI shows its notice. With a licence, check *Enable small multiples* is on.
 - **No forecast triangle** — Forecast is Pro. With a licence, check the Forecast field is not blank for that category.
 - **Vertical orientation shows horizontal bars** — vertical is Pro.
+- **Second target not drawn** — it is Pro; with a licence, check the measure is not blank for that row.
 - **Only part of the categories** — the visual receives up to 2,000 categories. Filter or aggregate larger lists.
 - **The panel titles are unreadable** — the title sits on the panel border colour. Set *Small Multiples → Panel title colour* to something that contrasts with the border you chose. In high contrast mode it follows the theme automatically.
 - **Panels scroll instead of fitting** — each panel needs room for its rows; on a short visual the chart scrolls rather than overlapping. Make the visual taller or use fewer categories per panel.

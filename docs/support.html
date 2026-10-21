@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Support — Bullet Chart Pro | TCViz</title>
+  <meta name="description" content="Bullet Chart Pro for Power BI: field wells, format pane reference, setup guide, style templates, on-object formatting, languages, use cases and FAQ." />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
     h1   { color: #0078D4; margin-bottom: 4px; }
@@ -11,8 +12,11 @@
     h3   { margin-top: 1.4em; color: #333; }
     .card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre  { background: #f0f0f0; padding: 12px 16px; border-radius: 6px; overflow-x: auto; font-size: .88em; line-height: 1.5; }
+    pre code { background: none; padding: 0; }
     .badge { display: inline-block; background: #e8433a; color: #fff; font-size: .72rem; padding: 1px 7px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
     .badge.free { background: #388e3c; }
+    .badge.new  { background: #0078D4; }
     nav { margin-bottom: 32px; font-size: .95rem; }
     nav a { color: #0078D4; text-decoration: none; margin-right: 20px; }
     nav a:hover { text-decoration: underline; }
@@ -21,6 +25,11 @@
     details { border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; background: #fff; }
     details summary { font-weight: 600; cursor: pointer; color: #1a1a2e; }
     details p, details ul { margin-top: 10px; }
+    .tbl-wrap { overflow-x: auto; margin: 12px 0 20px; }
+    table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+    th, td { border-bottom: 1px solid #e0e0e0; padding: 6px 10px; text-align: left; vertical-align: top; }
+    th { background: #f4f4f4; color: #1a1a2e; }
+    .muted { color: #777; font-size: .9rem; }
     footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: .9rem; color: #888; }
   </style>
 </head>
@@ -29,15 +38,24 @@
   <h1>Support — Bullet Chart Pro</h1>
   <p><strong>Publisher:</strong> TCViz &nbsp;|&nbsp;
      <strong>Email:</strong> <a href="mailto:support@tcviz.com">support@tcviz.com</a> &nbsp;|&nbsp;
-     <strong>Version:</strong> 1.3.1.0</p>
+     <strong>Version:</strong> 1.5.0.0 &nbsp;|&nbsp;
+     <span class="muted">docs updated 21 Oct 2026</span></p>
 
   <nav>
+    <a href="#quick-start">Quick start</a>
+    <a href="#fields">Fields</a>
+    <a href="#format">Format pane</a>
+    <a href="#use-cases">Use cases</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
     <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a>
-    <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">Report an issue</a>
-    <a href="use-case.html">Use case</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
   </nav>
+
+  <p>Bullet Chart Pro shows each actual value against its target on one line: the bar is the
+     actual, the marker is the target, the grey bands say how far the value is from good, and the
+     variance (absolute and %) is calculated by the visual — no DAX measure needed for it.</p>
 
   <!-- VIDEO -->
   <h2>Overview video</h2>
@@ -45,120 +63,495 @@
     <iframe src="https://www.youtube.com/embed/bDW7qly8Mdo" allowfullscreen title="Bullet Chart Pro — overview and features"></iframe>
   </div>
 
+  <!-- WHAT'S NEW -->
+  <h2 id="whats-new">What's new in 1.5.0.0</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Second target</strong> <span class="badge">Pro</span> — a hollow marker next to the target, with its own variance in the tooltip.</li>
+      <li><strong>Bands from measures</strong> <span class="badge">Pro</span> — each row gets its own band thresholds, calculated in DAX.</li>
+      <li><strong>Setup guide</strong> inside the visual, in three steps.</li>
+      <li><strong>Six style templates</strong>: Clean, Minimal, Contrast, Soft, Compact and IBCS style.</li>
+      <li><strong>On-object formatting</strong>: click a bar, a marker, the legend or the axis and format it on the canvas.</li>
+      <li><strong>Legend</strong> with its own font, size and colour.</li>
+      <li><strong>12 languages</strong>, and number formats from your model (including dynamic format strings) in the report language.</li>
+      <li><strong>Selection</strong>: clicking a bar dims the others, also when a bookmark restores the selection.</li>
+      <li>Fixes for vertical orientation, small multiples, small tiles, <em>Values panel width %</em> and <em>Edit interactions</em>.</li>
+    </ul>
+  </div>
+
   <!-- QUICK START -->
-  <h2>Quick start</h2>
+  <h2 id="quick-start">Quick start</h2>
   <div class="card">
     <ol>
-      <li>Add the visual from Microsoft AppSource.</li>
-      <li>Drag a <strong>dimension</strong> field (e.g. Region, Month) into the <em>Category</em> well.</li>
-      <li>Drag your <strong>actual measure</strong> into the <em>Actual (Real)</em> well.</li>
-      <li>Drag your <strong>target measure</strong> into the <em>Target</em> well.</li>
-      <li>Variance (absolute + %) is computed <strong>automatically</strong> — no DAX needed.</li>
+      <li>Add the visual from Microsoft AppSource (Power BI Desktop → <em>Get more visuals</em>).</li>
+      <li>Drag a <strong>dimension</strong> (region, product, team, month) into <em>Category</em>: one bar per value.</li>
+      <li>Drag the measure you track into <em>Actual (Real)</em>. The bars appear.</li>
+      <li>Drag the goal — budget, plan or last year — into <em>Target</em>.</li>
+      <li>Variance (absolute + %) is calculated <strong>automatically</strong> and coloured green or red.</li>
     </ol>
+    <p>While you are editing, the <strong>setup guide</strong> opens over the chart and walks you through
+       these steps, the Pro features and the style templates. Close it with ✕ or <em>Finish</em>.</p>
+  </div>
+
+  <!-- FIELDS -->
+  <h2 id="fields">Field wells</h2>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Well</th><th>Type</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Category</td><td>Grouping</td><td>One bullet per value. Supports hierarchies and drill-down. Up to 2,000 categories.</td></tr>
+      <tr><td>Small Multiples By <span class="badge">Pro</span></td><td>Grouping</td><td>One panel per value of this field (region, year…).</td></tr>
+      <tr><td>Actual (Real)</td><td>Measure</td><td>The bar. Required: without it the start screen is shown.</td></tr>
+      <tr><td>Target</td><td>Measure</td><td>Solid marker. Drives the variance label and its colour.</td></tr>
+      <tr><td>Forecast <span class="badge">Pro</span></td><td>Measure</td><td>Triangle marker for the expected end-of-period value.</td></tr>
+      <tr><td>Second target <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Hollow marker next to the target: a stretch goal, last year or a commitment. Shown in the legend and in the tooltip with its own variance.</td></tr>
+      <tr><td>Band 1 limit <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 1 (worst) ends, for this row.</td></tr>
+      <tr><td>Band 2 limit <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 2 (mid) ends, for this row.</td></tr>
+      <tr><td>Band maximum <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 3 (best) ends, for this row. If empty, band 3 runs to the data maximum.</td></tr>
+      <tr><td>Tooltips</td><td>Measure</td><td>Up to 10 extra measures in the tooltip.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Without any of the three band measures, the bands are percentages of the data
+     maximum (Format → Qualitative Bands), exactly as in the free version.</p>
+
+  <!-- FREE VS PRO -->
+  <h2 id="free-pro">Free and Pro</h2>
+  <div class="card">
+    <p><span class="badge free">Free</span> The complete bullet chart: actual vs target with automatic
+       variance, qualitative bands (as percentages), IBCS mode and style templates, two reference lines,
+       a colour per category and conditional formatting (<em>fx</em>) on the bar, legend, axis, tooltips,
+       drill-down, cross-filtering, bookmarks, keyboard navigation, high contrast, on-object formatting,
+       the setup guide and 12 languages.</p>
+    <p><span class="badge">Pro</span> Small multiples, the Forecast marker, vertical orientation, a
+       second target and bands from measures.</p>
+    <p>Without a licence, <strong>while you edit</strong>, a Pro feature renders working under a
+       <em>Pro preview</em> watermark and Power BI shows its own notice with the option to buy. In
+       reading view, and wherever Power BI cannot check licences (Publish to Web, embedding, export),
+       the free chart is drawn with no watermark.</p>
+  </div>
+
+  <!-- GUIDE -->
+  <h2 id="guide">Setup guide</h2>
+  <p>The guide appears over the chart only while you edit a report, once the visual has data, and
+     not in tiles smaller than 360 × 220 px (there it would cover the whole chart).</p>
+  <ol>
+    <li><strong>Your data</strong> — Category, Actual and Target, each with a tick once it is in its well. The list updates by itself as you drag fields.</li>
+    <li><strong>Try Pro on your data</strong> — a <em>Try</em> button switches to vertical bars with one click. For bands from measures, the second target and small multiples, the guide tells you which well to use and ticks the item once it is filled. Without a licence they show under the watermark while you edit.</li>
+    <li><strong>Pick a style</strong> — the six templates, each with a thumbnail.</li>
+  </ol>
+  <p>Close it with ✕ or <em>Finish</em>. To open it again: Format → <strong>Style template</strong> → <strong>Setup guide</strong> = On.</p>
+
+  <!-- TEMPLATES -->
+  <h2 id="templates">Style templates</h2>
+  <p>Format → Style template → <em>Template</em>, or step 3 of the guide. Picking a template
+     <strong>replaces the settings that template defines</strong> (for example, Contrast resets the
+     colours you had changed); every other setting stays as you left it. After picking one, you can
+     still change anything by hand.</p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Template</th><th>What it sets</th></tr></thead>
+    <tbody>
+      <tr><td>Clean</td><td>The usual look (the defaults). Sets nothing.</td></tr>
+      <tr><td>Minimal</td><td>Grey target, very light bands, no scale axis, grey legend text.</td></tr>
+      <tr><td>Contrast</td><td>Navy bar, black target, darker bands, strong green and red for the variance.</td></tr>
+      <tr><td>Soft</td><td>Light blue bar and bands, green and orange for the variance.</td></tr>
+      <tr><td>Compact</td><td>Font size 9 for labels and 8 for the legend, for dense pages.</td></tr>
+      <tr><td>IBCS style</td><td>Turns on IBCS mode (dark grey bar, black target, grey bands) with green and red variance. A style inspired by IBCS notation, not a statement of compliance with the standard.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- ON-OBJECT -->
+  <h2 id="on-object">On-object formatting</h2>
+  <p>With on-object formatting turned on in Power BI Desktop, you can click these elements on the
+     canvas and format them from the menu that opens: the actual bar, the target, the second target,
+     the forecast, the bands, the labels, the variance, the legend, the axis, the reference lines and
+     the panel titles in small multiples. Each menu has shortcuts (show/hide, reset) and a link to its
+     card in the format pane.</p>
+  <p>In Desktop the <strong>first click selects the visual and the second selects the element</strong>.
+     While formatting, clicks do not filter and tooltips are not shown.</p>
+
+  <!-- FORMAT PANE -->
+  <h2 id="format">Format pane reference</h2>
+  <p class="muted">Defaults in brackets. Settings saved in reports made with earlier versions are kept.</p>
+
+  <h3>Style template <span class="badge new">1.5</span></h3>
+  <ul>
+    <li><strong>Template</strong> [Clean] — Clean, Minimal, Contrast, Soft, Compact, IBCS style.</li>
+    <li><strong>Setup guide</strong> [On] — shows the guide while editing.</li>
+  </ul>
+
+  <h3>General</h3>
+  <ul>
+    <li><strong>Orientation</strong> [Horizontal] — Horizontal or Vertical <span class="badge">Pro</span>.</li>
+    <li><strong>IBCS Mode</strong> [Off] — monochrome palette: dark grey bar (#333333), black target, grey bands. Overrides the bar, target and band colours.</li>
+  </ul>
+
+  <h3>Colors</h3>
+  <ul>
+    <li><strong>Actual bar</strong> [#2196F3] — with the <em>fx</em> button for conditional formatting. Below it, one colour per category; a colour set on a category overrides the rule for that category.</li>
+    <li><strong>Target marker</strong> [#212121]</li>
+    <li><strong>Second target marker (Pro)</strong> [#6D6D6D] <span class="badge new">1.5</span></li>
+    <li><strong>Forecast marker</strong> [#FF9800]</li>
+    <li><strong>Positive variance</strong> [#4CAF50] · <strong>Negative variance</strong> [#F44336]</li>
+    <li><strong>Band 1 (worst)</strong> [#E0E0E0] · <strong>Band 2 (mid)</strong> [#C8C8C8] · <strong>Band 3 (best)</strong> [#B0B0B0]</li>
+  </ul>
+
+  <h3>Qualitative Bands</h3>
+  <ul>
+    <li><strong>Show bands</strong> [On] — off draws a single light grey track.</li>
+    <li><strong>Band 1 threshold %</strong> [60] · <strong>Band 2 threshold %</strong> [80] — percentages of the largest value in the data (not of the target). Band 3 runs to 100%. Ignored for rows that have band measures (Pro).</li>
+  </ul>
+
+  <h3>Variance</h3>
+  <ul>
+    <li><strong>Show variance label</strong> [On] — ▲/▼ and the absolute variance (Actual − Target).</li>
+    <li><strong>Show variance %</strong> [On] — adds the % of the target in brackets.</li>
+    <li><strong>Green/red threshold</strong> [0] — in the units of the measure: a variance equal to or above it is shown as positive (green ▲), below it as negative (red ▼). Set −5 to flag only misses larger than 5.</li>
+  </ul>
+
+  <h3>Labels</h3>
+  <ul>
+    <li><strong>Show category</strong> [On] · <strong>Show actual value</strong> [On] · <strong>Show target value</strong> [Off]</li>
+    <li><strong>Font size</strong> [11] · <strong>Font family</strong> [Segoe UI]</li>
+  </ul>
+
+  <h3>Layout</h3>
+  <ul>
+    <li><strong>Category column width %</strong> [22, range 5–40] — horizontal only.</li>
+    <li><strong>Values panel width %</strong> [34, range 10–45] — horizontal only. Applied when you set it; until then the width is calculated from the longest value.</li>
+    <li><strong>Show scale axis</strong> [On]</li>
+  </ul>
+
+  <h3>Legend</h3>
+  <ul>
+    <li><strong>Show legend</strong> [On] · <strong>Position</strong> [Bottom] — Top or Bottom.</li>
+    <li><strong>Font size</strong> [10] · <strong>Font family</strong> [Segoe UI] · <strong>Text color</strong> [#333333] <span class="badge new">1.5</span></li>
+  </ul>
+  <p class="muted">The legend names each item after your measure (e.g. “Sales 2026”, “Budget”).</p>
+
+  <h3>Reference Lines</h3>
+  <ul>
+    <li>Two lines, each with <strong>Show</strong> [Off], <strong>Value</strong> [0], <strong>Label</strong> [empty] and <strong>Color</strong> [Line 1 #E53935, Line 2 #FB8C00]. In small multiples they appear in every panel.</li>
+  </ul>
+
+  <h3>Small Multiples [Pro]</h3>
+  <ul>
+    <li><strong>Enable small multiples</strong> [On] — with a field in <em>Small Multiples By</em>, the chart splits straight away.</li>
+    <li><strong>Columns</strong> [2] — reduced automatically when the visual is too narrow for that many panels.</li>
+    <li><strong>Sync scale across panels</strong> [On] — on to compare magnitudes, off to compare shapes within each panel.</li>
+    <li><strong>Show panel titles</strong> [On] · <strong>Panel background color</strong> [#FAFAFA] · <strong>Panel border color</strong> [#E0E0E0] · <strong>Panel title color</strong> [#333333]</li>
+  </ul>
+  <p class="muted">The card is visible without a licence so you can see what Pro offers.</p>
+
+  <!-- LANGUAGES -->
+  <h2 id="languages">Languages and number formats</h2>
+  <p>The format pane, the field wells, the start screen, the guide, the legend, the tooltip and the
+     notices are available in <strong>12 languages</strong>: English, Spanish, Portuguese (Brazil),
+     Portuguese (Portugal), French, German, Italian, Dutch, Polish, Japanese, Chinese (Simplified) and
+     Korean. The visual follows the language of Power BI; any other language falls back to English.</p>
+  <p>Numbers use the <strong>format string of each measure</strong> in your model — currency,
+     thousands, decimals, percentages — including <strong>dynamic format strings</strong> and
+     calculation groups, and the decimal and thousands separators of the report language. A measure
+     with no format is shortened to K / M.</p>
+
+  <!-- USE CASES -->
+  <h2 id="use-cases">Use cases</h2>
+
+  <h3>1. Plan vs actual by region</h3>
+  <div class="card">
+    <p><strong>Category</strong> = Region · <strong>Actual</strong> = <code>[Sales]</code> ·
+       <strong>Target</strong> = <code>[Budget]</code>. Each region reads in one line: how much it sold,
+       where the budget is and the gap in money and %. Turn on <em>Show target value</em> if the reader
+       needs the budget figure, and set <em>Green/red threshold</em> to a small negative number to
+       tolerate near misses.</p>
+    <p>With Pro, put <em>Year</em> in <strong>Small Multiples By</strong> to see one panel per year with a
+       shared scale, or switch to vertical bars when the category is a month.</p>
+  </div>
+
+  <h3>2. Operational KPIs with thresholds per row <span class="badge">Pro</span></h3>
+  <div class="card">
+    <p>Different KPIs — tickets closed, on-time delivery, first-call resolution — each have their own
+       idea of “poor” and “good”. Percentages of the data maximum cannot express that; band measures can:</p>
+<pre><code>Band 1 limit = SUM ( KPI[Target] ) * 0.8
+Band 2 limit = SUM ( KPI[Target] ) * 0.95
+Band maximum = SUM ( KPI[Target] ) * 1.2</code></pre>
+    <p>Each row now has bands at 80%, 95% and 120% of its own target. You can also read the limits from a
+       table of thresholds maintained by the business, e.g. <code>MAX ( Thresholds[Poor] )</code>.</p>
+  </div>
+
+  <h3>3. Target plus stretch goal <span class="badge">Pro</span></h3>
+  <div class="card">
+    <p><strong>Target</strong> = <code>[Budget]</code> · <strong>Second target</strong> =
+       <code>[Stretch]</code> (or <code>[Sales LY]</code>). The second target is a hollow marker, so the
+       two never get confused. The tooltip shows both values and the variance against each one, named
+       after your measures.</p>
+<pre><code>Stretch = [Budget] * 1.1
+Sales LY = CALCULATE ( [Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )</code></pre>
   </div>
 
   <!-- FAQ -->
-  <h2>Frequently asked questions</h2>
+  <h2 id="faq">Frequently asked questions</h2>
 
-  <h3>Data & Variance</h3>
+  <h3>Getting started</h3>
 
   <details>
-    <summary>Why is variance not showing?</summary>
-    <p>Make sure both the <em>Actual</em> and <em>Target</em> fields are populated. Variance is only calculated when both values are present. Also check that <strong>Show variance label</strong> is enabled in Format pane → Variance.</p>
+    <summary>What is the difference between Free and Pro?</summary>
+    <p>Free is the complete bullet chart: actual vs target, automatic variance, qualitative bands,
+       IBCS mode, style templates, reference lines, colours per category and by rule, tooltips,
+       drill-down, cross-filtering, bookmarks, keyboard navigation, high contrast, on-object formatting
+       and 12 languages. Pro adds five things: small multiples, the forecast marker, vertical
+       orientation, a second target and bands from measures.</p>
   </details>
 
   <details>
-    <summary>Can I change the green/red threshold?</summary>
-    <p>Yes. Format pane → Variance → <strong>Green/red threshold</strong>. Variances above this number are shown in green; below in red. Default is 0.</p>
+    <summary>Do I need to write a DAX measure for the variance?</summary>
+    <p>No. With Actual and Target in their wells, the visual calculates Actual − Target and the % of
+       the target. DAX is only needed if you want bands from measures or a second target that you
+       calculate yourself.</p>
+  </details>
+
+  <details>
+    <summary>The visual only shows the start screen</summary>
+    <p>It needs a measure in <em>Actual (Real)</em>. Add a category and a target too. The links on the
+       start screen (guide, product page, video) open only when you click them.</p>
+  </details>
+
+  <details>
+    <summary>How do I reopen the setup guide?</summary>
+    <p>Format → <strong>Style template</strong> → <strong>Setup guide</strong> = On. It only appears
+       while you edit, with data in the visual, and in tiles of at least 360 × 220 px. It never
+       appears in reading view.</p>
+  </details>
+
+  <details>
+    <summary>I picked a template and some of my colours changed</summary>
+    <p>That is by design: a template replaces the settings it defines, so that you can see it. Settings
+       the template does not define stay as they were. Pick <em>Clean</em> to go back to the usual look,
+       then adjust anything by hand.</p>
+  </details>
+
+  <details>
+    <summary>Does “IBCS style” make my report IBCS compliant?</summary>
+    <p>No. It is a monochrome style inspired by IBCS notation. Compliance with the IBCS standard
+       depends on the whole report — titles, scaling, notation, layout — not on a chart colour scheme.</p>
+  </details>
+
+  <h3>Data &amp; variance</h3>
+
+  <details>
+    <summary>Why is the variance not showing in a small tile?</summary>
+    <p>When the values column is too narrow, the visual decides for the whole column what fits, in
+       this order: the variance amount is dropped first (the % stays), then the variance, then the
+       target value. Nothing is lost: <strong>hover over the bar and the tooltip shows the actual, the
+       target and the variance in full</strong>. Widen the visual, reduce <em>Category column width %</em>,
+       or set <em>Values panel width %</em>.</p>
+  </details>
+
+  <details>
+    <summary>Why is the variance not showing at all?</summary>
+    <p>Both Actual and Target must have a value for that row, and Format → Variance →
+       <em>Show variance label</em> must be on.</p>
+  </details>
+
+  <details>
+    <summary>How does the green/red threshold work?</summary>
+    <p>It is in the units of your measure. A variance equal to or above the threshold is positive
+       (green ▲); below it, negative (red ▼). 0 means “at or above target”. −5 tolerates misses of up
+       to 5 units.</p>
+  </details>
+
+  <details>
+    <summary>How do I set bands from measures? <span class="badge">Pro</span></summary>
+    <p>Create one, two or three measures and drag them into <em>Band 1 limit</em>, <em>Band 2 limit</em>
+       and <em>Band maximum</em>. For example:</p>
+<pre><code>Band 1 limit = SUM ( T[Target] ) * 0.9
+Band 2 limit = SUM ( T[Target] )
+Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
+    <p>Each row draws its own bands. If you leave <em>Band maximum</em> empty, band 3 runs to the data
+       maximum. Rows where the measures are blank fall back to the percentages in Format → Qualitative
+       Bands. The limits are listed in the tooltip. Colours stay in Format → Colors.</p>
+  </details>
+
+  <details>
+    <summary>What are the bands measured against?</summary>
+    <p>Without band measures, the two thresholds are percentages of the largest value in the data
+       (actual, target, forecast, second target), not of each row's target. Use them for “how good is
+       this”, and the target marker for “did we hit it”. For per-row thresholds use band measures (Pro).</p>
+  </details>
+
+  <details>
+    <summary>How do I add a second target? <span class="badge">Pro</span></summary>
+    <p>Drag a measure into <em>Second target</em>. It is drawn as a hollow marker in its own colour
+       (Format → Colors → <em>Second target marker</em>), appears in the legend with your measure's name,
+       and the tooltip adds its value and the variance against it.</p>
   </details>
 
   <details>
     <summary>Does it support negative values?</summary>
-    <p>Yes. When your data contains negative values the chart automatically switches to a bipolar scale with a zero baseline drawn at the correct position.</p>
+    <p>Yes. With negative values the scale includes zero and a zero baseline is drawn; bars to the left
+       of it are negative.</p>
   </details>
 
   <details>
-    <summary>Can I format numbers as currency, thousands, etc.?</summary>
-    <p>Yes — the visual reads the format string directly from your Power BI measure. Apply the format in Power BI (e.g. <code>€#,0</code>) and the visual will use it automatically. Calculation Groups are also supported.</p>
+    <summary>Can I format numbers as currency, thousands, percentages?</summary>
+    <p>Yes. The visual uses each measure's format string from the model, including
+       <strong>dynamic format strings</strong> and calculation groups, so a measure can switch between
+       €, $ and % per row or per selection. The separators follow the report language. A measure without
+       a format is shortened to K / M.</p>
   </details>
 
-  <h3>Features & Format pane</h3>
+  <details>
+    <summary>How many categories can it show?</summary>
+    <p>Up to 2,000. With many rows the chart scrolls instead of squeezing them; filter or use Top N
+       for longer lists.</p>
+  </details>
+
+  <h3>Layout &amp; formatting</h3>
 
   <details>
-    <summary>How do I use Small Multiples (trellis)? <span class="badge">Pro</span></summary>
-    <p>Drag a dimension into the <em>Small Multiples By</em> field: with a Pro licence the chart splits into one panel per value straight away. In Format pane → Small Multiples, set the number of columns and choose whether to sync the scale across panels. Without a licence, Power BI shows its own notice with the purchase option.</p>
+    <summary>How does on-object formatting work? Why do I need two clicks?</summary>
+    <p>In Power BI Desktop with on-object formatting on, the first click selects the visual and the
+       second click selects the element under the pointer — bar, target, second target, forecast,
+       bands, labels, variance, legend, axis, reference lines or panel titles. Its menu has the main
+       options and a link to its card in the format pane. While formatting, clicks do not filter and
+       tooltips are hidden.</p>
+  </details>
+
+  <details>
+    <summary>How do I use small multiples? <span class="badge">Pro</span></summary>
+    <p>Drag a field into <em>Small Multiples By</em>: the chart splits into one panel per value. In
+       Format → Small Multiples set the columns (fewer are used if the visual is too narrow), whether
+       the scale is shared, and the panel colours. In 1.5 the rows shrink down to 16 px so the panels fit
+       inside the visual, and the legend stays visible.</p>
+  </details>
+
+  <details>
+    <summary>How do I get vertical bars? <span class="badge">Pro</span></summary>
+    <p>Format → General → <em>Orientation</em> = Vertical, or <em>Try</em> in step 2 of the guide.
+       Vertical reads well for months or long category names. The width settings in Layout are not used in
+       vertical orientation.</p>
+  </details>
+
+  <details>
+    <summary>The values on the right are cut or missing</summary>
+    <p>The bar always keeps at least 40% of the width, so the values column gives way first. Widen the
+       visual, reduce <em>Category column width %</em> or set <em>Values panel width %</em>. Long
+       category names end in “…”: widen <em>Category column width %</em> to show more of them.</p>
   </details>
 
   <details>
     <summary>Can I colour the bars by a rule instead of one by one?</summary>
-    <p>Yes. Format pane &rarr; Colors &rarr; <em>Actual bar</em> has a conditional formatting
-       (<em>fx</em>) button. Use it to drive the bar colour from a measure &mdash; for example red
-       when the value is below target and green when it is above &mdash; instead of picking a
-       colour per category. The rule applies to every bar at once; a colour you then set by hand
-       on a single category overrides the rule for that category, so you can define the general
-       rule and still force the exceptions. Available in the free tier.</p>
-  </details>
-
-  <details>
-    <summary>The panel titles are hard to read on my colours <span class="badge">Pro</span></summary>
-    <p>Format pane &rarr; Small Multiples &rarr; <em>Panel title color</em>. The title sits on the
-       panel border colour, so if you pick a dark border you can now set a light title to match.
-       In high contrast mode the title follows the theme foreground automatically.</p>
+    <p>Yes. Format → Colors → <em>Actual bar</em> has the <em>fx</em> button: drive the colour from a
+       measure, e.g. red below target and green above. A colour set by hand on one category overrides
+       the rule for that category. Free.</p>
   </details>
 
   <details>
     <summary>How do I add reference lines?</summary>
-    <p>Format pane → Reference Lines → enable Line 1 or Line 2. Set the value, label and color. Reference lines appear across all panels in Small Multiples mode.</p>
+    <p>Format → Reference Lines → turn on Line 1 or Line 2 and set the value, label and colour. They
+       appear in every panel in small multiples.</p>
+  </details>
+
+  <h3>Interaction</h3>
+
+  <details>
+    <summary>How does selection work?</summary>
+    <p>Click a bar to filter the other visuals on the page; the other bars are dimmed. Ctrl+click adds or
+       removes bars. Click the same bar again, or an empty area, to clear. Right-click opens Power BI's
+       context menu.</p>
   </details>
 
   <details>
-    <summary>Can I color individual bars differently?</summary>
-    <p>Yes. Format pane → Colors lists every category with its own colour picker, so each bar can have a different colour.</p>
+    <summary>Do bookmarks keep the selection?</summary>
+    <p>Yes. A bookmark stores the selection and the filters; when you apply it, the selected bars are
+       highlighted and the rest dimmed, as if you had clicked them.</p>
   </details>
 
   <details>
-    <summary>How do I enable drilldown?</summary>
-    <p>Add a hierarchy or multiple fields to the <em>Category</em> well. Use Power BI's drill navigation buttons (top-left of the visual) or double-click a bar to drill down.</p>
+    <summary>Does it respect interactions being turned off?</summary>
+    <p>Yes (fixed in 1.5). The visual reads whether Power BI allows interactions with it; when they are
+       not allowed, clicks and keys do not select or filter.</p>
   </details>
 
   <details>
-    <summary>Does it support High Contrast mode?</summary>
-    <p>Yes. The visual detects Power BI's High Contrast setting automatically and adjusts all colors (bars, axis, legend, bands) to use the system palette.</p>
+    <summary>How do I drill down?</summary>
+    <p>Put a hierarchy or several fields in <em>Category</em> and use Power BI's drill buttons on the
+       visual header.</p>
+  </details>
+
+  <h3>Accessibility</h3>
+
+  <details>
+    <summary>Can I use the keyboard?</summary>
+    <p>Yes. Select the visual, then <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move between
+       bars with a visible focus ring, <kbd>Enter</kbd> selects, <kbd>Escape</kbd> clears.</p>
   </details>
 
   <details>
-    <summary>Can I use keyboard navigation?</summary>
-    <p>Yes — <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> cycle through bars, <kbd>Enter</kbd> selects, <kbd>Escape</kbd> clears selection. The focused bar is highlighted with a visible focus ring.</p>
-  </details>
-
-  <h3>Licensing</h3>
-
-  <details>
-    <summary>How do I unlock Pro features?</summary>
-    <p>Purchase a Pro license through Microsoft AppSource. After purchase, Pro features (Small Multiples, Forecast marker) activate automatically for licensed users in Power BI Service.</p>
+    <summary>What does a screen reader read?</summary>
+    <p>Each row in full: category, actual, target, variance (amount and %) and second target, with your
+       formats and measure names.</p>
   </details>
 
   <details>
-    <summary>Some users see "Unlicensed Features"</summary>
-    <p>Each user who views reports containing Pro features needs their own Pro license. Go to <strong>Microsoft 365 admin center → Billing → Licenses</strong> to assign licenses to your team.</p>
+    <summary>Does it support high contrast mode?</summary>
+    <p>Yes. In a Windows high contrast theme the bars, markers, bands, axis, legend, guide and start
+       screen take their colours from the theme.</p>
+  </details>
+
+  <h3>Languages, licensing &amp; privacy</h3>
+
+  <details>
+    <summary>Which languages does it speak?</summary>
+    <p>English, Spanish, Portuguese (Brazil and Portugal), French, German, Italian, Dutch, Polish,
+       Japanese, Chinese (Simplified) and Korean. It follows the Power BI language; other languages fall
+       back to English. Field names, titles and your measure names are shown as you wrote them.</p>
   </details>
 
   <details>
-    <summary>Does this work in Power BI Embedded or Report Server?</summary>
-    <p>Free features work in all environments. Pro license validation via <code>IVisualLicenseManager</code> requires Power BI Service. In Embedded or Report Server, the visual renders free-tier features only.</p>
+    <summary>How do I unlock Pro?</summary>
+    <p>Buy the Pro plan on Microsoft AppSource and assign the licences to your users in the Microsoft 365
+       admin center (Billing → Your products). Pro features switch on by themselves for licensed users;
+       there is no key to enter. Each user who opens a report with Pro features needs a licence.</p>
+  </details>
+
+  <details>
+    <summary>I see a “Pro preview” watermark</summary>
+    <p>You are editing and using a Pro feature without a licence. The watermark lets you try it on your
+       own data. In reading view the free chart is shown without the Pro feature and without the
+       watermark. Remove the field or setting, or buy Pro.</p>
+  </details>
+
+  <details>
+    <summary>Does it work in Embedded, Publish to Web or Report Server?</summary>
+    <p>The free features work everywhere. Where Power BI cannot check licences (Publish to Web,
+       embedding, export) the free chart is drawn, without the Pro features and without a watermark.</p>
+  </details>
+
+  <details>
+    <summary>Does the visual send my data anywhere?</summary>
+    <p>No. It makes no network calls, has no telemetry, sets no cookies and stores nothing outside the
+       report. Your data never leaves Power BI. The links on the start screen open only when you click
+       them, through Power BI. See the <a href="privacy.html">privacy policy</a>.</p>
   </details>
 
   <!-- CONTACT -->
-  <h2>Contact & issues</h2>
+  <h2 id="contact">Contact &amp; issues</h2>
   <div class="card">
-    <p>For bugs, feature requests, or licensing questions:</p>
-    <p>📧 <a href="mailto:support@tcviz.com">support@tcviz.com</a></p>
-    <p>🐛 <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">GitHub Issues</a> — preferred for bug reports (include Power BI version + screenshot)</p>
-    <p>📄 <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a> — full version history</p>
+    <p>Questions, bugs, feature requests or licensing: write to
+       <a href="mailto:support@tcviz.com">support@tcviz.com</a>. A person answers — the developer of the
+       visual, not a bot.</p>
+    <p>Bug reports are also welcome on
+       <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">GitHub Issues</a>.
+       Please include the visual version (1.5.0.0), Power BI Desktop or service, and a screenshot.</p>
+    <p>Full version history: <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a>.</p>
   </div>
 
   <footer>
-    Bullet Chart Pro by TCViz &nbsp;|&nbsp;
+    Bullet Chart Pro 1.5.0.0 by TCViz &nbsp;|&nbsp;
+    <a href="https://tcviz.com/product/bullet-chart-pro/">tcviz.com</a> &nbsp;|&nbsp;
     <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms of Use</a>
   </footer>

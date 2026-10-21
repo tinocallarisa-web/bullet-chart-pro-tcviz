@@ -6,6 +6,70 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 
 ---
 
+## [1.5.0.0] — 2026-10
+
+### Added
+- **Second target [Pro].** New *Second target [Pro]* field well: a hollow marker next to the
+  main target, for a stretch goal, last year or a forecast commitment. It appears in the legend
+  and in the tooltip with its own variance (*Variance vs* followed by the measure name, absolute and %).
+  Colour in Format → Colors → *Second target marker (Pro)*.
+- **Bands from measures [Pro].** New *Band 1 limit [Pro]*, *Band 2 limit [Pro]* and
+  *Band maximum [Pro]* wells: each row draws its own qualitative bands from thresholds you
+  calculate in DAX (e.g. `SUM(T[Target]) * 0.9`). The limits are listed in the tooltip. Without
+  these fields the bands are percentages of the data maximum, exactly as in Free.
+- **Setup guide inside the visual** (edit mode only; not shown in tiles smaller than 360×220 px).
+  Step 1 checks the fields, step 2 lets you try Pro on your own data (a *Try* button for vertical
+  bars; for the rest it names the well to use and ticks it once filled), step 3 picks a style.
+  Close it with ✕ or *Finish*; reopen it in Format → Style template → *Setup guide*.
+- **Style templates.** Format → Style template → *Template*: Clean (the usual look), Minimal,
+  Contrast, Soft, Compact and IBCS style. Picking one replaces the settings that template
+  defines; everything else stays as you set it. *IBCS style* is a monochrome style inspired by
+  IBCS notation, not a claim of compliance with the standard.
+- **New start screen** in three sizes, with links to the guide, the product page on tcviz.com
+  and the video. Links open only when clicked, through Power BI (`host.launchUrl`).
+- **On-object formatting.** Bar, target, second target, forecast, bands, labels, variance,
+  legend, axis, reference lines and panel titles can be selected on the canvas and formatted
+  from the on-object menu, with shortcuts to their card. In Desktop the first click selects the
+  visual and the second selects the element.
+- **Legend font, size and colour** of its own (Format → Legend).
+- **12 languages:** English, Spanish, Portuguese (Brazil), Portuguese (Portugal), French,
+  German, Italian, Dutch, Polish, Japanese, Chinese (Simplified) and Korean — format pane and
+  the visual's own texts. Previously English only.
+
+### Changed
+- **Number formats** come from the model, including **dynamic format strings**, and are
+  rendered in the report language (decimal and thousands separators). The variance % follows
+  the report language too.
+- **Selection:** clicking a bar dims the others, also when the selection is restored by a
+  bookmark. Ctrl+click adds or removes bars.
+- **Format pane migrated to `getFormattingModel`**, with the same objects and properties: saved
+  reports keep their settings.
+- Free/Pro: Pro is small multiples, forecast, vertical orientation, second target and bands
+  from measures. Everything else is free. The watermarked Pro preview (edit mode only) works as
+  in 1.4.
+
+### Fixed
+- **Vertical:** the font size was capped at 10/11 px and the value axis was drawn outside the
+  canvas.
+- ***Values panel width %* was ignored.** It is now applied when you set it; otherwise the
+  width is still calculated from the text. In vertical orientation the two width settings are
+  not offered.
+- **Small multiples overflowed the visual.** Rows shrink down to 16 px so the panels fit, and
+  the legend stays visible.
+- **Small tiles:** the values column decides once for the whole column what fits (value,
+  variance %, full variance, target), long category names end in “…”, axis labels no longer
+  overlap and the legend fits. Whatever is dropped is still in the tooltip.
+- **Interactions turned off by Power BI are respected**: clicks and keys no longer select or
+  filter when the host disallows them (`allowInteractions` is now read from `hostCapabilities`;
+  the old `host.allowInteractions` was almost always undefined).
+- **Rendering events 1:1:** exactly one `renderingStarted` and one `renderingFinished` /
+  `renderingFailed` per `update()`; internal repaints raise none.
+- The 1.4 package did not include the stylesheet.
+- **Screen readers** read each row in full: category, actual, target, variance and second
+  target, with their formats.
+
+---
+
 ## [1.4.0.0] — 2026-09-20
 
 ### Added
@@ -14,9 +78,7 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
   picking a colour per category. The rule is defined once for the whole series (one *fx*, not
   one per category) and applies to every bar; a colour set by hand on a category overrides the
   rule for that category, so the general rule and the exceptions coexist. The per-category
-  pickers keep working exactly as before. Free tier. None of the four bullet
-  visuals ahead of this one in AppSource — Microsoft's, OKVIZ's, xViz's or Inforiver's —
-  declares a `rule` in its capabilities.
+  pickers keep working exactly as before. Free tier.
 - **Panel title colour** for Small Multiples. The title is drawn on top of the panel border
   colour, which the user can already change, while the title text was hard-coded to `#333`:
   a dark border made the title unreadable with no way to fix it. In high contrast the title

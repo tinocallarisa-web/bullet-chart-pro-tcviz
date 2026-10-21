@@ -8,12 +8,63 @@
 | | |
 |---|---|
 | Visual | Bullet Chart Pro |
-| Version | 1.4.0.0 |
+| Version | 1.5.0.0 |
 | GUID | `bulletChartProTCViz20260001` |
 | Plan ID | `bullet-chart-pro-tcviz` |
 | Repository | https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz — branch `certification` |
 | Pages | https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/ |
 | Video | https://www.youtube.com/watch?v=bDW7qly8Mdo |
+
+## What changed in 1.5.0.0
+
+**Format pane on `getFormattingModel`.** The known gap of 1.4 is closed: the pane is built with
+`powerbi-visuals-utils-formattingmodel` (`src/formatting.ts`). Object and property names are
+unchanged from `capabilities.json`, so saved reports keep their settings. The *fx* entry on
+*Actual bar* keeps a wildcard selector, `altConstantSelector: null` and `ConstantOrRule`.
+
+**New Pro features.** Data roles `target2` (*Second target [Pro]*: hollow marker, legend,
+tooltip with its own variance) and `band1Limit`, `band2Limit`, `bandMax` (*Band 1 limit /
+Band 2 limit / Band maximum [Pro]*: per-row bands from DAX measures). Without a licence these
+columns are not read (`readExtraCols`), the bands fall back to percentages as in Free, and the
+Pro preview / purchase notice apply as for the other Pro features. New colour
+`colors.target2Color`.
+
+**Setup guide and style templates.** New object `style` (`template`, `guide`). The guide is an
+HTML overlay shown only while editing, with data, when interactions are allowed and in tiles of
+at least 360 x 220 px. Six templates; *IBCS style* is a style inspired by IBCS notation, not a
+compliance claim.
+
+**`persistProperties`** is called only (a) from a click in the guide (Try vertical, a template,
+Finish / X) and (b) once when the template value changes while editing, to remove the saved
+settings that template defines. It is never called from the selection callback or on report
+open, so bookmarks are not affected.
+
+**On-object formatting** (`supportsOnObjectFormatting`, `enablePointerEventsFormatMode`) with
+`powerbi-visuals-utils-onobjectutils`: bar, target, second target, forecast, bands, labels,
+variance, legend, axis, reference lines and panel titles. In format mode clicks do not filter and
+tooltips are not shown.
+
+**Localization.** 12 `stringResources` (en-US, es-ES, pt-BR, pt-PT, fr-FR, de-DE, it-IT,
+nl-NL, pl-PL, ja-JP, zh-CN, ko-KR). Runtime texts also travel in the bundle (`src/strings.ts`),
+because Desktop only translates keys declared in capabilities.
+
+**Number formats** through `powerbi-visuals-utils-formattingutils` with the report locale;
+dynamic format strings are read per row via `general.formatString`.
+
+**Selection and interactions.** The visual keeps its own selection, dims the other bars and
+repaints from the `registerOnSelectCallback` ids (bookmarks). `allowInteractions` is read from
+`host.hostCapabilities`.
+
+**Rendering events 1:1.** One `renderingStarted` and one `renderingFinished` /
+`renderingFailed` per `update()`. Repaints outside `update()` (licence resolved, selection,
+guide steps) go through `redraw()` and raise no events.
+
+**Start screen** in three sizes. Its links (support page, tcviz.com, YouTube) open only on a
+click, through `host.launchUrl`.
+
+**Fixes:** vertical font size and value axis, *Values panel width %* ignored, small multiples
+overflowing, small tiles, the 1.4 package missing its stylesheet, full per-row screen reader
+text. Tools 7.2.1, API 5.11.1.
 
 ## What changed in 1.4.0.0
 
@@ -83,11 +134,13 @@ The visual draws no licensing UI of its own.
 
 ## Free vs Pro
 
-**Free** — actual vs target with automatic variance, qualitative bands, IBCS mode, horizontal
-orientation, two reference lines, a colour per category, conditional formatting on the bar,
-tooltips, drilldown, cross-filtering, bookmarks, keyboard navigation, high contrast.
+**Free** — actual vs target with automatic variance, qualitative bands (percentages), IBCS
+mode and style templates, horizontal orientation, two reference lines, a colour per category,
+conditional formatting on the bar, legend, tooltips, drilldown, cross-filtering, bookmarks,
+keyboard navigation, high contrast, on-object formatting, setup guide, 12 languages.
 
-**Pro** — Small Multiples, the Forecast marker, vertical orientation.
+**Pro** — Small Multiples, the Forecast marker, vertical orientation, a second target and
+bands from measures.
 
 ## Privacy and network
 
@@ -106,7 +159,5 @@ path of `update()`, including early returns.
 
 ## Known gap
 
-The format pane still uses `enumerateObjectInstances`. `pbiviz` flags
-`getFormattingModel` as *required soon* (severity: deprecation). The migration touches all 9
-objects and 40 properties at once, so it is planned as its own release rather than bundled
-with a licensing change.
+None open. The `enumerateObjectInstances` gap listed for 1.4.0.0 was closed in 1.5.0.0
+(`getFormattingModel`).
