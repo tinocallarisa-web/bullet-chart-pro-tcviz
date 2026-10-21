@@ -1,7 +1,6 @@
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
-import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
 import VisualConstructorOptions        = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions             = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual                         = powerbi.extensibility.visual.IVisual;
@@ -11,11 +10,11 @@ import ISelectionManager               = powerbi.extensibility.ISelectionManager
 import ISelectionId                    = powerbi.visuals.ISelectionId;
 import ITooltipService                 = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem           = powerbi.extensibility.VisualTooltipDataItem;
-import VisualObjectInstance            = powerbi.VisualObjectInstance;
-import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
-import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 
 import { BulletSettings, getDefaultSettings } from "./settings";
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { buildFormattingCards, CategoryColor, COLOR_FIXED_SLICES } from "./formatting";
 import "./../style/visual.less";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -87,6 +86,7 @@ export class BulletChartPro implements IVisual {
     private selectionManager: ISelectionManager;
     private tooltipService:   ITooltipService;
     private settings:         BulletSettings;
+    private formattingService: FormattingSettingsService;
     private isPro:            boolean = false; // ISPRO_MARKER — build-test.js lo parchea; nunca a mano
     private licenseResolved      = false;  // no se avisa de compra hasta conocer la licencia
     private licenseEnvSupported  = true;   // false en Publish to Web, embebido, exportación
@@ -111,6 +111,7 @@ export class BulletChartPro implements IVisual {
         this.selectionManager = options.host.createSelectionManager();
         this.tooltipService   = options.host.tooltipService;
         this.localization     = options.host.createLocalizationManager();
+        this.formattingService = new FormattingSettingsService(this.localization);
         this.settings         = getDefaultSettings();
         this.container        = options.element;
         this.container.classList.add("bullet-chart-pro");
@@ -479,9 +480,9 @@ export class BulletChartPro implements IVisual {
             tooltipFields,
             colorActual,
             colorTarget,
-            formatActual:   ac.source.format   ?? undefined,
-            formatTarget:   tc?.source.format  ?? undefined,
-            formatForecast: fc?.source.format  ?? undefined,
+            formatActual:   this.fmtOf(ac, i),
+            formatTarget:   this.fmtOf(tc, i),
+            formatForecast: this.fmtOf(fc, i),
         };
     }
 
@@ -773,7 +774,7 @@ export class BulletChartPro implements IVisual {
                 const absV = this.formatValue(Math.abs(d.variance), d.formatActual);
                 let   txt  = (pos ? "▲ +" : "▼ ") + absV;
                 if (s.showVariancePct && d.variancePct != null)
-                    txt += ` (${d.variancePct >= 0 ? "+" : ""}${d.variancePct.toFixed(1)}%)`;
+                    txt += ` (${this.pctText(d.variancePct)})`;
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(rx));
                 t.setAttribute("y",           String(ry));
@@ -996,7 +997,7 @@ export class BulletChartPro implements IVisual {
                 const pos = d.variance >= s.varianceThreshold;
                 let txt = (pos ? "▲+" : "▼") + this.formatValue(Math.abs(d.variance), d.formatActual);
                 if (s.showVariancePct && d.variancePct != null)
-                    txt += ` ${d.variancePct.toFixed(1)}%`;
+                    txt += ` ${this.pctText(d.variancePct, false)}`;
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(colW / 2));
                 t.setAttribute("y",           String(baseline + labH + fs * 0.9));
@@ -1152,7 +1153,7 @@ export class BulletChartPro implements IVisual {
                 const absV = this.formatValue(Math.abs(d.variance), d.formatActual);
                 let txt    = (d.variance >= 0 ? "▲ +" : "▼ ") + absV;
                 if (s.showVariancePct && d.variancePct != null)
-                    txt   += ` (${d.variancePct >= 0 ? "+" : ""}${d.variancePct.toFixed(1)}%)`;
+                    txt   += ` (${this.pctText(d.variancePct)})`;
                 w += Math.ceil(txt.length * fs * 0.62 + 6);
             }
             maxW = Math.max(maxW, w);
@@ -1587,7 +1588,7 @@ export class BulletChartPro implements IVisual {
             const sign = d.variance >= 0 ? "+" : "";
             let varStr = `${sign}${this.formatValue(Math.abs(d.variance), d.formatActual)}`;
             if (d.variancePct != null)
-                varStr += ` (${d.variancePct >= 0 ? "+" : ""}${d.variancePct.toFixed(1)}%)`;
+                varStr += ` (${this.pctText(d.variancePct)})`;
             items.push({ displayName: "Variance", value: varStr });
         }
         if (d.forecast != null)
@@ -1695,57 +1696,46 @@ export class BulletChartPro implements IVisual {
         return (h?.hostCapabilities?.allowInteractions ?? h?.allowInteractions) !== false;
     }
 
-    // Applies a Power BI format string (from the measure's metadata) to a value.
-    // Handles: percentages, currency symbols, K/M/B/T scale suffixes, decimal precision,
-    // and thousands grouping. Falls back to fmt() for unknown or missing formats.
-    // This enables dynamic format strings from calculation groups.
+    /**
+     * Formato de una medida en una fila: la cadena DINÁMICA si el DAX la decide (con general.formatString
+     * declarado en capabilities, Power BI la manda en los objetos de cada fila), si no la de la columna.
+     */
+    private fmtOf(col: powerbi.DataViewValueColumn | undefined, i: number): string | undefined {
+        if (!col) return undefined;
+        const dyn = (col as any).objects?.[i]?.general?.formatString;
+        if (typeof dyn === "string" && dyn) return dyn;
+        try { return valueFormatter.getFormatStringByColumn(col.source as any) || col.source?.format || undefined; }
+        catch { return col.source?.format ?? undefined; }
+    }
+
+    private fmtCache = new Map<string, valueFormatter.IValueFormatter>();
+
+    /** Un valor con el formato del modelo, en el idioma del informe (formattingutils, como las visuales nativas). */
     private formatValue(value: number | null, formatStr?: string): string {
         if (value == null) return "–";
         if (!formatStr)    return this.fmt(value);
-        const locale = (this.host as any).locale as string || "en-US";
-        try {
-            // Percentage: contains % outside of quoted strings
-            if (/(?<!")%/.test(formatStr)) {
-                const dec = (formatStr.match(/\.(0+)%/) || [])[1]?.length ?? 0;
-                return new Intl.NumberFormat(locale, {
-                    style: "percent",
-                    minimumFractionDigits: dec,
-                    maximumFractionDigits: dec,
-                }).format(value);
-            }
-            // Scale suffix: "K", "M", "B", "T" inside quotes
-            const scaleM = formatStr.match(/"([KkMmBbTt])"/);
-            if (scaleM) {
-                const scales: Record<string, number> = { k:1e3, m:1e6, b:1e9, t:1e12 };
-                const scale = scales[scaleM[1].toLowerCase()] ?? 1;
-                const dec   = (formatStr.match(/\.(0+)/) || [])[1]?.length ?? 1;
-                const curr  = (formatStr.match(/[$€£¥₹₩₽]/) || [])[0] ?? "";
-                return curr + new Intl.NumberFormat(locale, {
-                    minimumFractionDigits: dec,
-                    maximumFractionDigits: dec,
-                    useGrouping: formatStr.includes(","),
-                }).format(value / scale) + scaleM[1].toUpperCase();
-            }
-            // Currency symbol
-            const curr = (formatStr.match(/[$€£¥₹₩₽]/) || [])[0] ?? "";
-            // Decimal precision
-            const dec  = (formatStr.match(/\.(0+)/) || [])[1]?.length ?? 0;
-            return curr + new Intl.NumberFormat(locale, {
-                minimumFractionDigits: dec,
-                maximumFractionDigits: dec,
-                useGrouping: formatStr.includes(","),
-            }).format(value);
-        } catch {
-            return this.fmt(value);
+        let f = this.fmtCache.get(formatStr);
+        if (!f) {
+            try { f = valueFormatter.create({ format: formatStr, cultureSelector: this.host.locale }); }
+            catch { return this.fmt(value); }
+            this.fmtCache.set(formatStr, f);
         }
+        return f.format(value);
+    }
+
+    /** Un porcentaje calculado por el visual (desviación), con la coma o el punto del idioma del informe. */
+    private pctText(v: number, signed = true): string {
+        const s = this.formatValue(v / 100, "0.0%");
+        return signed && v >= 0 ? "+" + s : s;
     }
 
     private fmt(v: number | null): string {
         if (v == null) return "–";
-        const a = Math.abs(v); const sg = v < 0 ? "-" : "";
-        if (a >= 1_000_000) return `${sg}${(a/1_000_000).toFixed(1)}M`;
-        if (a >= 1_000)     return `${sg}${(a/1_000).toFixed(1)}K`;
-        return v.toLocaleString(undefined, { maximumFractionDigits: 1 });
+        // Medida sin formato en el modelo: K/M con el separador decimal del idioma del informe.
+        const a = Math.abs(v);
+        if (a >= 1_000_000) return this.formatValue(v / 1_000_000, "#,0.0") + "M";
+        if (a >= 1_000)     return this.formatValue(v / 1_000,     "#,0.0") + "K";
+        return this.formatValue(v, "#,0.#");
     }
 
     private mkEl(tag: string): SVGElement {
@@ -1760,80 +1750,23 @@ export class BulletChartPro implements IVisual {
 
     // ── Format panel ─────────────────────────────────────────────────
 
-    public enumerateObjectInstances(opts: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
+    public getFormattingModel(): powerbi.visuals.FormattingModel {
         const s = this.settings ?? getDefaultSettings();
-        const n = opts.objectName;
-        const inst: VisualObjectInstance[] = [];
-        switch (n) {
-            case "general":
-                inst.push({ objectName:n, selector:null, properties:{ orientation:s.orientation, ibcsMode:s.ibcsMode }}); break;
-            case "colors": {
-                // Global block — defines the default color AND tells Power BI which picker
-                // type to use (full picker with "More colors"). Must include actualColor here
-                // even though per-category overrides live below, otherwise PBI falls back to
-                // a simplified picker without hex input / "More colors".
-                // actualColor va aparte, con selector comodin: es lo que hace que Power BI
-                // materialice la regla en cada barra. Emitido una sola vez, da un unico fx.
-                inst.push({
-                    objectName: n,
-                    selector: dataViewWildcard.createDataViewWildcardSelector(
-                                dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals),
-                    altConstantValueSelector: null,
-                    properties: { actualColor: {solid:{color:s.actualColor}} },
-                    propertyInstanceKind: { actualColor: 3 },  // ConstantOrRule
-                } as any);
-                inst.push({ objectName:n, selector:null, properties:{
-                    targetColor:   {solid:{color:s.targetColor}},
-                    forecastColor: {solid:{color:s.forecastColor}},
-                    positiveColor: {solid:{color:s.positiveColor}},
-                    negativeColor: {solid:{color:s.negativeColor}},
-                    band1Color:    {solid:{color:s.band1Color}},
-                    band2Color:    {solid:{color:s.band2Color}},
-                    band3Color:    {solid:{color:s.band3Color}},
-                }});
-                // Per-category actualColor only (one row per category, no duplicates).
-                // targetColor stays global — putting it here too causes Power BI to render
-                // two separate rows per category making it look duplicated.
-                const seen = new Set<string>();
-                this.lastDataPoints.forEach(d => {
-                    if (seen.has(d.category)) return;
-                    seen.add(d.category);
-                    // Color fijo por categoria, sin fx: la regla vive en la fila global.
-                    inst.push({
-                        objectName:  n,
-                        displayName: d.category,
-                        selector:    d.selectionId.getSelector(),
-                        properties:  { actualColor: {solid:{color: d.colorActual ?? s.actualColor}} },
-                    });
-                });
-                break;
-            }
-            case "bands":
-                inst.push({ objectName:n, selector:null, properties:{ showBands:s.showBands, band1Pct:s.band1Pct, band2Pct:s.band2Pct }}); break;
-            case "variance":
-                inst.push({ objectName:n, selector:null, properties:{ showVariance:s.showVariance, showVariancePct:s.showVariancePct, varianceThreshold:s.varianceThreshold }}); break;
-            case "labels":
-                inst.push({ objectName:n, selector:null, properties:{ showCategoryLabel:s.showCategoryLabel, showActualValue:s.showActualValue, showTargetValue:s.showTargetValue, fontSize:s.fontSize, fontFamily:s.fontFamily }}); break;
-            case "layout":
-                inst.push({ objectName:n, selector:null, properties:{ labelWidthPct:s.labelWidthPct, rightPanelWidthPct:s.rightPanelWidthPct, showAxis:s.showAxis }}); break;
-            case "legend":
-                inst.push({ objectName:n, selector:null, properties:{ showLegend:s.showLegend, legendPosition:s.legendPosition }}); break;
-            case "referenceLines":
-                inst.push({ objectName:n, selector:null, properties:{
-                    refLine1Show:s.refLine1Show, refLine1Value:s.refLine1Value, refLine1Label:s.refLine1Label, refLine1Color:{solid:{color:s.refLine1Color}},
-                    refLine2Show:s.refLine2Show, refLine2Value:s.refLine2Value, refLine2Label:s.refLine2Label, refLine2Color:{solid:{color:s.refLine2Color}},
-                }}); break;
-            case "trellis":
-                // Visible también en Free: si no, nadie descubre que Pro existe.
-                // El display name ya lleva "[Pro]" y activarlo sin licencia dispara el aviso.
-                inst.push({ objectName:n, selector:null, properties:{
-                    enabled:s.trellisEnabled, columns:s.trellisColumns, syncScale:s.trellisSyncScale,
-                    trellisShowTitle:s.trellisShowTitle,
-                    trellisPanelColor:{solid:{color:s.trellisPanelColor}},
-                    trellisBorderColor:{solid:{color:s.trellisBorderColor}},
-                    trellisTitleColor: {solid:{color:s.trellisTitleColor}},
-                }}); break;
-        }
-        return inst;
+        // Un color fijo por categoría (una fila por nombre, sin repetir en small multiples).
+        const cats: CategoryColor[] = [];
+        const seen = new Set<string>();
+        this.lastDataPoints.forEach(d => {
+            if (seen.has(d.category)) return;
+            seen.add(d.category);
+            cats.push({ name: d.category, selector: d.selectionId.getSelector(), color: d.colorActual ?? s.actualColor });
+        });
+        const fm = this.formattingService.buildFormattingModel(buildFormattingCards(s, cats));
+        // La librería forma el uid con objeto-propiedad: todas las filas por categoría saldrían con
+        // "colors-actualColor" repetido. Cada una necesita el suyo.
+        const colors: any = fm.cards.find((c: any) => c.uid?.startsWith("colors"));
+        colors?.groups?.forEach((g: any) => (g as any).slices?.forEach((sl: any, k: number) => {
+            if (k >= COLOR_FIXED_SLICES) sl.uid = `colors-actualColor-cat${k - COLOR_FIXED_SLICES}`;
+        }));
+        return fm;
     }
 }
