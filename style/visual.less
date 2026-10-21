@@ -23,10 +23,16 @@
     }
 }
 
-/* Modo formato (on-object): las piezas que normalmente no reciben el ratón sí se pueden elegir. */
+/* Modo formato (on-object): las piezas que normalmente no reciben el ratón sí se pueden elegir. "all" y no "auto":
+   el segundo objetivo es un rectángulo hueco y con "auto" solo respondía el borde de 1,5 px. */
 .bullet-chart-pro.fmt [data-o] {
-    pointer-events: auto;
+    pointer-events: all;
     cursor: pointer;
+}
+/* Marcadores de 3-5 px: en modo formato llevan un trazo transparente que ensancha la zona de clic sin cambiar el dibujo. */
+.bullet-chart-pro.fmt .bc-hit {
+    stroke: transparent;
+    stroke-width: 8px;
 }
 
 // Guía de configuración (1.5): panel compacto en la esquina, solo editando

@@ -170,6 +170,7 @@ export class BulletChartPro implements IVisual {
         this.container.classList.add("bullet-chart-pro");
 
         this.container.style.overflow = "auto";
+        this.container.addEventListener("scroll", () => this.stickLegend());
         this.container.style.position = "relative";
         this.container.tabIndex       = 0;
 
@@ -823,6 +824,7 @@ export class BulletChartPro implements IVisual {
     // ═══════════════════════════════════════════════════════════════
 
     private renderHorizontal(data: BulletDataPoint[], vpW: number, vpH: number, drillLabel: string = ""): void {
+        this.container.style.overflowX = "hidden";   // la barra vertical restaba unos px y forzaba una horizontal inútil
         const s       = this.settings;
         const legendH = s.showLegend ? this.legendH() : 0;
         const axisH   = s.showAxis   ? AXIS_H   : 0;
@@ -863,7 +865,7 @@ export class BulletChartPro implements IVisual {
         }
 
         // Legend and drill label always on top
-        if (s.showLegend) this.renderLegend(vpW, isTop ? 0 : Math.max(vpH, totalH) - legendH);
+        if (s.showLegend) this.renderLegend(vpW, isTop ? 0 : vpH - legendH);
         this.renderDrillLabel(drillLabel, vpW);
         // Scroll indicator when rows overflow the viewport height
         if (totalH > vpH) this.renderScrollHint(vpW, vpH, "vertical");
@@ -963,7 +965,7 @@ export class BulletChartPro implements IVisual {
             r.setAttribute("width",  String(TARGET_W));
             r.setAttribute("height", String(mH));
             r.setAttribute("fill",   d.colorTarget ?? s.targetColor);
-            r.setAttribute("data-o", "target");
+            r.setAttribute("data-o", "target"); r.classList.add("bc-hit");
             g.appendChild(r);
         }
 
@@ -991,7 +993,7 @@ export class BulletChartPro implements IVisual {
             tri.setAttribute("points",
                 `${fx},${fy} ${fx-FORECAST_SIZE},${fy-FORECAST_SIZE*1.5} ${fx+FORECAST_SIZE},${fy-FORECAST_SIZE*1.5}`);
             tri.setAttribute("fill",    s.forecastColor);
-            tri.setAttribute("data-o", "forecast");
+            tri.setAttribute("data-o", "forecast"); tri.classList.add("bc-hit");
             tri.setAttribute("opacity", "0.85");
             g.appendChild(tri);
         }
@@ -1080,6 +1082,7 @@ export class BulletChartPro implements IVisual {
     // ═══════════════════════════════════════════════════════════════
 
     private renderVertical(data: BulletDataPoint[], vpW: number, vpH: number, drillLabel: string = ""): void {
+        this.container.style.overflowX = "auto";
         const s       = this.settings;
         const legendH = s.showLegend ? this.legendH() : 0;
         const isTop   = s.legendPosition === "top";
@@ -1131,7 +1134,7 @@ export class BulletChartPro implements IVisual {
             this.renderRefLinesV(this.vPadL, svgW - VERT_PAD_LR, topY, botY, totalDomainV, domainMinV, data[0]?.formatActual);
         }
 
-        if (s.showLegend) this.renderLegend(svgW, isTop ? 0 : vpH - legendH);
+        if (s.showLegend) this.renderLegend(vpW, isTop ? 0 : vpH - legendH);
         this.renderDrillLabel(drillLabel, svgW);
         if (needsHScroll) this.renderScrollHint(vpW, vpH, "horizontal");
     }
@@ -1323,7 +1326,7 @@ export class BulletChartPro implements IVisual {
                 r.setAttribute("x",String(mX)); r.setAttribute("y",String(ty - TARGET_W / 2));
                 r.setAttribute("width",String(mW)); r.setAttribute("height",String(TARGET_W));
                 r.setAttribute("fill", d.colorTarget ?? s.targetColor); g.appendChild(r);
-                r.setAttribute("data-o", "target");
+                r.setAttribute("data-o", "target"); r.classList.add("bc-hit");
 
                 if (s.showTargetValue) {
                     const tv = this.mkEl("text");
@@ -1356,7 +1359,7 @@ export class BulletChartPro implements IVisual {
                 const dia = this.mkEl("polygon");
                 dia.setAttribute("points",`${fc},${fy-sz} ${fc+sz},${fy} ${fc},${fy+sz} ${fc-sz},${fy}`);
                 dia.setAttribute("fill",s.forecastColor); dia.setAttribute("opacity","0.85");
-                dia.setAttribute("data-o", "forecast");
+                dia.setAttribute("data-o", "forecast"); dia.classList.add("bc-hit");
                 g.appendChild(dia);
             }
 
@@ -1414,6 +1417,7 @@ export class BulletChartPro implements IVisual {
     // ═══════════════════════════════════════════════════════════════
 
     private renderTrellis(panels: TrellisPanel[], vpW: number, vpH: number): void {
+        this.container.style.overflowX = "hidden";
         const s      = this.settings;
         const titleH = s.trellisShowTitle ? TRELLIS_TITLE_H : 0;
 
@@ -1430,10 +1434,12 @@ export class BulletChartPro implements IVisual {
         const panelW     = Math.floor((vpW - TRELLIS_GAP * (cols  + 1)) / cols);
         const maxRows    = Math.max(1, ...panels.map(p => p.data.length));
         const fitH       = Math.floor((availH - TRELLIS_GAP * (nRows + 1)) / nRows);
-        const targetRowH  = Math.max(24, Math.floor((fitH - titleH) / maxRows));
+        // Las filas se encogen hasta 16 px para que los paneles quepan en el visual (antes, 28 px fijos: los paneles
+        // se salían, salían barras de desplazamiento y la leyenda quedaba fuera de la vista).
+        const targetRowH  = Math.max(16, Math.floor((fitH - titleH - 4) / maxRows));
         const allData     = panels.flatMap(p => p.data);
         const autoRightW  = this.estimateRightW(allData, s, s.fontSize);
-        const L           = this.hLayout(s, panelW, targetRowH, autoRightW);
+        const L           = this.hLayout(s, panelW, targetRowH, autoRightW, 16);
         this.rp = this.rightPanelMode(allData, s, L.rightW);
         // Cada panel mide al menos lo que ocupan sus filas (rowH nunca baja de 28). Antes el alto
         // salía solo del reparto del viewport y las filas se dibujaban encima del panel siguiente
@@ -1450,7 +1456,6 @@ export class BulletChartPro implements IVisual {
         const totalTrellisH = legendH + TRELLIS_GAP + nRows * (panelH + TRELLIS_GAP);
         this.clearSvg(vpW, Math.max(vpH, totalTrellisH));
         this.attachClearClick();
-        if (s.showLegend) this.renderLegend(vpW, isTop ? 0 : Math.max(vpH, totalTrellisH) - legendH);
 
         panels.forEach((panel, pi) => {
             const col  = pi % cols;
@@ -1520,6 +1525,7 @@ export class BulletChartPro implements IVisual {
                 }
             }
         });
+        if (s.showLegend) this.renderLegend(vpW, isTop ? 0 : vpH - legendH);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1549,9 +1555,9 @@ export class BulletChartPro implements IVisual {
         return maxW + 8; // small safety margin
     }
 
-    private hLayout(s: BulletSettings, vpW: number, targetRowH?: number, autoRightW?: number) {
+    private hLayout(s: BulletSettings, vpW: number, targetRowH?: number, autoRightW?: number, minRowH = 28) {
         const fs      = s.fontSize;
-        const rowH    = Math.max(28, Math.ceil(targetRowH ?? fs * 3.4));
+        const rowH    = Math.max(minRowH, Math.ceil(targetRowH ?? fs * 3.4));
         const barH    = Math.max(6,  Math.floor(rowH * 0.44));
         const barY    = Math.floor((rowH - barH) / 2);
         const aBarH   = Math.max(3, Math.floor(barH * 0.55));
@@ -1682,6 +1688,29 @@ export class BulletChartPro implements IVisual {
             x += it.label.length * LABEL_PX + ITEM_GAP;
         });
         this.tagFrom(n0, "legend", false);
+
+        // Se agrupa y se fija a la vista: con más filas de las que caben, el contenedor se desplaza y la leyenda tiene
+        // que seguir visible. yPos es relativo a la vista; stickLegend la mueve con el scroll.
+        const lg = this.mkEl("g");
+        lg.setAttribute("class", "bc-legend-g");
+        const svgH = Number(this.rootSvg.getAttribute("height")) || 0;
+        if (svgH > (this.lastOptions?.viewport?.height ?? svgH)) {
+            const bgr = this.mkEl("rect");
+            bgr.setAttribute("x", "0"); bgr.setAttribute("y", String(yPos));
+            bgr.setAttribute("width", String(vpW)); bgr.setAttribute("height", String(this.legendH()));
+            bgr.setAttribute("fill", this.hcColors().isHC ? this.hcColors().bg : "#FFFFFF");
+            lg.appendChild(bgr);
+        }
+        const nodes = Array.prototype.slice.call(this.rootSvg.childNodes, n0) as Node[];
+        nodes.forEach(nd => { if ((nd as Element).tagName !== "clipPath") lg.appendChild(nd); });
+        this.rootSvg.appendChild(lg);
+        this.stickLegend();
+    }
+
+    /** La leyenda sigue al desplazamiento del contenedor. */
+    private stickLegend(): void {
+        const lg = this.rootSvg.querySelector(".bc-legend-g");
+        if (lg) lg.setAttribute("transform", `translate(${this.container.scrollLeft},${this.container.scrollTop})`);
     }
 
     // Returns nicely-rounded tick values for a 0-to-maxValue scale.
