@@ -45,6 +45,8 @@ export interface BulletSettings {
     legendFontSize:     number;
     legendFontFamily:   string;
     legendColor:        string;
+    template:           string;
+    guide:              boolean;
 
     // ── Reference Lines ───────────────────────────────────────────────
     refLine1Show:       boolean;
@@ -105,6 +107,8 @@ export function getDefaultSettings(): BulletSettings {
         legendFontSize:     10,
         legendFontFamily:   "Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
         legendColor:        "#333333",
+        template:           "clean",
+        guide:              true,
 
         refLine1Show:       false,
         refLine1Value:      0,

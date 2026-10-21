@@ -15,6 +15,7 @@ import { BulletSettings, getDefaultSettings } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { STRINGS } from "./strings";
+import { LANDING_ICON } from "./landingIcon";
 import {
     HtmlSubSelectableClass, HtmlSubSelectionHelper, SubSelectableDisplayNameAttribute,
     SubSelectableObjectNameAttribute, SubSelectableTypeAttribute,
@@ -69,6 +70,28 @@ const LEGEND_H        = 22;
 const AXIS_H          = 16;   // height reserved below chart rows for H-axis labels
 const MAX_ROW_H       = 72;   // cap row height so tall visuals don't look odd
 const MIN_COL_W       = 32;   // minimum column width in vertical mode before H-scroll kicks in
+
+const URL_GUIDE   = "https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html";
+const URL_PRODUCT = "https://tcviz.com/product/bullet-chart-pro/?ref=visual-bullet";
+const URL_VIDEO   = "https://www.youtube.com/watch?v=bDW7qly8Mdo";
+
+/**
+ * Plantillas de estilo (1.5). Un punto de partida: solo rellenan lo que el usuario no ha tocado (lo guardado en
+ * metadata.objects gana siempre) y, al ELEGIR una, se borran los ajustes que ella define (aplicarPlantilla).
+ * "clean" no cambia nada: es el aspecto de siempre. "ibcs" usa el modo IBCS que ya existía; es un estilo inspirado en
+ * la notación IBCS, no afirma cumplir el estándar.
+ */
+const TEMPLATES: Record<string, Record<string, Record<string, any>>> = {
+    clean: {},
+    minimal: { colors: { targetColor: "#605E5C", band1Color: "#F3F2F1", band2Color: "#EDEBE9", band3Color: "#E1DFDD" },
+        layout: { showAxis: false }, legend: { color: "#8A8886" } },
+    contrast: { colors: { actualColor: "#1F3864", targetColor: "#000000", band1Color: "#D9D9D9", band2Color: "#BFBFBF",
+        band3Color: "#A6A6A6", positiveColor: "#107C10", negativeColor: "#C00000" } },
+    soft: { colors: { actualColor: "#5B9BD5", targetColor: "#404040", band1Color: "#EEF4FA", band2Color: "#DCE8F4",
+        band3Color: "#C9DCEF", positiveColor: "#70AD47", negativeColor: "#ED7D31" } },
+    compact: { labels: { fontSize: 9 }, legend: { fontSize: 8 } },
+    ibcs: { general: { ibcsMode: true }, colors: { positiveColor: "#8CB400", negativeColor: "#FF0000" } },
+};
 const PLAN_ID         = "bullet-chart-pro-tcviz";   // Plan ID: última parte del Service ID de Partner Center
 
 /**
@@ -116,6 +139,14 @@ export class BulletChartPro implements IVisual {
     /** Margen izquierdo del modo vertical: VERT_PAD_LR más el ancho de las etiquetas del eje (antes salían fuera). */
     private vPadL = VERT_PAD_LR;
     private formatMode = false;
+    private editing = false;
+    /** Última plantilla vista: al cambiarla editando se aplica de verdad (aplicarPlantilla). */
+    private tplVisto: string | null = null;
+    private guideStep = 1;
+    private guideEl: HTMLDivElement | null = null;
+    private landingEl: HTMLDivElement | null = null;
+    /** Qué pozos tienen campo: los lee la guía. */
+    private wells = { target: false, target2: false, bands: false, trellis: false, forecast: false };
     private subSelectionHelper: HtmlSubSelectionHelper;
     public visualOnObjectFormatting: powerbi.extensibility.visual.VisualOnObjectFormatting;
     /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
@@ -361,9 +392,11 @@ export class BulletChartPro implements IVisual {
         if (!dv?.metadata?.objects) return d;
         const obj = dv.metadata.objects;
 
-        const col  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return (v && typeof v === "object" && "solid" in v) ? (v as any).solid.color ?? def : def; };
-        const num  = (g: string, p: string, def: number)  => { const v = obj?.[g]?.[p]; return typeof v === "number"  ? v : def; };
-        const bool = (g: string, p: string, def: boolean) => { const v = obj?.[g]?.[p]; return typeof v === "boolean" ? v : def; };
+        const tpl  = TEMPLATES[String((obj as any)?.style?.template ?? "clean")] ?? {};
+        const tv   = (g: string, p: string): any => tpl[g]?.[p];
+        const col  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return (v && typeof v === "object" && "solid" in v) ? (v as any).solid.color ?? def : (tv(g, p) ?? def); };
+        const num  = (g: string, p: string, def: number)  => { const v = obj?.[g]?.[p]; return typeof v === "number"  ? v : (tv(g, p) ?? def); };
+        const bool = (g: string, p: string, def: boolean) => { const v = obj?.[g]?.[p]; return typeof v === "boolean" ? v : (tv(g, p) ?? def); };
         const str  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return typeof v === "string"  ? v : def; };
 
         const s: BulletSettings = {
@@ -398,6 +431,8 @@ export class BulletChartPro implements IVisual {
             legendFontSize:     Math.max(6, num("legend", "fontSize", d.legendFontSize)),
             legendFontFamily:   str( "legend", "fontFamily",         d.legendFontFamily),
             legendColor:        col( "legend", "color",              d.legendColor),
+            template:           str( "style",  "template",           d.template),
+            guide:              bool("style",  "guide",              d.guide),
             refLine1Show:       bool("referenceLines","refLine1Show",  d.refLine1Show),
             refLine1Value:      num( "referenceLines","refLine1Value", d.refLine1Value),
             refLine1Label:      str( "referenceLines","refLine1Label", d.refLine1Label),
@@ -573,6 +608,7 @@ export class BulletChartPro implements IVisual {
             this.subSelectionHelper.setFormatMode(this.formatMode);
             this.container.classList.toggle("fmt", this.formatMode);
             this.render(options);
+            this.renderGuide();
             this.markSubSelectables();
             if (this.formatMode) this.subSelectionHelper.updateOutlinesFromSubSelections((options as any).subSelections ?? [], true);
             this.events.renderingFinished(options);
@@ -590,6 +626,7 @@ export class BulletChartPro implements IVisual {
         if (!this.lastOptions) return;
         try {
             this.render(this.lastOptions);
+            this.renderGuide();
             this.markSubSelectables();
             if (this.focusedIndex >= 0) this.updateFocusRing();
         } catch (e) { console.error("[BulletChartPro]", e); }
@@ -610,8 +647,19 @@ export class BulletChartPro implements IVisual {
         // gratuito sin marca: ahí un cliente que paga se leería como Free.
         const viewMode = (options as any).viewMode;
         const editing  = typeof viewMode === "number" && viewMode !== 0;
+        this.editing   = editing;
         this.proPreview = !this.isPro && editing && this.licenseResolved
             && this.licenseEnvSupported && this.licenseInfoAvailable;
+        if (this.landingEl) { this.landingEl.remove(); this.landingEl = null; }
+
+        // Elegir una plantilla (panel o guía) la aplica de verdad: se borran los ajustes que define, porque un ajuste
+        // guardado manda sobre ella. Solo al CAMBIARLA y editando; nunca al abrir el informe.
+        const tplAhora = String(((dv.metadata?.objects as any)?.style?.template) ?? "clean");
+        if (editing && this.tplVisto !== null && this.tplVisto !== tplAhora) this.aplicarPlantilla(tplAhora);
+        this.tplVisto = tplAhora;
+        const has = (r: string) => !!(dv.categorical?.values?.some(v => v.source.roles?.[r]) || dv.categorical?.categories?.some(c => c.source.roles?.[r]));
+        this.wells = { target: has("target"), target2: has("target2"), bands: has("band1Limit") || has("band2Limit") || has("bandMax"),
+            trellis: has("trellisBy"), forecast: has("forecast") };
 
         this.settings = this.parseSettings(dv);
         const s = this.settings;
@@ -656,17 +704,113 @@ export class BulletChartPro implements IVisual {
 
     // ── Landing ───────────────────────────────────────────────────────
 
+    /** Pantalla de inicio de la serie TCViz, en tres tamaños. Los enlaces solo se abren con un clic (host.launchUrl). */
     private renderLanding(vp: powerbi.IViewport): void {
         this.clearSvg(vp.width, vp.height);
-        const t = this.mkEl("text");
-        t.setAttribute("x",           String(vp.width  / 2));
-        t.setAttribute("y",           String(vp.height / 2));
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("font-size",   "13");
-        t.setAttribute("fill",        "#888");
-        t.setAttribute("font-family", this.settings.fontFamily);
-        t.textContent = this.t("UI_Landing", "Add a measure to 'Actual' to get started.");
-        this.rootSvg.appendChild(t);
+        if (this.guideEl) this.guideEl.style.display = "none";
+        if (this.landingEl) this.landingEl.remove();
+        const w = vp.width || 0, h = vp.height || 0;
+        const size = (w >= 600 && h >= 340) ? "l" : (w >= 360 && h >= 220) ? "m" : "s";
+        const pal: any = this.host.colorPalette;
+        const hc = !!pal?.isHighContrast;
+        const fg = hc ? (pal.foreground?.value || "#FFFFFF") : "";
+        const bg = hc ? (pal.background?.value || "#000000") : "";
+        const el = document.createElement("div");
+        el.className = "bc-landing bc-landing-" + size;
+        if (hc) el.style.background = bg;
+        const mk = (tag: string, cls?: string, text?: string): HTMLElement => {
+            const n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (text !== undefined) n.textContent = text;
+            if (fg) n.style.color = fg;
+            return n;
+        };
+        const cat = this.t("Visual_Category", "Category"), act = this.t("Visual_Actual", "Actual (Real)"), tgt = this.t("Visual_Target", "Target");
+        const head = mk("div", "bc-l-head");
+        const img = document.createElement("img");
+        img.src = LANDING_ICON; img.alt = ""; img.className = "bc-l-icon";
+        head.appendChild(img);
+        const titles = mk("div");
+        titles.appendChild(mk("div", "bc-l-title", "Bullet Chart Pro"));
+        if (size !== "s") {
+            titles.appendChild(mk("div", "bc-l-tag", size === "l"
+                ? this.t("Landing_Tagline", "Actual against target on one line: the gap, its sign and how far it is from good.")
+                : this.t("Landing_TaglineShort", "Actual against target, at a glance.")));
+        }
+        head.appendChild(titles);
+        el.appendChild(head);
+        const link = (txt: string, url: string, cls: string): HTMLElement => {
+            const a = mk("a", cls) as HTMLAnchorElement;
+            a.href = url; a.tabIndex = 0; a.textContent = txt;
+            if (hc) { a.style.background = "transparent"; a.style.borderColor = fg; }
+            const open = (e: Event) => { e.preventDefault(); e.stopPropagation(); if (this.canInteract()) this.host.launchUrl(url); };
+            a.addEventListener("click", open);
+            a.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") open(e); });
+            return a;
+        };
+        const links: [string, string, string][] = [
+            [this.t("Landing_Guide", "Guide"), this.t("Landing_GuideSub", "support page"), URL_GUIDE],
+            [this.t("Landing_Product", "Product page"), "tcviz.com", URL_PRODUCT],
+            [this.t("Landing_Video", "Video"), "YouTube", URL_VIDEO],
+        ];
+        const fin = () => { this.container.appendChild(el); this.landingEl = el; };
+        if (size === "s") {
+            el.appendChild(mk("p", "bc-l-do", this.tf("Landing_Small", "Add {0} and {1}.", cat, act)));
+            const row = mk("div", "bc-l-inline");
+            row.appendChild(link(links[0][0], links[0][2], "bc-l-a"));
+            el.appendChild(row);
+            fin();
+            return;
+        }
+        const L = size === "l";
+        const steps = mk("ol", "bc-l-steps");
+        const step = (n: number, well: string, txt: string) => {
+            const li = mk("li");
+            const num = mk("b", "bc-l-n", String(n));
+            if (hc) { num.style.background = fg; num.style.color = bg; }
+            li.appendChild(num);
+            const sp = mk("span");
+            sp.appendChild(mk("strong", "bc-l-well", well));
+            sp.appendChild(document.createTextNode(" · " + txt));
+            li.appendChild(sp);
+            steps.appendChild(li);
+        };
+        step(1, cat, L ? this.t("Landing_Step1", "regions, products or teams — one bar each") : this.t("Landing_Step1Short", "one bar per item"));
+        step(2, act, L ? this.t("Landing_Step2", "the measure you track: sales, margin, tickets") : this.t("Landing_Step2Short", "the measure you track"));
+        step(3, tgt, L ? this.t("Landing_Step3", "budget, plan or last year: the gap is calculated for you") : this.t("Landing_Step3Short", "budget or plan"));
+        if (L) {
+            const cols = mk("div", "bc-l-cols");
+            const c1 = mk("div");
+            c1.appendChild(mk("div", "bc-l-lbl", this.t("Landing_Start", "Start in 3 steps")));
+            c1.appendChild(steps);
+            const c2 = mk("div");
+            c2.appendChild(mk("div", "bc-l-lbl", this.t("Landing_Help", "Help")));
+            const list = mk("div", "bc-l-links");
+            for (const [txt, sub, url] of links) {
+                const a = link(txt, url, "bc-l-card");
+                a.appendChild(mk("small", "bc-l-sub", sub));
+                list.appendChild(a);
+            }
+            c2.appendChild(list);
+            cols.appendChild(c1); cols.appendChild(c2);
+            el.appendChild(cols);
+        } else {
+            el.appendChild(steps);
+            const row = mk("div", "bc-l-inline");
+            for (const l of links) row.appendChild(link(l[1] === "tcviz.com" ? "tcviz.com" : l[0], l[2], "bc-l-a"));
+            el.appendChild(row);
+        }
+        if (!this.isPro) {
+            const pro = mk("div", "bc-l-pro");
+            const chip = mk("span", "bc-l-chip", "Pro");
+            if (hc) { chip.style.background = "transparent"; chip.style.border = "1px solid " + fg; }
+            pro.appendChild(chip);
+            pro.appendChild(mk("span", undefined, L
+                ? this.t("Landing_Pro", "Bands from your own measures, a second target, small multiples, forecast and vertical bars.")
+                : this.t("Landing_ProShort", "Bands from measures, second target, small multiples.")));
+            el.appendChild(pro);
+        }
+        fin();
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -2030,6 +2174,186 @@ export class BulletChartPro implements IVisual {
         while (this.rootSvg.firstChild) this.rootSvg.removeChild(this.rootSvg.firstChild);
         this.rootSvg.setAttribute("width",  String(w));
         this.rootSvg.setAttribute("height", String(h));
+    }
+
+    // ── Plantillas y guía (1.5) ──────────────────────────────────────
+
+    /** Quita los ajustes guardados que la plantilla define, para que se vea. Lo demás se queda como estaba. */
+    private aplicarPlantilla(nombre: string): void {
+        const tp = TEMPLATES[nombre] ?? {};
+        const remove: any[] = Object.keys(tp).map(obj => ({
+            objectName: obj, selector: null,
+            properties: Object.keys(tp[obj]).reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
+        }));
+        if (remove.length) this.host.persistProperties({ remove });
+    }
+
+    private persistir(objectName: string, properties: any): void {
+        this.host.persistProperties({ merge: [{ objectName, selector: null as any, properties }] });
+    }
+
+    /**
+     * Guía, solo editando y con datos: (1) los campos, (2) el Pro con tus datos: la orientación vertical se prueba con un
+     * clic y el resto dice en qué pozo poner la medida (sin licencia se ve bajo la marca de agua y con el aviso de Power
+     * BI), (3) las plantillas. persistProperties solo desde un clic. ✕ o Terminar la cierran (style.guide = false); se
+     * reabre en Formato → Plantilla de estilo.
+     */
+    private renderGuide(): void {
+        if (!this.guideEl) {
+            this.guideEl = document.createElement("div");
+            this.guideEl.className = "bc-guide";
+            this.container.appendChild(this.guideEl);
+        }
+        const el = this.guideEl;
+        while (el.firstChild) el.removeChild(el.firstChild);
+        el.style.display = "none";
+        const s = this.settings;
+        if (!this.editing || this.formatMode || !s?.guide || this.landingEl || !this.lastDataPoints.length || !this.canInteract()) return;
+        const objs: any = this.lastOptions?.dataViews?.[0]?.metadata?.objects ?? {};
+        const pal: any = this.host.colorPalette;
+        const hc = !!pal?.isHighContrast;
+        const azul = hc ? (pal.foregroundSelected?.value || "#FFFF00") : "#2B6CB0";
+        const fg = hc ? (pal.foreground?.value || "#FFFFFF") : "#252423";
+        const muted = hc ? fg : "#605E5C";
+        el.style.display = "block";
+        el.style.background = hc ? (pal.background?.value || "#000000") : "#FFFFFF";
+        el.style.borderColor = azul;
+        el.style.color = fg;
+        el.setAttribute("role", "dialog");
+        el.setAttribute("aria-label", this.t("Guide_Title", "Setup guide"));
+        el.onclick = e => e.stopPropagation();
+        el.onkeydown = e => e.stopPropagation();
+        const mk = (tag: string, cls: string, text?: string): HTMLElement => {
+            const n = document.createElement(tag); n.className = cls; if (text !== undefined) n.textContent = text; return n;
+        };
+        const boton = (texto: string, principal: boolean, accion: () => void): HTMLButtonElement => {
+            const b = mk("button", "bc-g-btn", texto) as HTMLButtonElement;
+            b.type = "button";
+            b.style.borderColor = azul;
+            b.style.background = principal ? azul : "transparent";
+            b.style.color = principal ? (hc ? (pal.background?.value || "#000000") : "#FFFFFF") : azul;
+            b.addEventListener("click", accion);
+            return b;
+        };
+        const terminar = () => { this.guideStep = 1; this.persistir("style", { guide: false }); };
+        const cab = mk("div", "bc-g-head");
+        const paso = mk("div", "", this.tf("Guide_Step", "Setup · step {0} of 3", String(this.guideStep)));
+        paso.style.color = azul;
+        const cerrar = mk("button", "bc-g-close", "✕") as HTMLButtonElement;
+        cerrar.type = "button";
+        cerrar.title = this.t("Guide_Close", "Close the guide");
+        cerrar.setAttribute("aria-label", cerrar.title);
+        cerrar.style.color = muted;
+        cerrar.addEventListener("click", terminar);
+        cab.appendChild(paso); cab.appendChild(cerrar);
+        el.appendChild(cab);
+        const titulo = mk("div", "bc-g-title");
+        el.appendChild(titulo);
+        const pie = mk("div", "bc-g-foot");
+        const chipPro = (txt: HTMLElement) => {
+            if (this.isPro) return;
+            const chip = mk("span", "bc-g-chip", "Pro");
+            if (hc) { chip.style.background = "transparent"; chip.style.border = "1px solid " + fg; chip.style.color = fg; }
+            txt.appendChild(chip);
+        };
+        const fila = (hecho: boolean, nombre: string, porque: string, pro = false) => {
+            const f = mk("div", "bc-g-item");
+            const marca = mk("span", "", hecho ? "✓" : "○");
+            marca.setAttribute("aria-label", hecho ? this.t("Guide_Done", "added") : this.t("Guide_Todo", "not added"));
+            marca.style.color = hecho ? (hc ? fg : "#107C10") : muted;
+            const txt = mk("span", "");
+            txt.appendChild(mk("b", "", nombre));
+            if (pro) chipPro(txt);
+            txt.appendChild(document.createTextNode(" — " + porque));
+            txt.style.color = hecho ? muted : fg;
+            f.appendChild(marca); f.appendChild(txt);
+            el.appendChild(f);
+        };
+        if (this.guideStep === 1) {
+            titulo.textContent = this.t("Guide_Fields", "Your data");
+            fila(true, this.t("Visual_Category", "Category"), this.t("Guide_CatWhy", "regions, products or teams — one bar each"));
+            fila(true, this.t("Visual_Actual", "Actual (Real)"), this.t("Guide_ActWhy", "the measure you track"));
+            fila(this.wells.target, this.t("Visual_Target", "Target"), this.t("Guide_TgtWhy", "budget, plan or last year: the gap and its sign"));
+            const nota = mk("div", "bc-g-note", this.t("Guide_Wells", "Drag the fields into the field wells; this list updates by itself."));
+            nota.style.color = muted;
+            el.appendChild(nota);
+            pie.appendChild(boton(this.t("Guide_Next", "Next"), true, () => { this.guideStep = 2; this.renderGuide(); }));
+        } else if (this.guideStep === 2) {
+            titulo.textContent = this.isPro ? this.t("Guide_TryPro2", "Pro features on your data") : this.t("Guide_TryPro", "Try Pro on your data");
+            // La orientación se prueba con un clic; lo demás necesita una medida en su pozo.
+            const vert = objs?.general?.orientation === "vertical";
+            const f = mk("div", "bc-g-try");
+            const txt = mk("span", "");
+            txt.appendChild(mk("b", "", this.t("Guide_TryVertical", "Vertical bars")));
+            chipPro(txt);
+            txt.appendChild(document.createTextNode(" — " + this.t("Guide_TryVerticalWhy", "for months or long category names")));
+            const b = boton(vert ? this.t("Guide_On", "On") : this.t("Guide_Try", "Try"), vert,
+                () => this.persistir("general", { orientation: vert ? "horizontal" : "vertical" }));
+            b.setAttribute("aria-pressed", String(vert));
+            f.appendChild(txt); f.appendChild(b);
+            el.appendChild(f);
+            fila(this.wells.bands, this.t("Guide_Bands", "Bands from measures"), this.t("Guide_BandsWhy", "measures in Band 1 limit, Band 2 limit, Band maximum: each row its own thresholds"), true);
+            fila(this.wells.target2, this.t("Visual_Target2", "Second target [Pro]").replace(" [Pro]", ""), this.t("Guide_T2Why", "a stretch goal or last year, next to the target"), true);
+            fila(this.wells.trellis, this.t("Feat_trellisTitle", "Small multiples"), this.t("Guide_TrellisWhy", "a field in Small Multiples By: one panel per region or year"), true);
+            if (!this.isPro) {
+                const nota = mk("div", "bc-g-note", this.t("Guide_TryNote", "Without a licence they show under a watermark while you edit; reading view shows the free chart."));
+                nota.style.color = muted;
+                el.appendChild(nota);
+            }
+            pie.appendChild(boton(this.t("Guide_Back", "Back"), false, () => { this.guideStep = 1; this.renderGuide(); }));
+            pie.appendChild(boton(this.t("Guide_Next", "Next"), true, () => { this.guideStep = 3; this.renderGuide(); }));
+        } else {
+            titulo.textContent = this.t("Guide_Style", "Pick a style");
+            const actual = String(objs?.style?.template ?? "clean");
+            const rejilla = mk("div", "bc-g-grid");
+            const nombres: [string, string, string][] = [["clean", "Enum_tpl_clean", "Clean"], ["minimal", "Enum_tpl_minimal", "Minimal"],
+                ["contrast", "Enum_tpl_contrast", "Contrast"], ["soft", "Enum_tpl_soft", "Soft"], ["compact", "Enum_tpl_compact", "Compact"],
+                ["ibcs", "Enum_tpl_ibcs", "IBCS style"]];
+            for (const [nombre, clave, def] of nombres) {
+                const chip = mk("button", "bc-g-tpl") as HTMLButtonElement;
+                chip.type = "button";
+                chip.setAttribute("aria-pressed", String(nombre === actual));
+                chip.style.borderColor = nombre === actual ? azul : "#C8C6C4";
+                chip.style.borderWidth = nombre === actual ? "2px" : "1px";
+                chip.appendChild(this.miniBullet(nombre, hc));
+                chip.appendChild(mk("div", "", this.t(clave, def)));
+                chip.addEventListener("click", () => this.persistir("style", { template: nombre }));
+                rejilla.appendChild(chip);
+            }
+            el.appendChild(rejilla);
+            pie.appendChild(boton(this.t("Guide_Back", "Back"), false, () => { this.guideStep = 2; this.renderGuide(); }));
+            pie.appendChild(boton(this.t("Guide_Finish", "Finish"), true, terminar));
+        }
+        el.appendChild(pie);
+    }
+
+    /** Miniatura de una plantilla: dos bullets con las bandas, la barra y el objetivo en sus colores. */
+    private miniBullet(nombre: string, hc: boolean): SVGSVGElement {
+        const tp: any = TEMPLATES[nombre] ?? {};
+        const d = getDefaultSettings();
+        const ibcs = tp.general?.ibcsMode === true;
+        const c = (p: string, def: string) => hc ? "#FFFFFF" : (ibcs && p === "actualColor" ? "#333333" : ibcs && p === "targetColor" ? "#000000" : (tp.colors?.[p] ?? def));
+        const bands = ibcs ? ["#B8B8B8", "#D0D0D0", "#E8E8E8"] : [c("band3Color", d.band3Color), c("band2Color", d.band2Color), c("band1Color", d.band1Color)];
+        const NS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(NS, "svg") as SVGSVGElement;
+        svg.setAttribute("width", "64"); svg.setAttribute("height", "40"); svg.setAttribute("aria-hidden", "true");
+        [[8, 44, 38], [24, 34, 46]].forEach(([y, act, tgt]) => {
+            [60, 46, 30].forEach((w, k) => {
+                const r = document.createElementNS(NS, "rect");
+                r.setAttribute("x", "2"); r.setAttribute("y", String(y)); r.setAttribute("width", String(w)); r.setAttribute("height", "10");
+                r.setAttribute("fill", hc ? "none" : bands[k]); if (hc) r.setAttribute("stroke", "#FFFFFF");
+                svg.appendChild(r);
+            });
+            const a = document.createElementNS(NS, "rect");
+            a.setAttribute("x", "2"); a.setAttribute("y", String(y + 3)); a.setAttribute("width", String(act)); a.setAttribute("height", "4");
+            a.setAttribute("fill", c("actualColor", d.actualColor));
+            svg.appendChild(a);
+            const tg = document.createElementNS(NS, "rect");
+            tg.setAttribute("x", String(tgt)); tg.setAttribute("y", String(y + 1)); tg.setAttribute("width", "2"); tg.setAttribute("height", "8");
+            tg.setAttribute("fill", c("targetColor", d.targetColor));
+            svg.appendChild(tg);
+        });
+        return svg;
     }
 
     // ── Formato sobre el lienzo ─────────────────────────────────────

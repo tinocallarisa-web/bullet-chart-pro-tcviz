@@ -28,3 +28,73 @@
     pointer-events: auto;
     cursor: pointer;
 }
+
+// Guía de configuración (1.5): panel compacto en la esquina, solo editando
+.bc-guide {
+    display: none;
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 340px;
+    max-width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
+    overflow: auto;
+    border: 1px solid #2B6CB0;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    padding: 8px 10px;
+    box-sizing: border-box;
+    z-index: 20;
+    font: 11.5px/1.35 "Segoe UI", sans-serif;
+    cursor: default;
+    .bc-g-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-weight: 700; div { flex: 1; } }
+    .bc-g-close { border: none; background: transparent; cursor: pointer; font-size: 13px; }
+    .bc-g-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+    .bc-g-item { display: flex; gap: 6px; align-items: baseline; margin: 2px 0; span:first-child { font-weight: 700; width: 12px; flex-shrink: 0; } }
+    .bc-g-try { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 4px 0; span { flex: 1; } }
+    .bc-g-chip { display: inline-block; margin-left: 5px; font-size: 9px; font-weight: 700; letter-spacing: .5px; padding: 1px 5px; border-radius: 999px; background: #E3F2E8; color: #2F7A47; vertical-align: 1px; }
+    .bc-g-note { font-size: 11px; margin-top: 4px; }
+    .bc-g-foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+    .bc-g-btn { font: 600 12px "Segoe UI", sans-serif; border-radius: 4px; padding: 3px 12px; cursor: pointer; border: 1px solid; flex-shrink: 0; }
+    .bc-g-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+    .bc-g-tpl { border-style: solid; border-radius: 6px; padding: 4px; cursor: pointer; background: #FFFFFF; font: 11px "Segoe UI", sans-serif; color: #252423; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+}
+
+// Pantalla de inicio (1.5): la de la serie, en tres tamaños
+.bc-landing {
+    position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 18px;
+    padding: 24px 32px; box-sizing: border-box; overflow: hidden; color: #605E5C; font-family: "Segoe UI", sans-serif;
+    .bc-l-head { display: flex; gap: 12px; align-items: center; }
+    .bc-l-icon { width: 44px; height: 44px; border-radius: 9px; flex-shrink: 0; }
+    .bc-l-title { font-size: 20px; font-weight: 600; color: #252423; }
+    .bc-l-tag { font-size: 14px; margin-top: 2px; }
+    .bc-l-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+    .bc-l-lbl { font-size: 10.5px; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; color: #8A8886; margin-bottom: 7px; }
+    .bc-l-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: 13.5px; }
+    .bc-l-steps li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; }
+    .bc-l-n { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #2B6CB0; color: #FFFFFF; font-size: 10.5px; }
+    .bc-l-well { color: #252423; }
+    .bc-l-links { display: grid; gap: 7px; }
+    .bc-l-card { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border: 1px solid #E1DFDD; border-radius: 6px; background: #F7F6F3; color: #252423; text-decoration: none; font-size: 13.5px; cursor: pointer; }
+    .bc-l-card:hover, .bc-l-card:focus-visible { border-color: #2B6CB0; outline: none; }
+    .bc-l-sub { margin-left: auto; color: #8A8886; font-size: 11px; }
+    .bc-l-inline { display: flex; gap: 14px; flex-wrap: wrap; }
+    .bc-l-a { color: #2B6CB0; font-weight: 600; text-decoration: none; cursor: pointer; }
+    .bc-l-a:hover, .bc-l-a:focus-visible { text-decoration: underline; outline: none; }
+    .bc-l-pro { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; border-top: 1px solid #EDEBE9; padding-top: 12px; font-size: 13px; }
+    .bc-l-chip { font-size: 10px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: #E3F2E8; color: #2F7A47; }
+    .bc-l-do { margin: 0; font-size: 12px; line-height: 1.45; }
+}
+.bc-landing-m {
+    gap: 11px; padding: 16px 20px;
+    .bc-l-icon { width: 34px; height: 34px; }
+    .bc-l-title { font-size: 16px; }
+    .bc-l-tag, .bc-l-steps, .bc-l-inline { font-size: 12.5px; }
+    .bc-l-pro { font-size: 12px; padding-top: 9px; }
+}
+.bc-landing-s {
+    gap: 8px; padding: 12px 14px;
+    .bc-l-icon { width: 26px; height: 26px; border-radius: 6px; }
+    .bc-l-title { font-size: 14px; }
+    .bc-l-inline { font-size: 12px; }
+}

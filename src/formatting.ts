@@ -36,6 +36,12 @@ function card(name: string, key: string, displayName: string, slices: formatting
 export const COLOR_FIXED_SLICES = 9;
 
 export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): Model {
+    // Plantilla y guía (1.5): la primera tarjeta, para que se vea.
+    const style = card("style", "Obj_style", "Style template", [
+        new AutoDropdown({ name: "template", displayName: "Template",    displayNameKey: "Prop_style_template", value: s.template }),
+        new ToggleSwitch({ name: "guide",    displayName: "Setup guide", displayNameKey: "Prop_style_guide",    value: s.guide }),
+    ]);
+
     const general = card("general", "Visual_General", "General", [
         new AutoDropdown({ name: "orientation", displayName: "Orientation", displayNameKey: "Visual_General_Orientation", value: s.orientation }),
         new ToggleSwitch({ name: "ibcsMode", displayName: "IBCS Mode", displayNameKey: "Visual_General_IbcsMode", value: s.ibcsMode }),
@@ -124,6 +130,6 @@ export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): 
     ]);
 
     const m = new Model();
-    m.cards = [general, colors, bands, variance, labels, layout, legend, ref, trellis];
+    m.cards = [style, general, colors, bands, variance, labels, layout, legend, ref, trellis];
     return m;
 }

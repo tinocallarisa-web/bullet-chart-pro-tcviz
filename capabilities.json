@@ -173,6 +173,57 @@
     }
   ],
   "objects": {
+    "style": {
+      "displayName": "Style template",
+      "displayNameKey": "Obj_style",
+      "properties": {
+        "template": {
+          "displayName": "Template",
+          "displayNameKey": "Prop_style_template",
+          "type": {
+            "enumeration": [
+              {
+                "value": "clean",
+                "displayName": "Clean",
+                "displayNameKey": "Enum_tpl_clean"
+              },
+              {
+                "value": "minimal",
+                "displayName": "Minimal",
+                "displayNameKey": "Enum_tpl_minimal"
+              },
+              {
+                "value": "contrast",
+                "displayName": "Contrast",
+                "displayNameKey": "Enum_tpl_contrast"
+              },
+              {
+                "value": "soft",
+                "displayName": "Soft",
+                "displayNameKey": "Enum_tpl_soft"
+              },
+              {
+                "value": "compact",
+                "displayName": "Compact",
+                "displayNameKey": "Enum_tpl_compact"
+              },
+              {
+                "value": "ibcs",
+                "displayName": "IBCS style",
+                "displayNameKey": "Enum_tpl_ibcs"
+              }
+            ]
+          }
+        },
+        "guide": {
+          "displayName": "Setup guide",
+          "displayNameKey": "Prop_style_guide",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
     "general": {
       "displayName": "General",
       "displayNameKey": "Visual_General",
