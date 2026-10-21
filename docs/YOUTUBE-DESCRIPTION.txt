@@ -94,5 +94,5 @@ A bullet chart answers it on one line: the variance and its %, and bands that sh
 are from "good". In Power BI, with three fields and no DAX — and with Pro, every row with its
 own thresholds and a stretch goal next to the budget.
 
-Full walkthrough: https://www.youtube.com/watch?v=<NEW_ID>
+Full walkthrough: https://www.youtube.com/watch?v=PdmOWIAKYho
 #PowerBI #BudgetVsActual #DataVisualization

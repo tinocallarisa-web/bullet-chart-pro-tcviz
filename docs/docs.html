@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation — Bullet Chart Pro | TCViz</title>
+  <style>
+    :root {
+      --dark:   #1a1a2e;
+      --mid:    #16213e;
+      --accent: #e8433a;
+      --blue:   #0078D4;
+      --green:  #388e3c;
+      --gold:   #f5a623;
+      --sidebar-w: 260px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #222; background: #f5f7fa; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--dark); color: #fff;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 56px; position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 12px; }
+    .topbar .brand strong { font-size: 1.05rem; letter-spacing: -.3px; }
+    .topbar .brand .version { background: var(--accent); border-radius: 4px; font-size: .7rem; font-weight: 700; padding: 2px 8px; }
+    .topbar nav a { color: #aac4ff; text-decoration: none; margin-left: 24px; font-size: .9rem; }
+    .topbar nav a:hover { color: #fff; }
+
+    /* ── LAYOUT ── */
+    .page { display: flex; flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 0 80px; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      padding: 32px 0; position: sticky; top: 56px; align-self: flex-start;
+      max-height: calc(100vh - 56px); overflow-y: auto;
+    }
+    .sidebar .nav-section { margin-bottom: 8px; }
+    .sidebar .nav-label {
+      font-size: .68rem; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase; color: #999; padding: 12px 20px 4px;
+    }
+    .sidebar a {
+      display: block; padding: 7px 20px 7px 24px;
+      color: #444; text-decoration: none; font-size: .88rem;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .sidebar a:hover { color: var(--blue); border-left-color: var(--blue); background: #eef3fb; }
+    .sidebar a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; padding: 40px 48px 0; min-width: 0; }
+
+    /* Headings */
+    h1 { font-size: 2rem; color: var(--dark); margin-bottom: 10px; }
+    h2 {
+      font-size: 1.35rem; color: var(--dark);
+      margin: 52px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e8ecf2;
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2 .anchor { color: #ccc; font-size: .9rem; text-decoration: none; }
+    h3 { font-size: 1.05rem; color: #333; margin: 28px 0 10px; }
+    p  { line-height: 1.75; color: #444; margin-bottom: 14px; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { line-height: 1.8; color: #444; }
+    code {
+      background: #eef0f4; color: var(--accent);
+      padding: 1px 6px; border-radius: 4px; font-size: .88em;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+    }
+
+    /* Lead / intro */
+    .lead { font-size: 1.05rem; color: #555; line-height: 1.8; margin-bottom: 32px; }
+
+    /* Alert boxes */
+    .alert {
+      border-radius: 8px; padding: 14px 18px; margin: 20px 0;
+      display: flex; gap: 12px; align-items: flex-start;
+      font-size: .9rem; line-height: 1.6;
+    }
+    .alert.tip  { background: #e8f4fd; border-left: 4px solid var(--blue); color: #1558a0; }
+    .alert.warn { background: #fff8e1; border-left: 4px solid var(--gold); color: #7a5000; }
+    .alert.pro  { background: #fff3e0; border-left: 4px solid var(--gold); color: #7a5000; }
+    .alert.new  { background: #fce8e6; border-left: 4px solid var(--accent); color: #8b1a14; }
+    .alert-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 18px 0 28px; font-size: .9rem; }
+    th { background: var(--dark); color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    td { padding: 9px 14px; border-bottom: 1px solid #e8ecf2; vertical-align: top; }
+    tr:nth-child(even) td { background: #f9fafc; }
+    td code { font-size: .85em; }
+    .pill {
+      display: inline-block; font-size: .7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; margin-left: 4px;
+      vertical-align: middle;
+    }
+    .pill.pro  { background: var(--gold); color: #fff; }
+    .pill.free { background: var(--green); color: #fff; }
+    .pill.new  { background: var(--accent); color: #fff; }
+
+    /* Steps */
+    .steps { counter-reset: step; margin: 20px 0 32px; }
+    .step {
+      display: flex; gap: 18px; margin-bottom: 24px;
+      background: #fff; border-radius: 10px;
+      padding: 20px 22px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; flex-shrink: 0;
+    }
+    .step-body h3 { margin: 0 0 8px; font-size: 1rem; }
+    .step-body p  { margin: 0; color: #555; font-size: .9rem; line-height: 1.65; }
+
+    /* Field table header */
+    .role-badge {
+      display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+      margin-right: 6px; vertical-align: middle;
+    }
+
+    /* Prop table */
+    .prop-section { margin-bottom: 40px; }
+    .prop-section h3 {
+      background: var(--dark); color: #fff;
+      padding: 10px 16px; border-radius: 6px 6px 0 0; margin: 0;
+      font-size: .95rem;
+    }
+    .prop-table { width: 100%; border-collapse: collapse; margin: 0 0 0; }
+    .prop-table th { background: #2d3a5a; color: #fff; padding: 8px 14px; font-size: .82rem; }
+    .prop-table td { padding: 9px 14px; border-bottom: 1px solid #eef0f4; font-size: .87rem; }
+    .prop-table tr:last-child td { border-bottom: none; }
+    .prop-table tr:nth-child(even) td { background: #fafbfc; }
+    .prop-table td:first-child { font-family: 'Cascadia Code', monospace; color: var(--accent); font-size: .83em; }
+
+    /* FAQ */
+    details {
+      border: 1px solid #e0e4ec; border-radius: 8px;
+      padding: 14px 18px; margin-bottom: 10px; background: #fff;
+    }
+    details summary {
+      font-weight: 600; cursor: pointer; color: var(--dark);
+      font-size: .95rem; list-style: none; display: flex; justify-content: space-between;
+    }
+    details summary::after { content: '＋'; color: var(--accent); font-size: 1.1rem; }
+    details[open] summary::after { content: '－'; }
+    details p, details ul { margin-top: 12px; font-size: .9rem; color: #444; }
+
+    /* Footer */
+    footer {
+      background: var(--dark); color: #aaa;
+      text-align: center; padding: 28px 16px; font-size: .88rem; margin-top: auto;
+    }
+    footer a { color: #aac4ff; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { padding: 28px 20px 0; }
+      .topbar nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="1" y="6" width="14" height="10" rx="2" fill="#aac4ff"/><rect x="1" y="8" width="10" height="6" rx="1.5" fill="#fff"/><line x1="15" y1="10" x2="15" y2="16" stroke="#e8433a" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <strong>Bullet Chart Pro</strong>
+    <span class="version">v1.2.0.0</span>
+  </div>
+  <nav>
+    <a href="infographic.html">Infographic</a>
+    <a href="support.html">Support</a>
+    <a href="use-case.html">Use Case</a>
+    <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a>
+  </nav>
+</div>
+
+<div class="page">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="#overview">Overview</a>
+      <a href="#quickstart">Quick Start</a>
+      <a href="#field-wells">Field Wells</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Format Pane</div>
+      <a href="#fp-general">General</a>
+      <a href="#fp-colors">Colors</a>
+      <a href="#fp-bands">Qualitative Bands</a>
+      <a href="#fp-variance">Variance</a>
+      <a href="#fp-labels">Labels</a>
+      <a href="#fp-layout">Layout</a>
+      <a href="#fp-legend">Legend</a>
+      <a href="#fp-reflines">Reference Lines</a>
+      <a href="#fp-trellis">Trellis [Pro]</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Advanced</div>
+      <a href="#ibcs">IBCS Mode</a>
+      <a href="#negative">Negative Values</a>
+      <a href="#cf">Colour per Category</a>
+      <a href="#dfs">Dynamic Format Strings</a>
+      <a href="#trellis-adv">Trellis Advanced</a>
+      <a href="#bookmarks">Bookmarks</a>
+      <a href="#accessibility">Accessibility</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Reference</div>
+      <a href="#capabilities">Capabilities Summary</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- ── OVERVIEW ── -->
+    <section id="overview">
+      <h1>Bullet Chart Pro — Documentation</h1>
+      <p class="lead">
+        A Power BI custom visual that replaces the combination of bar chart + KPI card + gauge with a single,
+        information-dense bullet chart. Actual vs Target comparison, automatic variance calculation,
+        qualitative performance bands — all without writing a single DAX measure.
+      </p>
+
+      <div class="alert tip">
+        <span class="alert-icon">💡</span>
+        <div><strong>No DAX required.</strong> Drop your Actual and Target measures into the field wells — variance (absolute + percentage) is calculated automatically by the visual.</div>
+      </div>
+
+      <table>
+        <tr><th>Property</th><th>Value</th></tr>
+        <tr><td>Publisher</td><td>TCViz</td></tr>
+        <tr><td>Contact</td><td><a href="mailto:support@tcviz.com">support@tcviz.com</a></td></tr>
+        <tr><td>Current version</td><td>1.2.0.0 (Jul 27, 2026)</td></tr>
+        <tr><td>API compatibility</td><td>powerbi-visuals-api ~5.10.0</td></tr>
+        <tr><td>Max data rows</td><td>2,000 per render</td></tr>
+        <tr><td>License tiers</td><td>Free / Pro (IVisualLicenseManager)</td></tr>
+      </table>
+    </section>
+
+    <!-- ── QUICK START ── -->
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Import the visual</h3>
+            <p>In Power BI Desktop, go to <strong>Insert → Visuals → Get more visuals</strong> and search for <em>Bullet Chart Pro</em> by TCViz. Click <strong>Add</strong>. The visual icon appears in your Visualizations pane.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Add your data fields</h3>
+            <p>Drag your dimension (e.g. <em>Product Category</em>) to <strong>Category</strong>, your primary measure to <strong>Actual (Real)</strong>, and your goal measure to <strong>Target</strong>. A working bullet chart renders immediately.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Configure the format pane</h3>
+            <p>Open the <strong>Format visual</strong> panel (paintbrush icon). Adjust band thresholds, colors, label visibility, and layout width to match your report style. All settings have sensible defaults.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>[Pro] Enable Trellis</h3>
+            <p>Drag a grouping field (e.g. <em>Region</em>) to <strong>Small Multiples By</strong>. In the format pane, under <strong>Trellis</strong>, toggle <strong>Enabled</strong> on and set the number of columns. Each region renders as a side-by-side panel.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FIELD WELLS ── -->
+    <section id="field-wells">
+      <h2>Field Wells</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Field Well</th>
+            <th>Kind</th>
+            <th>Required</th>
+            <th>Max</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="role-badge" style="background:#0078D4"></span><strong>Category</strong></td>
+            <td>Grouping</td>
+            <td>Yes</td>
+            <td>1</td>
+            <td>Dimension that generates one bullet row per value. Supports hierarchy drilldown.</td>
+          </tr>
+          <tr>
+            <td><span class="role-badge" style="background:#f5a623"></span><strong>Small Multiples By</strong> <span class="pill pro">PRO</span></td>
+            <td>Grouping</td>
+            <td>No</td>
+            <td>1</td>
+            <td>Splits the visual into trellis panels — one per value of this field.</td>
+          </tr>
+          <tr>
+            <td><span class="role-badge" style="background:#1a1a2e"></span><strong>Actual (Real)</strong></td>
+            <td>Measure</td>
+            <td>Yes</td>
+            <td>1</td>
+            <td>Primary measure. Drives the bar length and the variance calculation. Supports Dynamic Format Strings.</td>
+          </tr>
+          <tr>
+            <td><span class="role-badge" style="background:#e8433a"></span><strong>Target</strong></td>
+            <td>Measure</td>
+            <td>No</td>
+            <td>1</td>
+            <td>Success threshold. Renders as a vertical marker. When present, variance is auto-calculated.</td>
+          </tr>
+          <tr>
+            <td><span class="role-badge" style="background:#f5a623"></span><strong>Forecast</strong> <span class="pill pro">PRO</span></td>
+            <td>Measure</td>
+            <td>No</td>
+            <td>1</td>
+            <td>Expected end-of-period value. Shown as a distinct colored marker. Supports Dynamic Format Strings.</td>
+          </tr>
+          <tr>
+            <td><span class="role-badge" style="background:#90caf9"></span><strong>Tooltips</strong></td>
+            <td>Measure</td>
+            <td>No</td>
+            <td>10</td>
+            <td>Additional numeric or boolean measures surfaced in the Power BI tooltip on hover.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert warn">
+        <span class="alert-icon">⚠️</span>
+        <div>The <strong>dataReductionAlgorithm</strong> limits rendering to the top 2,000 category rows. For large datasets, apply slicers or use Top N filtering upstream.</div>
+      </div>
+    </section>
+
+    <!-- ── FORMAT PANE ── -->
+    <h2>Format Pane Reference</h2>
+
+    <div class="prop-section" id="fp-general">
+      <h3>⚙️ General</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>orientation</td><td>Enum</td><td><code>horizontal</code></td><td>Switch between <strong>horizontal</strong> (bars grow left→right) and <strong>vertical</strong> (bars grow bottom→top) layouts.</td></tr>
+          <tr><td>ibcsMode</td><td>Boolean</td><td><code>false</code></td><td>Enable IBCS-compliant monochrome palette. Overrides all custom colors with a standardized grayscale scheme.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prop-section" id="fp-colors">
+      <h3>🎨 Colors</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>actualColor</td><td>Fill</td><td><code>#1a1a2e</code></td><td>Fill color of the actual (primary) bar. Each category can override it with its own colour picker in Format pane → Colors.</td></tr>
+          <tr><td>targetColor</td><td>Fill</td><td><code>#e8433a</code></td><td>Color of the target vertical marker line.</td></tr>
+          <tr><td>forecastColor</td><td>Fill</td><td><code>#f5a623</code></td><td>Color of the forecast vertical marker [Pro].</td></tr>
+          <tr><td>positiveColor</td><td>Fill</td><td><code>#388e3c</code></td><td>Variance label color when Actual ≥ Target.</td></tr>
+          <tr><td>negativeColor</td><td>Fill</td><td><code>#e8433a</code></td><td>Variance label color when Actual &lt; Target.</td></tr>
+          <tr><td>band1Color</td><td>Fill</td><td><code>#e0e0e0</code></td><td>Background color for Band 1 (worst / lowest performance zone).</td></tr>
+          <tr><td>band2Color</td><td>Fill</td><td><code>#b0bec5</code></td><td>Background color for Band 2 (mid / satisfactory zone).</td></tr>
+          <tr><td>band3Color</td><td>Fill</td><td><code>#78909c</code></td><td>Background color for Band 3 (best / good zone).</td></tr>
+        </tbody>
+      </table>
+      <div class="alert warn">
+        <span class="alert-icon">⚠️</span>
+        <div>When <strong>IBCS Mode</strong> is on, all color settings are ignored and a built-in monochrome palette is applied.</div>
+      </div>
+    </div>
+
+    <div class="prop-section" id="fp-bands">
+      <h3>📐 Qualitative Bands</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>showBands</td><td>Boolean</td><td><code>true</code></td><td>Toggle the qualitative background bands on/off.</td></tr>
+          <tr><td>band1Pct</td><td>Number (0–100)</td><td><code>40</code></td><td>Upper threshold of Band 1 as a percentage of the data maximum. Band 1 spans from 0% to this value.</td></tr>
+          <tr><td>band2Pct</td><td>Number (0–100)</td><td><code>70</code></td><td>Upper threshold of Band 2. Band 2 spans from <code>band1Pct</code> to this value. Band 3 covers the remainder up to 100%.</td></tr>
+        </tbody>
+      </table>
+      <div class="alert tip">
+        <span class="alert-icon">💡</span>
+        <div>Band thresholds are relative to the <strong>data maximum</strong> (not a padded domain), so they align precisely with the bar scale. Changing the scale via slicers updates the bands automatically.</div>
+      </div>
+    </div>
+
+    <div class="prop-section" id="fp-variance">
+      <h3>📊 Variance</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>showVariance</td><td>Boolean</td><td><code>true</code></td><td>Show/hide the absolute variance value in the right panel (Actual − Target).</td></tr>
+          <tr><td>showVariancePct</td><td>Boolean</td><td><code>true</code></td><td>Show/hide the percentage variance alongside the absolute value.</td></tr>
+          <tr><td>varianceThreshold</td><td>Number</td><td><code>0</code></td><td>Values within ±threshold of the target are shown in a neutral color instead of green/red. Useful for "close enough" tolerance zones.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prop-section" id="fp-labels">
+      <h3>🏷️ Labels</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>showCategoryLabel</td><td>Boolean</td><td><code>true</code></td><td>Show/hide the category name in the left panel.</td></tr>
+          <tr><td>showActualValue</td><td>Boolean</td><td><code>true</code></td><td>Show/hide the formatted actual value in the right panel.</td></tr>
+          <tr><td>showTargetValue</td><td>Boolean</td><td><code>false</code></td><td>Show/hide the formatted target value in the right panel below the actual.</td></tr>
+          <tr><td>fontSize</td><td>Number (pt)</td><td><code>12</code></td><td>Base font size for all text elements in the visual.</td></tr>
+          <tr><td>fontFamily</td><td>Enum / String</td><td><code>Segoe UI</code></td><td>Font family applied to all text. Exposed in the format pane font picker.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prop-section" id="fp-layout">
+      <h3>📏 Layout</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>labelWidthPct</td><td>Number (0–50)</td><td><code>22</code></td><td>Width of the left label column as a percentage of total visual width.</td></tr>
+          <tr><td>rightPanelWidthPct</td><td>Number (0–40)</td><td><code>18</code></td><td>Width of the right values column (variance + actual value) as a percentage of total width. Auto-calculated from the longest formatted number when set to <code>0</code>.</td></tr>
+          <tr><td>showAxis</td><td>Boolean</td><td><code>true</code></td><td>Show/hide the horizontal axis with formatted tick labels below the bars.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prop-section" id="fp-legend">
+      <h3>🗺️ Legend</h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>showLegend</td><td>Boolean</td><td><code>false</code></td><td>Show/hide the legend strip (Actual, Target, Forecast, and Band swatches).</td></tr>
+          <tr><td>legendPosition</td><td>Enum</td><td><code>top</code></td><td>Render the legend above (<code>top</code>) or below (<code>bottom</code>) the chart area. Legend height is subtracted from the trellis panel layout so it never overlaps content.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prop-section" id="fp-reflines">
+      <h3>📏 Reference Lines <span class="pill new">v1.2</span></h3>
+      <p>Two independently configurable vertical reference lines. Each line has the same four properties:</p>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>refLine1Show / refLine2Show</td><td>Boolean</td><td>Toggle each reference line on/off independently.</td></tr>
+          <tr><td>refLine1Value / refLine2Value</td><td>Number</td><td>X-axis value where the line is drawn. Must be within the visible scale range.</td></tr>
+          <tr><td>refLine1Label / refLine2Label</td><td>String</td><td>Optional text label rendered above the line.</td></tr>
+          <tr><td>refLine1Color / refLine2Color</td><td>Fill</td><td>Line and label color.</td></tr>
+        </tbody>
+      </table>
+      <div class="alert tip">
+        <span class="alert-icon">💡</span>
+        <div>Reference lines propagate to <strong>all trellis panels</strong> in absolute SVG coordinates, so a budget ceiling or seasonal benchmark appears consistently across every panel.</div>
+      </div>
+    </div>
+
+    <div class="prop-section" id="fp-trellis">
+      <h3>🪟 Trellis (Small Multiples) <span class="pill pro">PRO</span> <span class="pill new">v1.2</span></h3>
+      <table class="prop-table">
+        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>enabled</td><td>Boolean</td><td><code>false</code></td><td>Activate trellis mode. Requires the <strong>Small Multiples By</strong> field to be populated.</td></tr>
+          <tr><td>columns</td><td>Number (1–10)</td><td><code>2</code></td><td>Number of panel columns. Panels wrap to new rows automatically.</td></tr>
+          <tr><td>syncScale</td><td>Boolean</td><td><code>true</code></td><td>When on, all panels share the same X-axis scale. When off, each panel auto-scales independently to its own data max — useful for comparing shapes rather than magnitudes.</td></tr>
+          <tr><td>trellisShowTitle</td><td>Boolean</td><td><code>true</code></td><td>Show the group-value name as a title above each panel.</td></tr>
+          <tr><td>trellisPanelColor</td><td>Fill</td><td><code>#ffffff</code></td><td>Background fill of each individual panel.</td></tr>
+          <tr><td>trellisBorderColor</td><td>Fill</td><td><code>#e0e0e0</code></td><td>Border color drawn around each panel.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── ADVANCED ── -->
+    <section id="ibcs">
+      <h2>IBCS Mode</h2>
+      <p>IBCS (International Business Communication Standards) defines a monochrome, notation-based standard for business charts. When <code>ibcsMode</code> is <code>true</code>, the visual replaces all custom color settings with a built-in palette:</p>
+      <ul>
+        <li><strong>Actual bar</strong> — solid black</li>
+        <li><strong>Target marker</strong> — outlined rectangle (no fill)</li>
+        <li><strong>Forecast marker</strong> — hatched pattern</li>
+        <li><strong>Bands</strong> — light to mid gray</li>
+        <li><strong>Positive variance</strong> — dark gray</li>
+        <li><strong>Negative variance</strong> — outlined (hollow)</li>
+      </ul>
+      <div class="alert tip"><span class="alert-icon">💡</span><div>IBCS mode is useful for print-ready reports, regulatory submissions, or organizations that mandate notation standards.</div></div>
+    </section>
+
+    <section id="negative">
+      <h2>Negative Values <span class="pill new">v1.2</span></h2>
+      <p>When any value in the <strong>Actual</strong> or <strong>Target</strong> measures is negative, the visual automatically switches to a bipolar scale:</p>
+      <ul>
+        <li>The X-axis is centered at zero.</li>
+        <li>Bars extend left for negative values and right for positive values.</li>
+        <li>Performance bands are suppressed in bipolar mode (they don't have a meaningful negative interpretation).</li>
+        <li>Variance color logic is preserved — green means above target, red means below, regardless of sign.</li>
+      </ul>
+    </section>
+
+    <section id="cf">
+      <h2>Colour per Category <span class="pill new">v1.2</span></h2>
+      <p>Format pane → Colors lists every category with its own <strong>actualColor</strong> picker, so each bar can have a fixed colour of its own — for example, to highlight a key product — without modifying the visual's built-in variance colors. Rule-based (<strong>fx</strong>) conditional formatting is not available yet.</p>
+      <div class="alert warn">
+        <span class="alert-icon">⚠️</span>
+        <div>Colors picked from the "Recent colors" panel that result in an empty hex string are silently ignored — the bar falls back to the default <code>actualColor</code>. This is by design to prevent invisible bars.</div>
+      </div>
+    </section>
+
+    <section id="dfs">
+      <h2>Dynamic Format Strings <span class="pill new">v1.2</span></h2>
+      <p>The visual reads the format string directly from the measure's metadata. This means:</p>
+      <ul>
+        <li>If your measure is formatted as <code>€#,##0.0</code>, values appear with the euro symbol and one decimal automatically.</li>
+        <li>Calculation Groups that swap format strings at runtime are fully supported — the visual re-reads the format on every update cycle.</li>
+        <li>The same logic applies to <strong>Actual</strong>, <strong>Target</strong>, and <strong>Forecast</strong> independently — they can each carry a different format string.</li>
+      </ul>
+    </section>
+
+    <section id="trellis-adv">
+      <h2>Trellis — Advanced Notes</h2>
+      <h3>Scale synchronization</h3>
+      <p>With <code>syncScale: true</code> (default), the visual computes the maximum value across <em>all</em> panels and uses that as the shared domain. This makes absolute comparisons between panels meaningful. Set <code>syncScale: false</code> when you want to compare the shape/distribution of values rather than magnitudes (e.g., ranking within each region).</p>
+      <h3>Category colours in trellis</h3>
+      <p>Per-category colours propagate to all panels via a canonical row index mapped from the category field. Each category always receives the same color regardless of which panel it appears in.</p>
+      <h3>Legend with trellis</h3>
+      <p>The legend height is automatically subtracted from the available trellis layout space, so it never overlaps panel content at any visual size.</p>
+    </section>
+
+    <section id="bookmarks">
+      <h2>Bookmarks & Cross-filtering <span class="pill new">v1.2</span></h2>
+      <p>The visual declares <code>supportsBookmarkActions: true</code>. Selection state (which categories/bars are highlighted) is serialized and restored when a Power BI bookmark is applied. This enables storytelling flows where each bookmark shows a different subset of highlighted data.</p>
+      <p>Cross-visual filtering (<code>supportsSynchronizingFilterState</code>) and multi-visual selection (<code>supportsMultiVisualSelection</code>) are also active — clicking a bar filters other visuals on the page just as standard Power BI visuals do.</p>
+    </section>
+
+    <section id="accessibility">
+      <h2>Accessibility <span class="pill new">v1.2</span></h2>
+      <h3>Keyboard navigation</h3>
+      <table>
+        <thead><tr><th>Key</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code>←</code> / <code>→</code> (horizontal)</td><td>Move focus to previous / next bar</td></tr>
+          <tr><td><code>↑</code> / <code>↓</code> (vertical)</td><td>Move focus to previous / next bar</td></tr>
+          <tr><td><code>Enter</code></td><td>Select the focused bar (applies cross-visual filter)</td></tr>
+          <tr><td><code>Escape</code></td><td>Clear selection</td></tr>
+        </tbody>
+      </table>
+      <h3>High Contrast mode</h3>
+      <p>When Power BI detects a High Contrast Windows theme, the visual reads all colors from <code>host.colorPalette</code>. Every element — axis lines, labels, bands, variance markers — uses the system-defined HC colors, satisfying WCAG 2.1 AA contrast requirements.</p>
+    </section>
+
+    <!-- ── CAPABILITIES SUMMARY ── -->
+    <section id="capabilities">
+      <h2>Capabilities Summary</h2>
+      <table>
+        <thead><tr><th>Capability flag</th><th>Value</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>supportsHighlight</code></td><td>true</td><td>Visual responds to cross-visual highlight events</td></tr>
+          <tr><td><code>supportsSynchronizingFilterState</code></td><td>true</td><td>Selection syncs with other visuals on the canvas</td></tr>
+          <tr><td><code>supportsLandingPage</code></td><td>true</td><td>Shows a placeholder when no data is bound</td></tr>
+          <tr><td><code>supportsKeyboardFocus</code></td><td>true</td><td>Arrow-key navigation across bars</td></tr>
+          <tr><td><code>supportsMultiVisualSelection</code></td><td>true</td><td>Ctrl+click selects multiple bars</td></tr>
+          <tr><td><code>tooltips.supportedTypes.canvas</code></td><td>true</td><td>Power BI canvas/report tooltips supported</td></tr>
+          <tr><td><code>sorting.default</code></td><td>declared</td><td>Native Power BI sort controls wired to category</td></tr>
+          <tr><td><code>drilldown.roles</code></td><td>["category"]</td><td>Hierarchy drill-navigation active on category</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── FAQ ── -->
+    <section id="faq">
+      <h2>FAQ</h2>
+
+      <details>
+        <summary>Do I need to write a DAX measure for variance?</summary>
+        <p>No. When both <strong>Actual</strong> and <strong>Target</strong> fields are populated, the visual calculates variance (absolute and percentage) automatically. No DAX is required.</p>
+      </details>
+
+      <details>
+        <summary>What's the difference between Free and Pro?</summary>
+        <p>The Free tier includes the full bullet chart with variance, bands, IBCS mode, reference lines, a colour per category, bookmarks, and accessibility. The Pro tier adds three features: <strong>Small Multiples / Trellis</strong> (side-by-side panels), the <strong>Forecast marker</strong>, and <strong>vertical orientation</strong>.</p>
+      </details>
+
+      <details>
+        <summary>My bands don't align with the bars. What's wrong?</summary>
+        <p>Bands are relative to the <em>data maximum</em>, not a fixed scale. If your scale looks padded or different from what you expect, check whether a slicer or filter is reducing the data range. As of v1.2.0.0, bands use the data max directly — if you upgraded from an older version you may need to re-enter your <code>band1Pct</code> / <code>band2Pct</code> values.</p>
+      </details>
+
+      <details>
+        <summary>Can I use this with Calculation Groups?</summary>
+        <p>Yes. Dynamic Format Strings (v1.2+) are read from the measure's metadata on every render, so Calculation Groups that swap format strings at runtime work correctly for Actual, Target, and Forecast independently.</p>
+      </details>
+
+      <details>
+        <summary>How do I get trellis panels to share the same scale?</summary>
+        <p>In the format pane, under <strong>Trellis</strong>, ensure <strong>Sync Scale</strong> is toggled on (it's on by default). The visual computes the global maximum across all panels and uses it as the shared domain.</p>
+      </details>
+
+      <details>
+        <summary>My actual bar color shows as white after picking from Recent Colors.</summary>
+        <p>The "Recent colors" picker can sometimes return an empty string instead of a hex value. The visual detects this and falls back to the default <code>actualColor</code> to prevent invisible bars. Pick the color directly from the color wheel or hex input instead.</p>
+      </details>
+
+      <details>
+        <summary>Does the visual work in Power BI Embedded / Publish to web?</summary>
+        <p>Yes, for the Free tier. Pro features require a valid Power BI Pro or Premium Per User license for the end user, as enforced by <code>IVisualLicenseManager</code>. Publish to Web (anonymous) does not support license enforcement — Pro features are not available in that mode.</p>
+      </details>
+
+      <details>
+        <summary>The visual shows a landing page with no data. Why?</summary>
+        <p>The <strong>Category</strong> and <strong>Actual</strong> fields are both required. If either is empty the visual renders a landing page placeholder. Check your field wells and ensure at least one measure and one dimension are connected.</p>
+      </details>
+
+      <details>
+        <summary>How do I report a bug or request a feature?</summary>
+        <p>Open an issue on <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues" target="_blank">GitHub</a> or email <a href="mailto:support@tcviz.com">support@tcviz.com</a>. Please include the visual version, a screenshot, and the steps to reproduce.</p>
+      </details>
+
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <p><strong style="color:#fff">Bullet Chart Pro</strong> by TCViz &nbsp;·&nbsp;
+    <a href="infographic.html">Infographic</a> &nbsp;·&nbsp;
+    <a href="support.html">Support</a> &nbsp;·&nbsp;
+    <a href="use-case.html">Use Case</a> &nbsp;·&nbsp;
+    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+    <a href="terms.html">Terms</a>
+  </p>
+  <p style="margin-top:8px">© 2026 TCViz · <a href="mailto:support@tcviz.com">support@tcviz.com</a></p>
+</footer>
+
+</body>
+</html>

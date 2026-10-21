@@ -73,7 +73,7 @@ const MIN_COL_W       = 32;   // minimum column width in vertical mode before H-
 
 const URL_GUIDE   = "https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html";
 const URL_PRODUCT = "https://tcviz.com/product/bullet-chart-pro/?ref=visual-bullet";
-const URL_VIDEO   = "https://www.youtube.com/watch?v=bDW7qly8Mdo";
+const URL_VIDEO   = "https://www.youtube.com/watch?v=PdmOWIAKYho";
 
 /**
  * Plantillas de estilo (1.5). Un punto de partida: solo rellenan lo que el usuario no ha tocado (lo guardado en

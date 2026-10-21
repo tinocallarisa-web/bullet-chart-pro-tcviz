@@ -11,7 +11,7 @@ be pasted by hand in Partner Center → Offer listing, and the certification not
 (`docs/CERTIFICATION-NOTES-SHORT.txt`) again in the submission.
 
 Video field (Offer listing → Videos), canonical form only:
-`https://www.youtube.com/watch?v=bDW7qly8Mdo`
+`https://www.youtube.com/watch?v=PdmOWIAKYho`
 
 ---
 

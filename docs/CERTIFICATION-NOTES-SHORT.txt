@@ -1,7 +1,7 @@
 Bullet Chart Pro 1.5.0.0 - GUID bulletChartProTCViz20260001
 Repo, branch certification: https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/tree/certification
 Pages: https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/ (support, privacy, terms)
-Video: https://www.youtube.com/watch?v=bDW7qly8Mdo
+Video: https://www.youtube.com/watch?v=PdmOWIAKYho
 
 WHY THIS SUBMISSION
 Replaces 1.4.0.0: getFormattingModel (same objects/properties), on-object formatting, 12
