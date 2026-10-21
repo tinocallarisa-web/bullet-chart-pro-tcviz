@@ -128,11 +128,13 @@
             "enumeration": [
               {
                 "value": "horizontal",
-                "displayName": "Horizontal"
+                "displayName": "Horizontal",
+                "displayNameKey": "Enum_orientation_horizontal"
               },
               {
                 "value": "vertical",
-                "displayName": "Vertical [Pro]"
+                "displayName": "Vertical [Pro]",
+                "displayNameKey": "Enum_orientation_vertical"
               }
             ]
           }
@@ -391,11 +393,13 @@
             "enumeration": [
               {
                 "value": "bottom",
-                "displayName": "Bottom"
+                "displayName": "Bottom",
+                "displayNameKey": "Enum_legend_bottom"
               },
               {
                 "value": "top",
-                "displayName": "Top"
+                "displayName": "Top",
+                "displayNameKey": "Enum_legend_top"
               }
             ]
           }

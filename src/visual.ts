@@ -14,6 +14,7 @@ import VisualTooltipDataItem           = powerbi.extensibility.VisualTooltipData
 import { BulletSettings, getDefaultSettings } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { STRINGS } from "./strings";
 import { buildFormattingCards, CategoryColor, COLOR_FIXED_SLICES } from "./formatting";
 import "./../style/visual.less";
 
@@ -104,6 +105,8 @@ export class BulletChartPro implements IVisual {
     private lastDataPoints:   BulletDataPoint[] = [];
     /** Selección propia, llevada aquí: se repinta al momento sin esperar a la promesa del host. */
     private sel:              ISelectionId[] = [];
+    /** Nombres de las medidas en los pozos: leyenda y tooltip hablan como el modelo, en su idioma. */
+    private names = { actual: "Actual", target: "Target", forecast: "Forecast" };
     private focusedIndex:     number = -1;
     private isDrilled:        boolean = false;
 
@@ -131,7 +134,7 @@ export class BulletChartPro implements IVisual {
         // clics ni entra en el recorrido del lector de pantalla.
         this.watermarkEl = document.createElement("div");
         this.watermarkEl.setAttribute("aria-hidden", "true");
-        this.watermarkEl.textContent = "Pro preview";
+        this.watermarkEl.textContent = this.t("UI_ProPreview", "Pro preview");
         this.watermarkEl.style.cssText =
             "position:absolute;left:0;top:0;right:0;bottom:0;display:none;align-items:center;" +
             "justify-content:center;pointer-events:none;z-index:5;font:700 32px 'Segoe UI',sans-serif;" +
@@ -180,6 +183,24 @@ export class BulletChartPro implements IVisual {
         this.checkLicense();
     }
 
+    // ── Textos ───────────────────────────────────────────────────────
+
+    /** Texto del visual: primero la tabla del bundle (Desktop solo traduce con getDisplayName las claves de capabilities). */
+    private t(key: string, fallback: string): string {
+        const loc = String(this.host?.locale || "");
+        const tabla = STRINGS[loc] || STRINGS[Object.keys(STRINGS).find(l => l.slice(0, 2) === loc.slice(0, 2)) || ""];
+        if (tabla && tabla[key]) return tabla[key];
+        try {
+            const s = this.localization?.getDisplayName(key);
+            return s && s !== key ? s : fallback;
+        } catch { return fallback; }
+    }
+
+    /** Plantillas con "{0}". */
+    private tf(key: string, fallback: string, ...args: string[]): string {
+        return this.t(key, fallback).replace(/\{(\d+)\}/g, (_m, i) => args[Number(i)] ?? "");
+    }
+
     // ── License ──────────────────────────────────────────────────────
 
     private async checkLicense(): Promise<void> {
@@ -221,9 +242,9 @@ export class BulletChartPro implements IVisual {
         const wanted: string[] = [];
         const cat = dv?.categorical;
         const trellisOn = (dv?.metadata?.objects as any)?.trellis?.enabled === true;
-        if (trellisOn || cat?.categories?.some(c => c.source.roles?.["trellisBy"])) wanted.push("Small Multiples");
-        if (cat?.values?.some(v => v.source.roles?.["forecast"])) wanted.push("the Forecast marker");
-        if ((dv?.metadata?.objects as any)?.general?.orientation === "vertical") wanted.push("vertical orientation");
+        if (trellisOn || cat?.categories?.some(c => c.source.roles?.["trellisBy"])) wanted.push(this.t("Feat_trellis", "small multiples"));
+        if (cat?.values?.some(v => v.source.roles?.["forecast"])) wanted.push(this.t("Feat_forecast", "the Forecast marker"));
+        if ((dv?.metadata?.objects as any)?.general?.orientation === "vertical") wanted.push(this.t("Feat_vertical", "vertical orientation"));
         return wanted;
     }
 
@@ -253,10 +274,10 @@ export class BulletChartPro implements IVisual {
         this.lastBlockedNotice = wanted.join("|");
         const one = added.length === 1;
         // El texto sale de stringResources; el literal queda como respaldo si falta la clave.
-        const list = added.join(" and ");
-        const tpl  = this.localization?.getDisplayName(one ? "LicenceNotice_One" : "LicenceNotice_Many")
-            || `Bullet Chart Pro: {0} ${one ? "is" : "are"} part of the Pro plan, shown as a watermarked preview.`;
-        const msg  = tpl.replace("{0}", list);
+        const list = added.join(this.t("UI_And", " and "));
+        const msg  = one
+            ? this.tf("LicenceNotice_One",  "Bullet Chart Pro: {0} is part of the Pro plan, shown as a watermarked preview.", list)
+            : this.tf("LicenceNotice_Many", "Bullet Chart Pro: {0} are part of the Pro plan, shown as a watermarked preview.", list);
 
         const show = () => {
             try { lm?.notifyFeatureBlocked?.(msg.slice(0, 500)); } catch { /* best effort */ }
@@ -429,7 +450,7 @@ export class BulletChartPro implements IVisual {
 
         const map = new Map<string, BulletDataPoint[]>(); const order: string[] = [];
         for (let i = 0; i < n; i++) {
-            const key = trlCat ? String(trlCat.values[i] ?? "—") : "(All)";
+            const key = trlCat ? String(trlCat.values[i] ?? "—") : this.t("UI_All", "(All)");
             if (!map.has(key)) { map.set(key, []); order.push(key); }
             const catName = mainCat ? String(mainCat.values[i] ?? "") : String(actCol.source.displayName ?? i);
             const cfIndex = categoryFirstIndex.get(catName) ?? i;
@@ -535,6 +556,13 @@ export class BulletChartPro implements IVisual {
 
         this.settings = this.parseSettings(dv);
         const s = this.settings;
+        const vcols = dv.categorical?.values ?? [];
+        const nameOf = (role: string, def: string) => vcols.find(v => v.source.roles?.[role])?.source.displayName || def;
+        this.names = {
+            actual:   nameOf("actual",   this.t("UI_Actual", "Actual")),
+            target:   nameOf("target",   this.t("UI_Target", "Target")),
+            forecast: nameOf("forecast", this.t("UI_Forecast", "Forecast")),
+        };
         this.notifyProBlocked(dv);
         this.updateWatermark(this.attemptedPro(dv).length > 0);
 
@@ -577,7 +605,7 @@ export class BulletChartPro implements IVisual {
         t.setAttribute("font-size",   "13");
         t.setAttribute("fill",        "#888");
         t.setAttribute("font-family", this.settings.fontFamily);
-        t.textContent = "Add a measure to 'Actual' to get started.";
+        t.textContent = this.t("UI_Landing", "Add a measure to 'Actual' to get started.");
         this.rootSvg.appendChild(t);
     }
 
@@ -761,7 +789,7 @@ export class BulletChartPro implements IVisual {
             }
 
             if (s.showTargetValue && d.target != null) {
-                const label = `T: ${this.formatValue(d.target, d.formatTarget)}`;
+                const label = `${this.t("UI_TargetShort", "T:")} ${this.formatValue(d.target, d.formatTarget)}`;
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(rx));
                 t.setAttribute("y",           String(ry));
@@ -1153,7 +1181,7 @@ export class BulletChartPro implements IVisual {
             if (s.showActualValue && d.actual != null)
                 w += Math.ceil(this.formatValue(d.actual, d.formatActual).length * fs * 0.62 + 10);
             if (s.showTargetValue && d.target != null)
-                w += Math.ceil((`T: ${this.formatValue(d.target, d.formatTarget)}`).length * fs * 0.62 + 10);
+                w += Math.ceil((`${this.t("UI_TargetShort", "T:")} ${this.formatValue(d.target, d.formatTarget)}`).length * fs * 0.62 + 10);
             if (s.showVariance && d.variance != null) {
                 const absV = this.formatValue(Math.abs(d.variance), d.formatActual);
                 let txt    = (d.variance >= 0 ? "▲ +" : "▼ ") + absV;
@@ -1219,7 +1247,7 @@ export class BulletChartPro implements IVisual {
         const items: Item[] = [];
 
         // Actual — filled rectangle
-        items.push({ label: "Actual", draw: (x) => {
+        items.push({ label: this.names.actual, draw: (x) => {
             const r = this.mkEl("rect");
             r.setAttribute("x",      String(x));  r.setAttribute("y",      String(mid - 5));
             r.setAttribute("width",  "14");        r.setAttribute("height", "10");
@@ -1229,7 +1257,7 @@ export class BulletChartPro implements IVisual {
         }});
 
         // Target — thin vertical bar
-        if (hasTarget) items.push({ label: "Target", draw: (x) => {
+        if (hasTarget) items.push({ label: this.names.target, draw: (x) => {
             const r = this.mkEl("rect");
             r.setAttribute("x",      String(x + 5)); r.setAttribute("y",      String(mid - 7));
             r.setAttribute("width",  String(TARGET_W)); r.setAttribute("height", "14");
@@ -1239,7 +1267,7 @@ export class BulletChartPro implements IVisual {
         }});
 
         // Forecast — diamond
-        if (hasForecast) items.push({ label: "Forecast", draw: (x) => {
+        if (hasForecast) items.push({ label: this.names.forecast, draw: (x) => {
             const cx = x + 7; const sz = 5;
             const poly = this.mkEl("polygon");
             poly.setAttribute("points", `${cx},${mid-sz} ${cx+sz},${mid} ${cx},${mid+sz} ${cx-sz},${mid}`);
@@ -1250,7 +1278,7 @@ export class BulletChartPro implements IVisual {
         }});
 
         // Qualitative bands (3 stacked squares)
-        if (s.showBands) items.push({ label: "Bands", draw: (x) => {
+        if (s.showBands) items.push({ label: this.t("UI_Bands", "Bands"), draw: (x) => {
             [[s.band3Color, 0],[s.band2Color, 3],[s.band1Color, 6]].forEach(([c, off]) => {
                 const r = this.mkEl("rect");
                 r.setAttribute("x",      String(x + (off as number)));
@@ -1418,7 +1446,7 @@ export class BulletChartPro implements IVisual {
     // Draws a subtle scroll indicator badge when content overflows the viewport.
     // "vertical" = more rows below (H-mode); "horizontal" = more columns to the right (V-mode).
     private renderScrollHint(vpW: number, vpH: number, direction: "vertical" | "horizontal"): void {
-        const label = direction === "vertical" ? "▼ scroll" : "▶ scroll";
+        const label = (direction === "vertical" ? "▼ " : "▶ ") + this.t("UI_Scroll", "scroll");
         const bW = 52; const bH = 14; const bR = 4;
         const bX = vpW - bW - 4; const bY = vpH - bH - 4;
         const { fg, bg: bgCol, isHC } = this.hcColors();
@@ -1586,18 +1614,18 @@ export class BulletChartPro implements IVisual {
     private buildTooltipItems(d: BulletDataPoint): VisualTooltipDataItem[] {
         const items: VisualTooltipDataItem[] = [];
         if (d.actual != null)
-            items.push({ displayName: "Actual",   value: this.formatValue(d.actual, d.formatActual) });
+            items.push({ displayName: this.names.actual,   value: this.formatValue(d.actual, d.formatActual) });
         if (d.target != null)
-            items.push({ displayName: "Target",   value: this.formatValue(d.target, d.formatTarget) });
+            items.push({ displayName: this.names.target,   value: this.formatValue(d.target, d.formatTarget) });
         if (d.variance != null) {
             const sign = d.variance >= 0 ? "+" : "";
             let varStr = `${sign}${this.formatValue(Math.abs(d.variance), d.formatActual)}`;
             if (d.variancePct != null)
                 varStr += ` (${this.pctText(d.variancePct)})`;
-            items.push({ displayName: "Variance", value: varStr });
+            items.push({ displayName: this.t("UI_Variance", "Variance"), value: varStr });
         }
         if (d.forecast != null)
-            items.push({ displayName: "Forecast", value: this.formatValue(d.forecast, d.formatForecast) });
+            items.push({ displayName: this.names.forecast, value: this.formatValue(d.forecast, d.formatForecast) });
         // Extra user-defined tooltip fields
         items.push(...d.tooltipFields);
         return items;
