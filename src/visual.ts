@@ -102,6 +102,7 @@ export class BulletChartPro implements IVisual {
     private watermarkEl: HTMLDivElement;
     private lastOptions:      VisualUpdateOptions | null = null;
     private lastDataPoints:   BulletDataPoint[] = [];
+    private restoredSel:      ISelectionId[] = [];
     private focusedIndex:     number = -1;
     private isDrilled:        boolean = false;
 
@@ -147,7 +148,8 @@ export class BulletChartPro implements IVisual {
         // Re-rendering with lastOptions is enough because the dataView already contains
         // the correct highlights for the restored bookmark at that point.
         // Se repinta sin pasar por update(): los eventos de render van uno a uno con cada update().
-        this.selectionManager.registerOnSelectCallback(() => this.redraw());
+        // Un marcador restaura la selección por aquí; los ids llegan en el callback (getSelectionIds puede no tenerlos).
+        this.selectionManager.registerOnSelectCallback((ids: ISelectionId[]) => { this.restoredSel = ids ?? []; this.redraw(); });
 
         // Keyboard navigation (supportsKeyboardFocus declared in capabilities.json)
         this.container.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -165,12 +167,12 @@ export class BulletChartPro implements IVisual {
                 e.preventDefault();
                 if (this.focusedIndex >= 0 && this.focusedIndex < n) {
                     const d = this.lastDataPoints[this.focusedIndex];
-                    this.selectionManager.select(d.selectionId, false);
+                    this.selectionManager.select(d.selectionId, false).then(() => { this.restoredSel = []; this.redraw(); });
                 }
             } else if (e.key === "Escape") {
                 this.focusedIndex = -1;
                 this.removeFocusRing();
-                this.selectionManager.clear();
+                this.selectionManager.clear().then(() => { this.restoredSel = []; this.redraw(); });
             }
         });
 
@@ -506,8 +508,10 @@ export class BulletChartPro implements IVisual {
      */
     private redraw(): void {
         if (!this.lastOptions) return;
-        try { this.render(this.lastOptions); }
-        catch (e) { console.error("[BulletChartPro]", e); }
+        try {
+            this.render(this.lastOptions);
+            if (this.focusedIndex >= 0) this.updateFocusRing();
+        } catch (e) { console.error("[BulletChartPro]", e); }
     }
 
     private render(options: VisualUpdateOptions): void {
@@ -653,7 +657,7 @@ export class BulletChartPro implements IVisual {
         g.setAttribute("transform", `translate(0,${gy})`);
         g.setAttribute("role",      "listitem");
         if (ki >= 0) g.setAttribute("data-ki", String(ki));
-        g.style.opacity = d.isHighlighted ? "1" : "0.25";
+        g.style.opacity = this.dimmed(d) ? "0.25" : "1";
         if (allow) g.style.cursor = "pointer";
 
         // 1. Category label
@@ -798,7 +802,7 @@ export class BulletChartPro implements IVisual {
         if (allow) {
             g.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
-                this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey);
+                this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey).then(() => { this.restoredSel = []; this.redraw(); });
             });
         }
 
@@ -906,7 +910,7 @@ export class BulletChartPro implements IVisual {
             const g = this.mkEl("g");
             g.setAttribute("transform", `translate(${colX},0)`);
             g.setAttribute("data-ki", String(i));
-            g.style.opacity = d.isHighlighted ? "1" : "0.25";
+            g.style.opacity = this.dimmed(d) ? "0.25" : "1";
             if (allow) g.style.cursor = "pointer";
 
             if (s.showBands) {
@@ -1017,7 +1021,7 @@ export class BulletChartPro implements IVisual {
             if (allow) {
                 g.addEventListener("click", (e: MouseEvent) => {
                     e.stopPropagation();
-                    this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey);
+                    this.selectionManager.select(d.selectionId, e.ctrlKey || e.metaKey).then(() => { this.restoredSel = []; this.redraw(); });
                 });
             }
             appendTo.appendChild(g);
@@ -1636,7 +1640,7 @@ export class BulletChartPro implements IVisual {
 
     private attachClearClick(): void {
         this.rootSvg.onclick = () => {
-            this.selectionManager.clear();
+            this.selectionManager.clear().then(() => { this.restoredSel = []; this.redraw(); });
             this.focusedIndex = -1;
             this.removeFocusRing();
         };
@@ -1691,6 +1695,18 @@ export class BulletChartPro implements IVisual {
 
     // allowInteractions vive en hostCapabilities; host.allowInteractions solo existe en APIs antiguas
     // (casi siempre undefined, y el clic filtraba aunque el autor apagara las interacciones).
+    /**
+     * Atenuada si otro visual resalta y esta fila no entra, o si hay barras seleccionadas en este visual y esta no
+     * es una de ellas. Una categoría repetida en small multiples comparte identidad: se marcan todas sus barras.
+     */
+    private dimmed(d: BulletDataPoint): boolean {
+        if (!d.isHighlighted) return true;
+        const own = this.selectionManager.getSelectionIds() as ISelectionId[];
+        const sel = own?.length ? own : this.restoredSel;
+        if (!sel?.length) return false;
+        return !sel.some(id => id.equals(d.selectionId));
+    }
+
     private canInteract(): boolean {
         const h = this.host as any;
         return (h?.hostCapabilities?.allowInteractions ?? h?.allowInteractions) !== false;
