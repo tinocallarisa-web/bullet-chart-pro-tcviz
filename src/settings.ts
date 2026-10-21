@@ -34,6 +34,7 @@ export interface BulletSettings {
     fontFamily:         string;
     labelWidthPct:      number;   // % of viewport width for category column (5-40)
     rightPanelWidthPct: number;   // % of viewport width for values/variance column (10-45)
+    rightPanelWidthSet: boolean;  // true si el usuario lo fijó (si no, el ancho se calcula del texto)
 
     // ── Axis / Scale ──────────────────────────────────────────────────
     showAxis:           boolean;
@@ -92,6 +93,7 @@ export function getDefaultSettings(): BulletSettings {
         fontFamily:         "Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
         labelWidthPct:      22,
         rightPanelWidthPct: 34,
+        rightPanelWidthSet: false,
 
         showAxis:           true,
 

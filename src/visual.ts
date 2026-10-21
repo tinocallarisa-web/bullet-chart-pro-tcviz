@@ -371,6 +371,7 @@ export class BulletChartPro implements IVisual {
             fontFamily:         str( "labels", "fontFamily",         d.fontFamily),
             labelWidthPct:      Math.min(40, Math.max(5,  num("layout","labelWidthPct",      d.labelWidthPct))),
             rightPanelWidthPct: Math.min(45, Math.max(10, num("layout","rightPanelWidthPct", d.rightPanelWidthPct))),
+            rightPanelWidthSet: typeof obj?.["layout"]?.["rightPanelWidthPct"] === "number",
             showAxis:           bool("layout", "showAxis",           d.showAxis),
             showLegend:         bool("legend", "showLegend",         d.showLegend),
             legendPosition:     str( "legend", "legendPosition",     d.legendPosition) as any,
@@ -1269,12 +1270,13 @@ export class BulletChartPro implements IVisual {
         const aBarH   = Math.max(3, Math.floor(barH * 0.55));
         const aBarY   = barY + Math.floor((barH - aBarH) / 2);
         let labelW    = s.showCategoryLabel ? Math.round(vpW * s.labelWidthPct / 100) : 0;
-        // autoRightW: computed from actual data so column always fits the longest number.
-        // Falls back to rightPanelWidthPct when no data is available yet.
-        let rightW    = autoRightW != null
-            ? autoRightW
-            : (s.showActualValue || s.showVariance || s.showTargetValue)
-                ? Math.round(vpW * s.rightPanelWidthPct / 100) : 0;
+        // autoRightW sale del texto más largo. "Values panel width %" no se aplicaba nunca (hasta la 1.4 se ignoraba):
+        // desde la 1.5 manda si el usuario lo fija; si no, se sigue calculando solo y los informes no cambian.
+        const anyValue = s.showActualValue || s.showVariance || s.showTargetValue;
+        let rightW    = !anyValue ? 0
+            : s.rightPanelWidthSet || autoRightW == null
+                ? Math.round(vpW * s.rightPanelWidthPct / 100)
+                : autoRightW;
         // La barra es lo esencial. rightW va en píxeles fijos (sale del texto más largo), así que
         // en un visual estrecho etiqueta + valores se comían todo el ancho y la barra desaparecía.
         // Se garantiza un mínimo para la barra: primero se estrecha la columna de valores, si

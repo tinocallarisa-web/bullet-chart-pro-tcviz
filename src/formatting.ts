@@ -87,8 +87,9 @@ export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): 
     ]);
 
     const layout = card("layout", "Visual_Layout", "Layout", [
-        new NumUpDown({ name: "labelWidthPct",      displayName: "Category column width % (5-40)", displayNameKey: "Visual_Layout_LabelWidthPct",      value: s.labelWidthPct }),
-        new NumUpDown({ name: "rightPanelWidthPct", displayName: "Values panel width % (10-45)",    displayNameKey: "Visual_Layout_RightPanelWidthPct", value: s.rightPanelWidthPct }),
+        // Los dos anchos solo existen en horizontal: en vertical no se ofrecen.
+        new NumUpDown({ name: "labelWidthPct",      displayName: "Category column width % (5-40)", displayNameKey: "Visual_Layout_LabelWidthPct",      value: s.labelWidthPct, visible: s.orientation !== "vertical" }),
+        new NumUpDown({ name: "rightPanelWidthPct", displayName: "Values panel width % (10-45)",    displayNameKey: "Visual_Layout_RightPanelWidthPct", value: s.rightPanelWidthPct, visible: s.orientation !== "vertical" }),
         new ToggleSwitch({ name: "showAxis",        displayName: "Show scale axis",                displayNameKey: "Visual_Layout_ShowAxis",           value: s.showAxis }),
     ]);
 
