@@ -6,6 +6,61 @@ Versioning follows `MAJOR.MINOR.PATCH.BUILD`.
 
 ---
 
+## [1.6.0.0] — 2026-11
+
+### Added
+- **Collection styles.** Format → Style template → *Template*: *Report theme* (the default:
+  colours and text follow the report theme) plus Boardroom, Ledger, Editorial, Signal, Aurora and
+  Terrace — the same seven styles as the other TCViz visuals (Box & Whisker, Radar, Treemap, Line
+  Chart). All free. A style only fills what you have not set yourself; picking a style replaces
+  the colours any style defines (bar, target, second target, forecast, variance colours, bands,
+  legend text, small-multiple panel colours, focus colour; Ledger and Editorial also set a serif
+  font). The dark styles (Boardroom, Aurora) paint the background of the visual. Step 3 of the
+  setup guide shows the seven styles with thumbnails.
+- **Conditional formatting (fx) on the Target marker** (Format → Colors), as on the Actual bar.
+  The rule is evaluated per category.
+- **Accessibility card.** *High contrast*: Automatic (follows the Windows contrast theme) or On
+  (black on white, also without the Windows theme); *Focus color* and *Focus width* of the
+  keyboard focus; *Minimum text size* [6] — no text of the visual is drawn smaller (labels,
+  legend, axis, reference-line labels, panel titles).
+- **Sort card (free).** *Sort bars by*: Data order (default; the Power BI *Sort axis* menu still
+  works), Actual, Target, Variance, Variance %, Category name; *Descending*. Rows without a value
+  go last. In small multiples each panel is sorted the same way.
+- **Layout and axis** (the former *Layout* card): *Row height* — *Fit to visual* (default) or
+  *Fixed* with *Fixed row height (px)* (16–200, default 40; if the rows do not fit, the visual
+  scrolls); *Bar thickness % of row (10-90)* [44, the previous look; in vertical orientation it
+  sets the column width]; *Gridlines* [On]; *Axis title* [Off] and *Axis title text* (empty = the
+  measure name).
+- **Small multiples [Pro]: the nine common options of the TCViz collection** — Columns
+  (0 = automatic), Space between panels, Title size, Panel title color, Bold title, Title
+  alignment (Left, Center; default Center as in 1.5), Panel background color, Panel border
+  (on/off) and Panel border color — next to Enable small multiples, Sync scale across panels and
+  Show panel titles. The defaults keep the 1.5 look.
+- **On-object:** the axis offers *Show scale axis*, *Gridlines* and *Axis title* toggles; the
+  small-multiple titles offer *Panel border*.
+
+### Changed
+- **The 1.5 style templates are replaced by the collection styles.** Reports saved with a 1.5
+  template open with the closest style: Clean, Minimal, Soft and Compact → Report theme (Minimal
+  keeps the scale axis off, Compact keeps its 9 px labels and 8 px legend); Contrast → Boardroom;
+  IBCS style → Signal.
+- **The *IBCS Mode* switch is removed** from Format → General, which now only has *Orientation*.
+  A report saved with that switch on and no template chosen opens in the Signal style.
+- **Rows fill the visual.** With *Fit to visual* the rows share the whole height of the visual;
+  before 1.6 they were capped at 72 px and left empty space below.
+- **Reference line labels** sit in their own strip above the rows instead of being pressed
+  against the top edge; near the right edge the label goes to the left of the line; their size
+  follows the axis text. In small multiples they stay inside each panel.
+- **A fixed colour chosen next to *fx*** (Actual bar, Target marker) is stored once for the
+  whole visual. The per-category colours of the bar are still below.
+- **Pro preview watermark** is the common TCViz watermark: *Pro preview* plus the names of the
+  Pro features the report is using, centred, never covering the data.
+- New texts translated into the 12 languages.
+- Free/Pro unchanged: Pro is small multiples, forecast, vertical orientation, bands from measures
+  and the second target. Styles, sort, accessibility, axis title and row height are free.
+
+---
+
 ## [1.5.0.0] — 2026-10
 
 ### Added

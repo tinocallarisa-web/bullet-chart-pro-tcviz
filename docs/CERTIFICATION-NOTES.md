@@ -8,12 +8,48 @@
 | | |
 |---|---|
 | Visual | Bullet Chart Pro |
-| Version | 1.5.0.0 |
+| Version | 1.6.0.0 |
 | GUID | `bulletChartProTCViz20260001` |
 | Plan ID | `bullet-chart-pro-tcviz` |
 | Repository | https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz — branch `certification` |
 | Pages | https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/ |
 | Video | https://www.youtube.com/watch?v=PdmOWIAKYho |
+
+## What changed in 1.6.0.0
+
+**Collection styles.** The `style.template` enumeration now offers the seven styles of the
+TCViz collection: *Report theme* (`clean`, default: colours and text follow the report theme),
+Boardroom, Ledger, Editorial, Signal, Aurora and Terrace. All free. A style only fills what the
+user has not set (saved `metadata.objects` always win). Picking one removes, with a single
+`persistProperties({ remove })`, the colours any style defines, so switching back to Report theme
+also clears the previous style's colours. Saved 1.5 template values are read, never rewritten:
+Clean/Minimal/Soft/Compact → Report theme (Minimal keeps the axis off, Compact its 9/8 px
+sizes), Contrast → Boardroom, IBCS style → Signal.
+
+**IBCS Mode switch removed** from the General card (the property stays readable for saved
+reports: on, with no template chosen, it opens in Signal).
+
+**Conditional formatting (fx)** on `colors.actualColor` and, new, `colors.targetColor`: wildcard
+selector, `altConstantSelector: null` (the fixed colour is stored once for the visual) and
+`ConstantOrRule`. The rule is evaluated per category.
+
+**New cards.** *Sort* (Data order — Power BI *Sort axis* still applies —, Actual, Target,
+Variance, Variance %, Category name; Descending; blanks last; per panel in small multiples).
+*Accessibility* (High contrast Automatic/On, Focus color, Focus width, Minimum text size [6]).
+
+**Layout and axis** (former Layout card): row height *Fit to visual* (default; before 1.6 rows
+were capped at 72 px) or *Fixed* (16–200 px, scrolls if needed), bar thickness % of row [44],
+gridlines [On], axis title [Off] and its text. Reference line labels have their own strip.
+
+**Small multiples [Pro]:** the nine common options of the collection (columns with 0 =
+automatic, spacing, title size/colour/bold/alignment, panel background, border on/off, border
+colour). Defaults keep the 1.5 look.
+
+**Pro preview watermark** is the common TCViz piece (`src/comun/watermark.ts`, `textContent`
+only): "Pro preview" plus the names of the Pro features in use, centred, never over the data.
+
+**On-object:** axis toggles for scale axis, gridlines and axis title; panel border on the
+small-multiple titles. New texts in the 12 languages. Free/Pro split unchanged.
 
 ## What changed in 1.5.0.0
 
@@ -31,8 +67,7 @@ Pro preview / purchase notice apply as for the other Pro features. New colour
 
 **Setup guide and style templates.** New object `style` (`template`, `guide`). The guide is an
 HTML overlay shown only while editing, with data, when interactions are allowed and in tiles of
-at least 360 x 220 px. Six templates; *IBCS style* is a style inspired by IBCS notation, not a
-compliance claim.
+at least 360 x 220 px. Six templates (replaced by the collection styles in 1.6).
 
 **`persistProperties`** is called only (a) from a click in the guide (Try vertical, a template,
 Finish / X) and (b) once when the template value changes while editing, to remove the saved
@@ -134,10 +169,11 @@ The visual draws no licensing UI of its own.
 
 ## Free vs Pro
 
-**Free** — actual vs target with automatic variance, qualitative bands (percentages), IBCS
-mode and style templates, horizontal orientation, two reference lines, a colour per category,
-conditional formatting on the bar, legend, tooltips, drilldown, cross-filtering, bookmarks,
-keyboard navigation, high contrast, on-object formatting, setup guide, 12 languages.
+**Free** — actual vs target with automatic variance, qualitative bands (percentages), the seven
+collection styles, sorting, the Accessibility card, horizontal orientation, two reference lines,
+a colour per category, conditional formatting on the bar and the target, axis title, gridlines,
+row height, legend, tooltips, drilldown, cross-filtering, bookmarks, keyboard navigation, high
+contrast, on-object formatting, setup guide, 12 languages.
 
 **Pro** — Small Multiples, the Forecast marker, vertical orientation, a second target and
 bands from measures.
@@ -154,7 +190,8 @@ unsafe calls.
 
 Keyboard: arrows move the focus ring across bars, Enter selects, Escape clears, and the focus
 ring is restored after a re-render. High contrast is honoured through `host.colorPalette`
-(`isHighContrast`), including the panel title colour. Rendering events are raised on every exit
+(`isHighContrast`), including the panel title colour, or forced with Format → Accessibility →
+High contrast = On. Focus colour/width and a minimum text size are user settings (1.6). Rendering events are raised on every exit
 path of `update()`, including early returns.
 
 ## Known gap

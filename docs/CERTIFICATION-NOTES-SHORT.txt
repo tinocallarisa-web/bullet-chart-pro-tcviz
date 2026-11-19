@@ -1,44 +1,43 @@
-Bullet Chart Pro 1.5.0.0 - GUID bulletChartProTCViz20260001
-Repo, branch certification: https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/tree/certification
-Docs: tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html (+privacy, terms)
-Video: https://www.youtube.com/watch?v=PdmOWIAKYho
+Bullet Chart Pro 1.6.0.0 - GUID bulletChartProTCViz20260001
 
-WHY THIS SUBMISSION
-Replaces 1.4.0.0: getFormattingModel (same objects/properties), on-object formatting, 12
-languages, setup guide, style templates, 2 new Pro features, fixes. API 5.11.1.
+SOURCE CODE
+github.com/tinocallarisa-web/bullet-chart-pro-tcviz, branch "certification". Public, no
+credentials.
 
-PRO PREVIEW
-Without a licence, IN EDIT MODE ONLY, Pro features render under a "Pro preview" watermark.
-Intentional. In reading view, before the licence resolves and where licences cannot be read
-(Publish to Web, embed, export) the FREE result is drawn, no watermark.
+NEW IN 1.6.0.0
+Style templates are now the 7 TCViz collection styles (saved 1.5 templates map to them); IBCS
+Mode switch removed. fx on Actual bar and Target marker (altConstantSelector null). New cards:
+Sort, Accessibility (high contrast On/Automatic, focus colour/width, minimum text size).
+Layout and axis: row height, bar thickness, gridlines, axis title. Small multiples: 9 common
+options. Common Pro preview watermark.
 
-TESTING - FREE (no plan)
-1. Category + Actual + Target: bars, target, variance, bands. Edit mode: setup guide on top;
-close with X.
-2. Click a bar: cross-filter, others dimmed. Ctrl+click, right-click menu, arrows/Enter/Esc.
-Bookmark restores it. allowInteractions false: no selection.
-3. Format > Style template: pick Contrast; the colours change.
-4. Edit mode, add Second target, a measure in Band 1 limit, Forecast, Small Multiples By or
-Vertical: watermark + Power BI banner, then Upgrade bar. Reading view: free chart.
+TESTING THE PREMIUM FEATURES - NO KEY NEEDED
+Pro comes from the AppSource plan via IVisualLicenseManager; no activation key. Plan
+"bullet-chart-pro-tcviz". In EDIT mode without a licence each Pro feature is drawn WORKING
+under a "Pro preview" watermark that names it, and Power BI shows its licence notice. Reading
+view, Publish to Web, embed and export show the free result, no watermark.
 
-TESTING - PRO (plan "bullet-chart-pro-tcviz")
-1. Second target: hollow marker, legend, tooltip with its variance.
-2. Band 1 limit / Band 2 limit / Band maximum: per-row bands.
-3. Small multiples, Forecast, Vertical: no watermark, no notice.
+WHAT TO CHECK
+1. Empty visual: start screen. Category + Actual + Target: bars, target, variance, bands.
+Edit mode: setup guide on top; close with X.
+2. Format > Style template: pick Boardroom (dark), then Report theme.
+3. Sort > Variance %; Accessibility > High contrast On, Minimum text size 10.
+4. Colors > fx on Actual bar and on Target marker.
+5. Pro without licence: Second target, Band 1 limit, Forecast, Small Multiples By or
+Vertical: watermark + banner. With the plan: no watermark.
+6. Click a bar: cross-filter, others dimmed; Ctrl+click; bookmarks restore it. Arrows/Enter/
+Esc. allowInteractions false: no selection. Format mode: on-object panes.
 
 PERSISTPROPERTIES
-Only on a click in the guide (step, Try, template, Finish/X) and once when the template is
-changed in the format pane (clears the settings it defines). Never in the selection callback.
+Only on a click in the guide and once when the style changes (clears the colours styles
+define). Never in the selection callback.
 
 PRIVACY
-No network, telemetry, cookies or storage. privileges: []. No innerHTML. Start-screen links
-open only on click via host.launchUrl. npm audit 0; ESLint clean.
+privileges []. No network, telemetry, cookies or storage. No innerHTML in src. Links open only
+on click via host.launchUrl. 12 languages, own texts bundled.
 
-LICENSING
-IVisualLicenseManager only. Pro if Service ID ends in ".bullet-chart-pro-tcviz", state
-Active or Warning. Never blocks render; failure = Free, no prompts. No own licensing UI.
+One renderingStarted/Finished pair per update(); repaints never call update(). eslint 0, npm audit 0.
 
-RENDERING EVENTS 1:1
-One renderingStarted and one Finished/Failed per update(). Repaints outside update()
-(licence, selection, guide) raise none.
 Full notes: docs/CERTIFICATION-NOTES.md
+Video https://www.youtube.com/watch?v=PdmOWIAKYho
+Support/privacy/terms: tinocallarisa-web.github.io/bullet-chart-pro-tcviz/

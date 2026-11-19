@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Support — Bullet Chart Pro | TCViz</title>
-  <meta name="description" content="Bullet Chart Pro for Power BI: field wells, format pane reference, setup guide, style templates, on-object formatting, languages, use cases and FAQ." />
+  <meta name="description" content="Bullet Chart Pro for Power BI: field wells, format pane reference, setup guide, collection styles, sorting, accessibility, on-object formatting, languages, use cases and FAQ." />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
     h1   { color: #0078D4; margin-bottom: 4px; }
@@ -17,7 +17,7 @@
     .badge { display: inline-block; background: #e8433a; color: #fff; font-size: .72rem; padding: 1px 7px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
     .badge.free { background: #388e3c; }
     .badge.new  { background: #0078D4; }
-    nav { margin-bottom: 32px; font-size: .95rem; }
+    nav { margin-bottom: 20px; font-size: .95rem; }
     nav a { color: #0078D4; text-decoration: none; margin-right: 20px; }
     nav a:hover { text-decoration: underline; }
     .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); margin: 20px 0 32px; }
@@ -31,6 +31,22 @@
     th { background: #f4f4f4; color: #1a1a2e; }
     .muted { color: #777; font-size: .9rem; }
     footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: .9rem; color: #888; }
+
+    /* ── Search ── */
+    .searchbar { margin: 0 0 28px; }
+    .searchbox { position: relative; display: flex; align-items: center; gap: 10px; background: #fff;
+                 border: 1px solid #d0d0d0; border-radius: 8px; padding: 0 12px; }
+    .searchbox:focus-within { border-color: #0078D4; box-shadow: 0 0 0 3px rgba(0,120,212,.16); }
+    .searchbox svg { color: #888; flex-shrink: 0; }
+    .searchbox input { flex: 1; border: none; outline: none; background: transparent; font: inherit;
+                       font-size: 15px; color: #333; padding: 11px 0; }
+    .searchbox input::placeholder { color: #888; }
+    .searchbox button { border: none; background: transparent; color: #888; font-size: 20px;
+                        line-height: 1; cursor: pointer; padding: 0 2px; }
+    .searchbox button:hover { color: #0078D4; }
+    .search-status { margin: 8px 0 0; font-size: 13px; color: #777; min-height: 16px; }
+    mark { background: #FCE8A8; color: #1a1a2e; border-radius: 2px; padding: 0 2px; }
+    .is-hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -38,13 +54,15 @@
   <h1>Support — Bullet Chart Pro</h1>
   <p><strong>Publisher:</strong> TCViz &nbsp;|&nbsp;
      <strong>Email:</strong> <a href="mailto:support@tcviz.com">support@tcviz.com</a> &nbsp;|&nbsp;
-     <strong>Version:</strong> 1.5.0.0 &nbsp;|&nbsp;
-     <span class="muted">docs updated 21 Oct 2026</span></p>
+     <strong>Version:</strong> 1.6.0.0 &nbsp;|&nbsp;
+     <span class="muted">docs updated 19 Nov 2026</span></p>
 
   <nav>
     <a href="#quick-start">Quick start</a>
     <a href="#fields">Fields</a>
+    <a href="#styles">Styles</a>
     <a href="#format">Format pane</a>
+    <a href="#accessibility">Accessibility</a>
     <a href="#use-cases">Use cases</a>
     <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
@@ -53,8 +71,21 @@
     <a href="terms.html">Terms</a>
   </nav>
 
+  <div class="searchbar">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="docsearch" type="search" placeholder="Search the documentation — try &quot;variance&quot;, &quot;bands&quot;, &quot;small multiples&quot;…"
+             autocomplete="off" aria-label="Search the documentation">
+      <button id="searchclear" type="button" aria-label="Clear search" hidden>&times;</button>
+    </div>
+    <div id="searchstatus" class="search-status" role="status" aria-live="polite"></div>
+  </div>
+
+<div class="wrap">
+
   <p>Bullet Chart Pro shows each actual value against its target on one line: the bar is the
-     actual, the marker is the target, the grey bands say how far the value is from good, and the
+     actual, the marker is the target, the bands say how far the value is from good, and the
      variance (absolute and %) is calculated by the visual — no DAX measure needed for it.</p>
 
   <!-- VIDEO -->
@@ -64,19 +95,22 @@
   </div>
 
   <!-- WHAT'S NEW -->
-  <h2 id="whats-new">What's new in 1.5.0.0</h2>
+  <h2 id="whats-new">What's new in 1.6.0.0</h2>
   <div class="card">
     <ul>
-      <li><strong>Second target</strong> <span class="badge">Pro</span> — a hollow marker next to the target, with its own variance in the tooltip.</li>
-      <li><strong>Bands from measures</strong> <span class="badge">Pro</span> — each row gets its own band thresholds, calculated in DAX.</li>
-      <li><strong>Setup guide</strong> inside the visual, in three steps.</li>
-      <li><strong>Six style templates</strong>: Clean, Minimal, Contrast, Soft, Compact and IBCS style.</li>
-      <li><strong>On-object formatting</strong>: click a bar, a marker, the legend or the axis and format it on the canvas.</li>
-      <li><strong>Legend</strong> with its own font, size and colour.</li>
-      <li><strong>12 languages</strong>, and number formats from your model (including dynamic format strings) in the report language.</li>
-      <li><strong>Selection</strong>: clicking a bar dims the others, also when a bookmark restores the selection.</li>
-      <li>Fixes for vertical orientation, small multiples, small tiles, <em>Values panel width %</em> and <em>Edit interactions</em>.</li>
+      <li><strong>Seven collection styles</strong> — Report theme (default), Boardroom, Ledger, Editorial, Signal, Aurora and Terrace: the same styles as the other TCViz visuals, all free. They replace the 1.5 templates; saved reports open with the closest style.</li>
+      <li><strong>Sort</strong> — by actual, target, variance, variance % or category name, ascending or descending. Free.</li>
+      <li><strong>Accessibility card</strong> — high contrast On or Automatic, focus colour and width, minimum text size.</li>
+      <li><strong>Conditional formatting (fx) on the Target marker</strong>, as on the Actual bar.</li>
+      <li><strong>Layout and axis</strong> — rows that fit the visual (or a fixed row height), bar thickness, gridlines on/off and an axis title.</li>
+      <li><strong>Reference line labels</strong> in their own strip above the rows, never pressed against the edge.</li>
+      <li><strong>Small multiples</strong> <span class="badge">Pro</span> — the nine common options of the collection: automatic columns, spacing, title size, colour, bold and alignment, panel background and border.</li>
+      <li><strong>Pro preview watermark</strong> names the Pro features the report is using, centred, never covering the data.</li>
+      <li>The <em>IBCS Mode</em> switch is gone from Format → General; reports saved with it on open in the Signal style.</li>
     </ul>
+    <p class="muted">1.5.0.0 added the second target and bands from measures (Pro), the setup guide,
+       on-object formatting, the legend font and colour, 12 languages and model number formats. Full
+       history in the <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">changelog</a>.</p>
   </div>
 
   <!-- QUICK START -->
@@ -90,7 +124,7 @@
       <li>Variance (absolute + %) is calculated <strong>automatically</strong> and coloured green or red.</li>
     </ol>
     <p>While you are editing, the <strong>setup guide</strong> opens over the chart and walks you through
-       these steps, the Pro features and the style templates. Close it with ✕ or <em>Finish</em>.</p>
+       these steps, the Pro features and the styles. Close it with ✕ or <em>Finish</em>.</p>
   </div>
 
   <!-- FIELDS -->
@@ -104,10 +138,10 @@
       <tr><td>Actual (Real)</td><td>Measure</td><td>The bar. Required: without it the start screen is shown.</td></tr>
       <tr><td>Target</td><td>Measure</td><td>Solid marker. Drives the variance label and its colour.</td></tr>
       <tr><td>Forecast <span class="badge">Pro</span></td><td>Measure</td><td>Triangle marker for the expected end-of-period value.</td></tr>
-      <tr><td>Second target <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Hollow marker next to the target: a stretch goal, last year or a commitment. Shown in the legend and in the tooltip with its own variance.</td></tr>
-      <tr><td>Band 1 limit <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 1 (worst) ends, for this row.</td></tr>
-      <tr><td>Band 2 limit <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 2 (mid) ends, for this row.</td></tr>
-      <tr><td>Band maximum <span class="badge">Pro</span> <span class="badge new">1.5</span></td><td>Measure</td><td>Where band 3 (best) ends, for this row. If empty, band 3 runs to the data maximum.</td></tr>
+      <tr><td>Second target <span class="badge">Pro</span></td><td>Measure</td><td>Hollow marker next to the target: a stretch goal, last year or a commitment. Shown in the legend and in the tooltip with its own variance.</td></tr>
+      <tr><td>Band 1 limit <span class="badge">Pro</span></td><td>Measure</td><td>Where band 1 (worst) ends, for this row.</td></tr>
+      <tr><td>Band 2 limit <span class="badge">Pro</span></td><td>Measure</td><td>Where band 2 (mid) ends, for this row.</td></tr>
+      <tr><td>Band maximum <span class="badge">Pro</span></td><td>Measure</td><td>Where band 3 (best) ends, for this row. If empty, band 3 runs to the data maximum.</td></tr>
       <tr><td>Tooltips</td><td>Measure</td><td>Up to 10 extra measures in the tooltip.</td></tr>
     </tbody>
   </table>
@@ -119,16 +153,18 @@
   <h2 id="free-pro">Free and Pro</h2>
   <div class="card">
     <p><span class="badge free">Free</span> The complete bullet chart: actual vs target with automatic
-       variance, qualitative bands (as percentages), IBCS mode and style templates, two reference lines,
-       a colour per category and conditional formatting (<em>fx</em>) on the bar, legend, axis, tooltips,
-       drill-down, cross-filtering, bookmarks, keyboard navigation, high contrast, on-object formatting,
-       the setup guide and 12 languages.</p>
+       variance, qualitative bands (as percentages), the seven collection styles, sorting, two reference
+       lines, a colour per category and conditional formatting (<em>fx</em>) on the bar and the target,
+       legend, axis with title and gridlines, row height and bar thickness, tooltips, drill-down,
+       cross-filtering, bookmarks, keyboard navigation, the Accessibility card (high contrast, focus,
+       minimum text size), on-object formatting, the setup guide and 12 languages.</p>
     <p><span class="badge">Pro</span> Small multiples, the Forecast marker, vertical orientation, a
        second target and bands from measures.</p>
     <p>Without a licence, <strong>while you edit</strong>, a Pro feature renders working under a
-       <em>Pro preview</em> watermark and Power BI shows its own notice with the option to buy. In
-       reading view, and wherever Power BI cannot check licences (Publish to Web, embedding, export),
-       the free chart is drawn with no watermark.</p>
+       <em>Pro preview</em> watermark that names the Pro features in use — centred, never covering the
+       data — and Power BI shows its own notice with the option to buy. In reading view, and wherever
+       Power BI cannot check licences (Publish to Web, embedding, export), the free chart is drawn with
+       no watermark.</p>
   </div>
 
   <!-- GUIDE -->
@@ -138,65 +174,82 @@
   <ol>
     <li><strong>Your data</strong> — Category, Actual and Target, each with a tick once it is in its well. The list updates by itself as you drag fields.</li>
     <li><strong>Try Pro on your data</strong> — a <em>Try</em> button switches to vertical bars with one click. For bands from measures, the second target and small multiples, the guide tells you which well to use and ticks the item once it is filled. Without a licence they show under the watermark while you edit.</li>
-    <li><strong>Pick a style</strong> — the six templates, each with a thumbnail.</li>
+    <li><strong>Pick a style</strong> — the seven collection styles, each with a thumbnail.</li>
   </ol>
   <p>Close it with ✕ or <em>Finish</em>. To open it again: Format → <strong>Style template</strong> → <strong>Setup guide</strong> = On.</p>
 
-  <!-- TEMPLATES -->
-  <h2 id="templates">Style templates</h2>
-  <p>Format → Style template → <em>Template</em>, or step 3 of the guide. Picking a template
-     <strong>replaces the settings that template defines</strong> (for example, Contrast resets the
-     colours you had changed); every other setting stays as you left it. After picking one, you can
-     still change anything by hand.</p>
+  <!-- STYLES -->
+  <h2 id="styles">Styles</h2>
+  <p>Format → Style template → <em>Template</em>, or step 3 of the guide. Bullet Chart Pro uses the
+     same seven styles as the other TCViz visuals (Box &amp; Whisker, Radar, Treemap, Line Chart), so a
+     page built with several of them reads as one report. All styles are free.</p>
+  <ul>
+    <li>A style <strong>only fills what you have not set yourself</strong>: a colour you picked by hand wins.</li>
+    <li><strong>Picking a style replaces the colours any style defines</strong>: bar, target, second target,
+        forecast, positive and negative variance, the three bands, legend text, small-multiple panel colours
+        and the focus colour. Ledger and Editorial also set a serif font. Everything else stays as you left it.</li>
+    <li>The dark styles (<strong>Boardroom</strong> and <strong>Aurora</strong>) paint the background of the visual.</li>
+    <li>High contrast always wins over the style.</li>
+  </ul>
   <div class="tbl-wrap">
   <table>
-    <thead><tr><th>Template</th><th>What it sets</th></tr></thead>
+    <thead><tr><th>Style</th><th>What it looks like</th></tr></thead>
     <tbody>
-      <tr><td>Clean</td><td>The usual look (the defaults). Sets nothing.</td></tr>
-      <tr><td>Minimal</td><td>Grey target, very light bands, no scale axis, grey legend text.</td></tr>
-      <tr><td>Contrast</td><td>Navy bar, black target, darker bands, strong green and red for the variance.</td></tr>
-      <tr><td>Soft</td><td>Light blue bar and bands, green and orange for the variance.</td></tr>
-      <tr><td>Compact</td><td>Font size 9 for labels and 8 for the legend, for dense pages.</td></tr>
-      <tr><td>IBCS style</td><td>Turns on IBCS mode (dark grey bar, black target, grey bands) with green and red variance. A style inspired by IBCS notation, not a statement of compliance with the standard.</td></tr>
+      <tr><td>Report theme</td><td>The default. Colours and text follow the report theme; sets nothing of its own.</td></tr>
+      <tr><td>Boardroom</td><td>Dark navy background, gold bar, light target, green and coral variance.</td></tr>
+      <tr><td>Ledger</td><td>Cream paper, dark red bar, dark ink target, green and red variance, serif font.</td></tr>
+      <tr><td>Editorial</td><td>White, red bar, black target, black and red variance, serif font.</td></tr>
+      <tr><td>Signal</td><td>White, green bar, dark slate target, amber forecast, green and red variance. Sober, for formal reporting.</td></tr>
+      <tr><td>Aurora</td><td>Dark blue-to-teal background, mint bar, white target, gold forecast, mint and pink variance.</td></tr>
+      <tr><td>Terrace</td><td>Warm cream, terracotta bar, brown target, olive and red variance.</td></tr>
     </tbody>
   </table>
   </div>
+  <h3>Reports saved with 1.5</h3>
+  <p>The six 1.5 templates are no longer offered. A report saved with one of them opens with the closest
+     style: <strong>Clean, Minimal, Soft and Compact → Report theme</strong> (Minimal keeps the scale axis off,
+     Compact keeps its 9 px labels and 8 px legend); <strong>Contrast → Boardroom</strong>;
+     <strong>IBCS style → Signal</strong>. Reports saved with the former IBCS mode switch on and no template
+     chosen open in the Signal style.</p>
 
   <!-- ON-OBJECT -->
   <h2 id="on-object">On-object formatting</h2>
   <p>With on-object formatting turned on in Power BI Desktop, you can click these elements on the
      canvas and format them from the menu that opens: the actual bar, the target, the second target,
      the forecast, the bands, the labels, the variance, the legend, the axis, the reference lines and
-     the panel titles in small multiples. Each menu has shortcuts (show/hide, reset) and a link to its
-     card in the format pane.</p>
+     the panel titles in small multiples. Each menu has shortcuts and a link to its card in the format
+     pane. The axis offers <em>Show scale axis</em>, <em>Gridlines</em> and <em>Axis title</em> toggles;
+     the small-multiple titles offer <em>Panel border</em>.</p>
   <p>In Desktop the <strong>first click selects the visual and the second selects the element</strong>.
      While formatting, clicks do not filter and tooltips are not shown.</p>
 
   <!-- FORMAT PANE -->
   <h2 id="format">Format pane reference</h2>
-  <p class="muted">Defaults in brackets. Settings saved in reports made with earlier versions are kept.</p>
+  <p class="muted">Defaults in brackets. Settings saved in reports made with earlier versions are kept
+     (1.5 templates map to the closest style, see <a href="#styles">Styles</a>).</p>
 
-  <h3>Style template <span class="badge new">1.5</span></h3>
+  <h3>Style template <span class="badge new">1.6</span></h3>
   <ul>
-    <li><strong>Template</strong> [Clean] — Clean, Minimal, Contrast, Soft, Compact, IBCS style.</li>
+    <li><strong>Template</strong> [Report theme] — Report theme, Boardroom, Ledger, Editorial, Signal, Aurora, Terrace.</li>
     <li><strong>Setup guide</strong> [On] — shows the guide while editing.</li>
   </ul>
 
   <h3>General</h3>
   <ul>
     <li><strong>Orientation</strong> [Horizontal] — Horizontal or Vertical <span class="badge">Pro</span>.</li>
-    <li><strong>IBCS Mode</strong> [Off] — monochrome palette: dark grey bar (#333333), black target, grey bands. Overrides the bar, target and band colours.</li>
   </ul>
 
   <h3>Colors</h3>
   <ul>
-    <li><strong>Actual bar</strong> [#2196F3] — with the <em>fx</em> button for conditional formatting. Below it, one colour per category; a colour set on a category overrides the rule for that category.</li>
-    <li><strong>Target marker</strong> [#212121]</li>
-    <li><strong>Second target marker (Pro)</strong> [#6D6D6D] <span class="badge new">1.5</span></li>
+    <li><strong>Actual bar</strong> [#2196F3] — with the <em>fx</em> button for conditional formatting; the rule is evaluated per category. Below it, one colour per category; a colour set on a category overrides the rule for that category.</li>
+    <li><strong>Target marker</strong> [#212121] — with the <em>fx</em> button <span class="badge new">1.6</span>; the rule is evaluated per category.</li>
+    <li><strong>Second target marker (Pro)</strong> [#6D6D6D]</li>
     <li><strong>Forecast marker</strong> [#FF9800]</li>
     <li><strong>Positive variance</strong> [#4CAF50] · <strong>Negative variance</strong> [#F44336]</li>
     <li><strong>Band 1 (worst)</strong> [#E0E0E0] · <strong>Band 2 (mid)</strong> [#C8C8C8] · <strong>Band 3 (best)</strong> [#B0B0B0]</li>
   </ul>
+  <p class="muted">A fixed colour chosen next to <em>fx</em> is stored once for the whole visual. A style
+     fills these colours only while you have not set them yourself.</p>
 
   <h3>Qualitative Bands</h3>
   <ul>
@@ -217,33 +270,82 @@
     <li><strong>Font size</strong> [11] · <strong>Font family</strong> [Segoe UI]</li>
   </ul>
 
-  <h3>Layout</h3>
+  <h3>Sort <span class="badge new">1.6</span> <span class="badge free">Free</span></h3>
   <ul>
+    <li><strong>Sort bars by</strong> [Data order] — Data order, Actual, Target, Variance, Variance %, Category name. With <em>Data order</em>, the Power BI <em>Sort axis</em> menu still works.</li>
+    <li><strong>Descending</strong> [On]</li>
+  </ul>
+  <p class="muted">Rows without a value go last. In small multiples each panel is sorted the same way.</p>
+
+  <h3>Layout and axis <span class="badge new">1.6</span></h3>
+  <ul>
+    <li><strong>Row height</strong> [Fit to visual] — <em>Fit to visual</em>: the rows share the whole height of the visual (before 1.6 they were capped and left empty space below). <em>Fixed</em>: every row has the height below; if the rows do not fit, the visual scrolls.</li>
+    <li><strong>Fixed row height (px)</strong> [40, range 16–200] — used with <em>Fixed</em>.</li>
+    <li><strong>Bar thickness % of row (10-90)</strong> [44] — the previous look is 44. In vertical orientation it sets the column width.</li>
     <li><strong>Category column width %</strong> [22, range 5–40] — horizontal only.</li>
     <li><strong>Values panel width %</strong> [34, range 10–45] — horizontal only. Applied when you set it; until then the width is calculated from the longest value.</li>
-    <li><strong>Show scale axis</strong> [On]</li>
+    <li><strong>Show scale axis</strong> [On] · <strong>Gridlines</strong> [On]</li>
+    <li><strong>Axis title</strong> [Off] · <strong>Axis title text</strong> [empty = the measure name]</li>
   </ul>
 
   <h3>Legend</h3>
   <ul>
     <li><strong>Show legend</strong> [On] · <strong>Position</strong> [Bottom] — Top or Bottom.</li>
-    <li><strong>Font size</strong> [10] · <strong>Font family</strong> [Segoe UI] · <strong>Text color</strong> [#333333] <span class="badge new">1.5</span></li>
+    <li><strong>Font size</strong> [10] · <strong>Font family</strong> [Segoe UI] · <strong>Text color</strong> [#333333]</li>
   </ul>
   <p class="muted">The legend names each item after your measure (e.g. “Sales 2026”, “Budget”).</p>
 
   <h3>Reference Lines</h3>
   <ul>
-    <li>Two lines, each with <strong>Show</strong> [Off], <strong>Value</strong> [0], <strong>Label</strong> [empty] and <strong>Color</strong> [Line 1 #E53935, Line 2 #FB8C00]. In small multiples they appear in every panel.</li>
+    <li>Two lines, each with <strong>Show</strong> [Off], <strong>Value</strong> [0], <strong>Label</strong> [empty] and <strong>Color</strong> [Line 1 #E53935, Line 2 #FB8C00].</li>
   </ul>
+  <p class="muted">The labels sit in their own strip above the rows; near the right edge a label goes
+     to the left of its line; their size follows the axis text. In small multiples the lines and
+     labels appear inside every panel.</p>
 
-  <h3>Small Multiples [Pro]</h3>
+  <h3>Small Multiples [Pro] <span class="badge new">1.6</span></h3>
   <ul>
     <li><strong>Enable small multiples</strong> [On] — with a field in <em>Small Multiples By</em>, the chart splits straight away.</li>
-    <li><strong>Columns</strong> [2] — reduced automatically when the visual is too narrow for that many panels.</li>
+    <li><strong>Columns</strong> [2] — 0 = automatic. Reduced when the visual is too narrow for that many panels.</li>
+    <li><strong>Space between panels</strong> [10]</li>
     <li><strong>Sync scale across panels</strong> [On] — on to compare magnitudes, off to compare shapes within each panel.</li>
-    <li><strong>Show panel titles</strong> [On] · <strong>Panel background color</strong> [#FAFAFA] · <strong>Panel border color</strong> [#E0E0E0] · <strong>Panel title color</strong> [#333333]</li>
+    <li><strong>Show panel titles</strong> [On] · <strong>Title size</strong> [12] · <strong>Panel title color</strong> [#333333] · <strong>Bold title</strong> [On] · <strong>Title alignment</strong> [Center] — Left or Center.</li>
+    <li><strong>Panel background color</strong> [#FAFAFA] · <strong>Panel border</strong> [On] · <strong>Panel border color</strong> [#E0E0E0]</li>
   </ul>
-  <p class="muted">The card is visible without a licence so you can see what Pro offers.</p>
+  <p class="muted">These are the nine common small-multiple options of the TCViz collection; the
+     defaults keep the 1.5 look. The card is visible without a licence so you can see what Pro offers.</p>
+
+  <h3>Accessibility <span class="badge new">1.6</span></h3>
+  <ul>
+    <li><strong>High contrast</strong> [Automatic] — <em>Automatic</em> follows the Windows contrast theme; <em>On</em> draws black on white, also without the Windows theme.</li>
+    <li><strong>Focus color</strong> [#1A73E8] · <strong>Focus width</strong> [2] — the ring that shows the bar with keyboard focus.</li>
+    <li><strong>Minimum text size</strong> [6] — no text of the visual is drawn smaller: labels, legend, axis, reference-line labels and panel titles.</li>
+  </ul>
+
+  <!-- ACCESSIBILITY -->
+  <h2 id="accessibility">Accessibility</h2>
+  <div class="card">
+    <p><strong>Keyboard.</strong> Select the visual, then <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd>
+       move between bars with a visible focus ring, <kbd>Enter</kbd> selects the bar (and filters the page),
+       <kbd>Esc</kbd> clears the selection. The colour and width of the focus ring are in Format →
+       Accessibility.</p>
+  </div>
+  <div class="card">
+    <p><strong>Screen readers.</strong> Each row is read in full: category, actual, target, variance
+       (amount and %) and, if present, the second target — with the formats and names of your measures.</p>
+  </div>
+  <div class="card">
+    <p><strong>High contrast.</strong> In a Windows high contrast theme the bars, markers, bands, axis,
+       legend, guide and start screen take their colours from the theme (Format → Accessibility →
+       <em>High contrast</em> = Automatic, the default). Set it to <em>On</em> to draw the chart black on
+       white even without the Windows theme — for printing, projectors or readers who need it. High
+       contrast always wins over the style.</p>
+  </div>
+  <div class="card">
+    <p><strong>Minimum text size.</strong> Format → Accessibility → <em>Minimum text size</em> [6]: no
+       text of the visual — labels, legend, axis, reference-line labels, panel titles — is drawn smaller,
+       even in small tiles. Raise it for projected or printed reports.</p>
+  </div>
 
   <!-- LANGUAGES -->
   <h2 id="languages">Languages and number formats</h2>
@@ -252,9 +354,9 @@
      Portuguese (Portugal), French, German, Italian, Dutch, Polish, Japanese, Chinese (Simplified) and
      Korean. The visual follows the language of Power BI; any other language falls back to English.</p>
   <p>Numbers use the <strong>format string of each measure</strong> in your model — currency,
-     thousands, decimals, percentages — including <strong>dynamic format strings</strong> and
-     calculation groups, and the decimal and thousands separators of the report language. A measure
-     with no format is shortened to K / M.</p>
+     thousands, decimals, percentages — including <strong>dynamic format strings</strong> (each row uses
+     the dynamic format of its measure) and calculation groups, and the decimal and thousands separators
+     of the report language. A measure with no format is shortened to K / M.</p>
 
   <!-- USE CASES -->
   <h2 id="use-cases">Use cases</h2>
@@ -264,8 +366,8 @@
     <p><strong>Category</strong> = Region · <strong>Actual</strong> = <code>[Sales]</code> ·
        <strong>Target</strong> = <code>[Budget]</code>. Each region reads in one line: how much it sold,
        where the budget is and the gap in money and %. Turn on <em>Show target value</em> if the reader
-       needs the budget figure, and set <em>Green/red threshold</em> to a small negative number to
-       tolerate near misses.</p>
+       needs the budget figure, set <em>Green/red threshold</em> to a small negative number to tolerate
+       near misses, and <strong>Sort → Variance %</strong> to put the worst misses at one end.</p>
     <p>With Pro, put <em>Year</em> in <strong>Small Multiples By</strong> to see one panel per year with a
        shared scale, or switch to vertical bars when the category is a month.</p>
   </div>
@@ -299,10 +401,11 @@ Sales LY = CALCULATE ( [Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )</code></pr
   <details>
     <summary>What is the difference between Free and Pro?</summary>
     <p>Free is the complete bullet chart: actual vs target, automatic variance, qualitative bands,
-       IBCS mode, style templates, reference lines, colours per category and by rule, tooltips,
-       drill-down, cross-filtering, bookmarks, keyboard navigation, high contrast, on-object formatting
-       and 12 languages. Pro adds five things: small multiples, the forecast marker, vertical
-       orientation, a second target and bands from measures.</p>
+       the seven styles, sorting, reference lines, colours per category and by rule (bar and target),
+       axis title and gridlines, row height, tooltips, drill-down, cross-filtering, bookmarks, keyboard
+       navigation, the Accessibility card, on-object formatting and 12 languages. Pro adds five things:
+       small multiples, the forecast marker, vertical orientation, a second target and bands from
+       measures.</p>
   </details>
 
   <details>
@@ -325,17 +428,47 @@ Sales LY = CALCULATE ( [Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )</code></pr
        appears in reading view.</p>
   </details>
 
+  <h3>Styles</h3>
+
   <details>
-    <summary>I picked a template and some of my colours changed</summary>
-    <p>That is by design: a template replaces the settings it defines, so that you can see it. Settings
-       the template does not define stay as they were. Pick <em>Clean</em> to go back to the usual look,
-       then adjust anything by hand.</p>
+    <summary>I picked a style and my colours changed</summary>
+    <p>That is by design: picking a style replaces the colours any style defines (bar, target, second
+       target, forecast, variance, bands, legend text, panel colours, focus colour), so that you can see
+       it. Settings no style defines — sizes, widths, sort, toggles — stay as they were. After picking a
+       style you can still change any colour by hand; your colour wins over the style.</p>
   </details>
 
   <details>
-    <summary>Does “IBCS style” make my report IBCS compliant?</summary>
-    <p>No. It is a monochrome style inspired by IBCS notation. Compliance with the IBCS standard
-       depends on the whole report — titles, scaling, notation, layout — not on a chart colour scheme.</p>
+    <summary>How do I go back to the look I had before picking a style?</summary>
+    <p>Pick <strong>Report theme</strong>: it clears the colours the previous style set, and the chart
+       follows the report theme again. Colours you had set by hand before picking the style are not
+       restored; set them again, or undo (Ctrl+Z) in Power BI Desktop.</p>
+  </details>
+
+  <details>
+    <summary>Why is the background dark?</summary>
+    <p>Boardroom and Aurora are dark styles and paint the background of the visual. Pick a light style
+       (Report theme, Ledger, Editorial, Signal or Terrace) for a light background.</p>
+  </details>
+
+  <details>
+    <summary>Where are Clean, Minimal, Contrast, Soft and Compact?</summary>
+    <p>The six 1.5 templates were replaced in 1.6 by the seven collection styles shared with the other
+       TCViz visuals. A report saved with one of them opens with the closest style: Clean, Minimal, Soft
+       and Compact → Report theme (Minimal keeps the scale axis off, Compact its 9 px labels and 8 px
+       legend), Contrast → Boardroom, IBCS style → Signal. Nothing to do on your side.</p>
+  </details>
+
+  <details>
+    <summary>Where did IBCS mode go?</summary>
+    <p>The switch was removed from Format → General in 1.6; General now only has Orientation. Reports
+       saved with the former IBCS mode on (and no template chosen) open in the <strong>Signal</strong>
+       style, the sober look closest to it.</p>
+  </details>
+
+  <details>
+    <summary>Do styles cost extra?</summary>
+    <p>No. All seven styles are free.</p>
   </details>
 
   <h3>Data &amp; variance</h3>
@@ -408,7 +541,51 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
        for longer lists.</p>
   </details>
 
+  <h3>Sorting</h3>
+
+  <details>
+    <summary>How do I sort the bars by variance?</summary>
+    <p>Format → <strong>Sort</strong> → <em>Sort bars by</em> = Variance (amount) or Variance % (relative to
+       the target), and turn <em>Descending</em> on or off to choose which end the biggest misses go to.
+       You can also sort by Actual, Target or Category name. Free.</p>
+  </details>
+
+  <details>
+    <summary>The Power BI “Sort axis” menu does nothing</summary>
+    <p>It works only with <em>Sort bars by</em> = <strong>Data order</strong> (the default). Any other
+       choice in the Sort card decides the order inside the visual.</p>
+  </details>
+
+  <details>
+    <summary>Where do rows without a value go when sorting?</summary>
+    <p>Last, whatever the direction. In small multiples each panel is sorted the same way.</p>
+  </details>
+
   <h3>Layout &amp; formatting</h3>
+
+  <details>
+    <summary>The rows look too thick or too thin. How do I change them?</summary>
+    <p>Two settings in Format → <strong>Layout and axis</strong>. <em>Row height</em>: with
+       <em>Fit to visual</em> (default) the rows share the whole height of the visual, so a few rows in a
+       tall visual are tall; choose <em>Fixed</em> and set <em>Fixed row height (px)</em> (16–200, default 40)
+       to keep the same height whatever the visual size — if the rows do not fit, the visual scrolls.
+       <em>Bar thickness % of row</em> (10–90, default 44) sets how much of the row the bar fills; raise it
+       for thicker bars. In vertical orientation it sets the column width.</p>
+  </details>
+
+  <details>
+    <summary>Since 1.6 my rows are taller and fill the visual</summary>
+    <p>Before 1.6 the rows were capped at 72 px and left empty space below. <em>Fit to visual</em> now uses
+       the whole height. For the old, tighter look, set <em>Row height</em> = Fixed with the height you want.</p>
+  </details>
+
+  <details>
+    <summary>How do I add an axis title or hide the gridlines?</summary>
+    <p>Format → <strong>Layout and axis</strong> → <em>Axis title</em> = On; leave <em>Axis title text</em>
+       empty to use the measure name, or type your own. <em>Gridlines</em> turns the axis gridlines on or
+       off, and <em>Show scale axis</em> hides the whole axis. On the canvas, the axis on-object menu has the
+       same three toggles.</p>
+  </details>
 
   <details>
     <summary>How does on-object formatting work? Why do I need two clicks?</summary>
@@ -422,16 +599,17 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
   <details>
     <summary>How do I use small multiples? <span class="badge">Pro</span></summary>
     <p>Drag a field into <em>Small Multiples By</em>: the chart splits into one panel per value. In
-       Format → Small Multiples set the columns (fewer are used if the visual is too narrow), whether
-       the scale is shared, and the panel colours. In 1.5 the rows shrink down to 16 px so the panels fit
+       Format → Small Multiples set the columns (0 = automatic; fewer are used if the visual is too
+       narrow), the space between panels, whether the scale is shared, the title size, colour, bold and
+       alignment, and the panel background and border. The rows shrink down to 16 px so the panels fit
        inside the visual, and the legend stays visible.</p>
   </details>
 
   <details>
     <summary>How do I get vertical bars? <span class="badge">Pro</span></summary>
     <p>Format → General → <em>Orientation</em> = Vertical, or <em>Try</em> in step 2 of the guide.
-       Vertical reads well for months or long category names. The width settings in Layout are not used in
-       vertical orientation.</p>
+       Vertical reads well for months or long category names. The two width settings in Layout and axis
+       are not used in vertical orientation; <em>Bar thickness % of row</em> sets the column width.</p>
   </details>
 
   <details>
@@ -444,14 +622,22 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
   <details>
     <summary>Can I colour the bars by a rule instead of one by one?</summary>
     <p>Yes. Format → Colors → <em>Actual bar</em> has the <em>fx</em> button: drive the colour from a
-       measure, e.g. red below target and green above. A colour set by hand on one category overrides
-       the rule for that category. Free.</p>
+       measure, e.g. red below target and green above. The rule is evaluated per category. A colour set
+       by hand on one category overrides the rule for that category. Free.</p>
+  </details>
+
+  <details>
+    <summary>Can I colour the target marker by a rule?</summary>
+    <p>Yes, new in 1.6. Format → Colors → <em>Target marker</em> → <em>fx</em>: for example, a different
+       colour for stretch targets or for targets set by a given team. The rule is evaluated per category.
+       A fixed colour chosen next to <em>fx</em> applies to the whole visual. Free.</p>
   </details>
 
   <details>
     <summary>How do I add reference lines?</summary>
-    <p>Format → Reference Lines → turn on Line 1 or Line 2 and set the value, label and colour. They
-       appear in every panel in small multiples.</p>
+    <p>Format → Reference Lines → turn on Line 1 or Line 2 and set the value, label and colour. The
+       labels sit in a strip above the rows; near the right edge a label moves to the left of its line.
+       In small multiples the lines appear inside every panel.</p>
   </details>
 
   <h3>Interaction</h3>
@@ -471,8 +657,8 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
 
   <details>
     <summary>Does it respect interactions being turned off?</summary>
-    <p>Yes (fixed in 1.5). The visual reads whether Power BI allows interactions with it; when they are
-       not allowed, clicks and keys do not select or filter.</p>
+    <p>Yes. The visual reads whether Power BI allows interactions with it; when they are not allowed,
+       clicks and keys do not select or filter.</p>
   </details>
 
   <details>
@@ -486,7 +672,8 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
   <details>
     <summary>Can I use the keyboard?</summary>
     <p>Yes. Select the visual, then <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move between
-       bars with a visible focus ring, <kbd>Enter</kbd> selects, <kbd>Escape</kbd> clears.</p>
+       bars with a visible focus ring, <kbd>Enter</kbd> selects, <kbd>Escape</kbd> clears. Change the ring's
+       colour and width in Format → Accessibility.</p>
   </details>
 
   <details>
@@ -499,6 +686,19 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
     <summary>Does it support high contrast mode?</summary>
     <p>Yes. In a Windows high contrast theme the bars, markers, bands, axis, legend, guide and start
        screen take their colours from the theme.</p>
+  </details>
+
+  <details>
+    <summary>Can I force high contrast without the Windows theme?</summary>
+    <p>Yes. Format → Accessibility → <em>High contrast</em> = <strong>On</strong> draws the chart black on
+       white whatever the Windows setting. <em>Automatic</em> (default) follows the Windows contrast theme.</p>
+  </details>
+
+  <details>
+    <summary>Some text is too small to read</summary>
+    <p>Format → Accessibility → <em>Minimum text size</em> (default 6): no text of the visual — labels,
+       legend, axis, reference-line labels, panel titles — is drawn smaller than this, even when the tile
+       is small. Raise it to 9 or 10 for projected or printed reports.</p>
   </details>
 
   <h3>Languages, licensing &amp; privacy</h3>
@@ -519,9 +719,10 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
 
   <details>
     <summary>I see a “Pro preview” watermark</summary>
-    <p>You are editing and using a Pro feature without a licence. The watermark lets you try it on your
-       own data. In reading view the free chart is shown without the Pro feature and without the
-       watermark. Remove the field or setting, or buy Pro.</p>
+    <p>You are editing and using a Pro feature without a licence. The watermark names the Pro features the
+       report is using and stays centred without covering the data, so you can try them on your own data.
+       In reading view the free chart is shown without the Pro feature and without the watermark. Remove
+       the field or setting, or buy Pro.</p>
   </details>
 
   <details>
@@ -541,20 +742,158 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
   <h2 id="contact">Contact &amp; issues</h2>
   <div class="card">
     <p>Questions, bugs, feature requests or licensing: write to
-       <a href="mailto:support@tcviz.com">support@tcviz.com</a>. A person answers — the developer of the
-       visual, not a bot.</p>
+       <a href="mailto:support@tcviz.com">support@tcviz.com</a>. Every message is read and answered by a
+       person — the developer of the visual, not a bot.</p>
     <p>Bug reports are also welcome on
        <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/issues">GitHub Issues</a>.
-       Please include the visual version (1.5.0.0), Power BI Desktop or service, and a screenshot.</p>
+       Please include the visual version (1.6.0.0), Power BI Desktop or service, and a screenshot.</p>
     <p>Full version history: <a href="https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz/blob/main/CHANGELOG.md">Changelog</a>.</p>
   </div>
 
+</div>
+
   <footer>
-    Bullet Chart Pro 1.5.0.0 by TCViz &nbsp;|&nbsp;
+    Bullet Chart Pro 1.6.0.0 by TCViz &nbsp;|&nbsp;
     <a href="https://tcviz.com/product/bullet-chart-pro/">tcviz.com</a> &nbsp;|&nbsp;
     <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms of Use</a>
   </footer>
 
+<script>
+(function () {
+  'use strict';
+
+  // ── Documentation search ────────────────────────────────────────────────────
+  var input  = document.getElementById('docsearch');
+  var clear  = document.getElementById('searchclear');
+  var status = document.getElementById('searchstatus');
+  var wrap   = document.querySelector('.wrap');
+  if (!input || !wrap) { return; }
+
+  var HIDE = 'is-hidden';
+
+  // Atomic searchable units: one FAQ entry, one table row, one card.
+  var units = [];
+  function add(el) {
+    if (units.some(function (u) { return u.el === el; })) { return; }
+    units.push({ el: el, html: el.innerHTML, text: (el.textContent || '').toLowerCase() });
+  }
+  wrap.querySelectorAll('details').forEach(add);
+  wrap.querySelectorAll('table tr').forEach(function (tr) {
+    if (tr.querySelector('th')) { return; }   // header rows follow their table
+    add(tr);
+  });
+  wrap.querySelectorAll('.card, .contact-box').forEach(add);
+
+  // Sections: an <h2> plus every sibling up to the next <h2>.
+  var sections = [];
+  var current = null;
+  Array.prototype.forEach.call(wrap.children, function (el) {
+    if (el.tagName === 'H2') {
+      current = { head: el, body: [] };
+      sections.push(current);
+    } else if (current) {
+      current.body.push(el);
+    }
+  });
+  // Each body element remembers which units live inside it.
+  sections.forEach(function (sec) {
+    sec.body.forEach(function (b) {
+      b._units = units.filter(function (u) { return b === u.el || b.contains(u.el); });
+      if (!b._units.length) { b._html = b.innerHTML; }
+    });
+  });
+
+  function escapeRe(t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function escapeHtml(t) {
+    return t.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; });
+  }
+
+  function highlight(el, terms) {
+    var re = new RegExp('(' + terms.map(escapeRe).join('|') + ')', 'gi');
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) { nodes.push(n); }
+    nodes.forEach(function (node) {
+      var txt = node.nodeValue;
+      re.lastIndex = 0;
+      if (!re.test(txt)) { return; }
+      re.lastIndex = 0;
+      var span = document.createElement('span');
+      span.innerHTML = escapeHtml(txt).replace(re, '<mark>$1</mark>');
+      node.parentNode.replaceChild(span, node);
+    });
+  }
+
+  function showAll() {
+    units.forEach(function (u) { u.el.classList.remove(HIDE); u.el.innerHTML = u.html; });
+    sections.forEach(function (sec) {
+      sec.head.classList.remove(HIDE);
+      sec.body.forEach(function (b) {
+        b.classList.remove(HIDE);
+        if (b._html !== undefined) { b.innerHTML = b._html; }
+      });
+    });
+    status.textContent = '';
+    clear.hidden = true;
+  }
+
+  function run(q) {
+    q = (q || '').trim();
+    if (q.length < 2) { showAll(); return; }
+    clear.hidden = false;
+
+    var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var hits = 0;
+
+    units.forEach(function (u) {
+      u.el.innerHTML = u.html;
+      var match = terms.every(function (t) { return u.text.indexOf(t) !== -1; });
+      u.el.classList.toggle(HIDE, !match);
+      if (match) {
+        hits++;
+        highlight(u.el, terms);
+        if (u.el.tagName === 'DETAILS') { u.el.open = true; }
+      }
+    });
+
+    sections.forEach(function (sec) {
+      var anyVisible = false;
+      sec.body.forEach(function (b) {
+        var visible;
+        if (b._units.length) {
+          visible = b._units.some(function (u) { return !u.el.classList.contains(HIDE); });
+        } else {
+          b.innerHTML = b._html;
+          var txt = (b.textContent || '').toLowerCase();
+          visible = terms.every(function (t) { return txt.indexOf(t) !== -1; });
+          if (visible) { highlight(b, terms); }
+        }
+        b.classList.toggle(HIDE, !visible);
+        if (visible) { anyVisible = true; }
+      });
+      sec.head.classList.toggle(HIDE, !anyVisible);
+    });
+
+    status.textContent = hits
+      ? hits + ' result' + (hits === 1 ? '' : 's') + ' for “' + q + '”'
+      : 'No results for “' + q + '”. Try a Format pane setting name, or email support@tcviz.com.';
+  }
+
+  var timer;
+  input.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () { run(input.value); }, 120);
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { input.value = ''; showAll(); }
+  });
+  clear.addEventListener('click', function () { input.value = ''; showAll(); input.focus(); });
+
+  // Deep link: support.html?q=bands
+  var qp = new URLSearchParams(location.search).get('q');
+  if (qp) { input.value = qp; run(qp); }
+})();
+</script>
 </body>
 </html>

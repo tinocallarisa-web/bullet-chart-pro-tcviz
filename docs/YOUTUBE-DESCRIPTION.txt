@@ -1,5 +1,5 @@
 ════════════════════════════════════════════════════════════════
-BULLET CHART PRO 1.5.0.0 — YOUTUBE
+BULLET CHART PRO 1.6.0.0 — YOUTUBE
 ════════════════════════════════════════════════════════════════
 
 TITLE (the first one is the recommendation)
@@ -30,7 +30,7 @@ WHAT YOU'LL SEE
 • A second target (Pro): the budget and the stretch goal side by side, each with its variance
 • Small multiples (Pro): one panel per country or year, on a shared scale
 • The setup guide inside the visual: try the Pro features on your own data
-• Style templates — Clean, Minimal, Contrast, Soft, Compact and an IBCS style — and the legend
+• Seven styles shared with the TCViz collection, sorting by variance, and the legend
 • Format on the canvas: click the bar, the target or the legend to format it
 • Small tiles, vertical bars and the visual in 12 languages
 
@@ -42,14 +42,14 @@ CHAPTERS
 0:00 [adjust] A second target: budget and stretch
 0:00 [adjust] Small multiples by country
 0:00 [adjust] The setup guide: try Pro on your data
-0:00 [adjust] Style templates, legend, format on the canvas
+0:00 [adjust] Styles, sorting, legend, format on the canvas
 0:00 [adjust] Small tiles, vertical bars and languages
 0:00 [adjust] Free and Pro
 
 FREE AND PRO
 The free version is a complete bullet chart: variance and %, qualitative bands, conditional
-formatting on the bar, reference lines, labels, legend, drilldown and cross-filtering, style
-templates, the setup guide, format on the canvas and 12 languages. Pro adds bands from your own
+formatting on the bar and the target, reference lines, labels, legend, drilldown and
+cross-filtering, styles, sorting, accessibility settings, the setup guide, format on the canvas and 12 languages. Pro adds bands from your own
 measures, a second target, small multiples, the forecast marker and vertical bars — and the
 setup guide lets you try them on your own data before buying, under a "Pro preview" watermark
 while you edit.

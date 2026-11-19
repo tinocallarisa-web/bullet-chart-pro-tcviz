@@ -12,3 +12,4 @@ docs/docs.html
 # Simulador (1.6): capturas regenerables
 tools/simulador/capturas/
 tools/__pycache__/
+tools/simulador/__pycache__/

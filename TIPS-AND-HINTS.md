@@ -1,16 +1,16 @@
-# Bullet Chart Pro — Tips & Hints (v1.5.0.0)
+# Bullet Chart Pro — Tips & Hints (v1.6.0.0)
 
-## New in 1.5.0.0
+## New in 1.6.0.0
 
-- **Second target [Pro]** — a hollow marker next to the target for a stretch goal or last year. It is in the legend and in the tooltip, with its own variance.
-- **Bands from measures [Pro]** — *Band 1 limit*, *Band 2 limit* and *Band maximum*: each row gets its own thresholds, calculated in DAX (e.g. `SUM(T[Target]) * 0.9`). Without these fields the bands stay as percentages, as in Free.
-- **Setup guide** — opens over the chart while you edit (not in tiles under 360×220 px): fields, Pro on your own data, style. Close it with ✕ or *Finish*; reopen it in *Format → Style template → Setup guide*.
-- **Style templates** — Clean, Minimal, Contrast, Soft, Compact and IBCS style. Picking one replaces the settings it defines; the rest stays as you set it. *IBCS style* is a style, not a statement of IBCS compliance.
-- **On-object formatting** — click a bar, a marker, the bands, the legend, the axis or a reference line on the canvas and format it there. In Desktop: first click selects the visual, second click the element.
-- **Legend** with its own font, size and colour.
-- **12 languages** and number formats from your model, including dynamic format strings, in the report language.
-- **Selection** dims the other bars, also when a bookmark restores it.
-- **Fixes**: vertical font size and axis, *Values panel width %* now applied, small multiples that fit, small tiles, interactions turned off by Power BI respected.
+- **Seven collection styles** — *Format → Style template → Template*: Report theme (default: colours and text follow the report theme), Boardroom, Ledger, Editorial, Signal, Aurora and Terrace, the same styles as the other TCViz visuals. All free. A style only fills what you have not set yourself; picking one replaces the colours any style defines. Boardroom and Aurora paint the background. Reports saved with a 1.5 template open with the closest style.
+- **Sort** — *Format → Sort*: Data order (default), Actual, Target, Variance, Variance %, Category name; Descending. Free.
+- **Accessibility card** — High contrast Automatic or On (black on white, also without the Windows theme), focus colour and width, minimum text size.
+- **Conditional formatting (fx) on the Target marker**, as on the Actual bar. The rule is evaluated per category.
+- **Layout and axis** — rows that fit the visual or a fixed row height, bar thickness, gridlines on/off, axis title.
+- **Reference line labels** in their own strip above the rows; near the right edge the label goes to the left of the line.
+- **Small multiples [Pro]** — automatic columns (0), space between panels, title size, colour, bold and alignment, panel background, border on/off and border colour.
+- **Pro preview watermark** names the Pro features in use, centred, never covering the data.
+- **IBCS Mode switch removed** from *General*; reports saved with it on open in the Signal style.
 
 ## Getting started
 
@@ -18,7 +18,7 @@
 2. Drag your measure into **Actual (Real)**. The bullets render straight away.
 3. Drag the goal into **Target**. Variance — absolute and % — is calculated by the visual. No DAX.
 4. Qualitative bands (poor / OK / good) are on by default. Set their thresholds in **Format → Qualitative Bands**.
-5. To colour the bars by a rule rather than one by one, use the **fx** button next to *Format → Colors → Actual bar*.
+5. Pick a look in **Format → Style template** (or step 3 of the setup guide), and an order in **Format → Sort**.
 
 ## Field wells
 
@@ -39,10 +39,10 @@
 |---|---|---|
 | Actual vs target, automatic variance (absolute + %) | ✓ | ✓ |
 | Qualitative bands as % of the data maximum | ✓ | ✓ |
-| IBCS mode and the six style templates | ✓ | ✓ |
-| Colour per category and conditional formatting (fx) on the bar | ✓ | ✓ |
-| Reference lines, legend, axis, tooltips, drilldown | ✓ | ✓ |
-| Cross-filtering, bookmarks, keyboard, high contrast, screen reader | ✓ | ✓ |
+| Seven collection styles, sort | ✓ | ✓ |
+| Colour per category and conditional formatting (fx) on the bar and the target | ✓ | ✓ |
+| Reference lines, legend, axis title, gridlines, row height, tooltips, drilldown | ✓ | ✓ |
+| Cross-filtering, bookmarks, keyboard, screen reader, Accessibility card | ✓ | ✓ |
 | On-object formatting, setup guide, 12 languages | ✓ | ✓ |
 | Small Multiples | — | ✓ |
 | Forecast marker | — | ✓ |
@@ -51,35 +51,44 @@
 | Bands from measures | — | ✓ |
 
 - **Without a licence, while you are editing the report**, a Pro feature renders working under a
-  *Pro preview* watermark, and Power BI shows its own notice with the option to buy. In reading view,
-  and wherever Power BI cannot check licences (Publish to Web, embedding, export), the free result is
-  shown with no watermark — so a published report never uses a Pro feature you have not paid for.
+  *Pro preview* watermark that names it, and Power BI shows its own notice with the option to buy. In
+  reading view, and wherever Power BI cannot check licences (Publish to Web, embedding, export), the
+  free result is shown with no watermark — so a published report never uses a Pro feature you have not paid for.
 
 ## Format pane — quick reference
 
 | Card | Settings |
 |---|---|
-| Style template | Template (Clean, Minimal, Contrast, Soft, Compact, IBCS style), Setup guide |
-| General | Orientation (Vertical is Pro), IBCS mode |
-| Colors | Actual, target, second target (Pro), forecast, positive / negative variance, three band colours, one colour per category, and **conditional formatting (fx) on the bar colour** |
+| Style template | Template (Report theme, Boardroom, Ledger, Editorial, Signal, Aurora, Terrace), Setup guide |
+| General | Orientation (Vertical is Pro) |
+| Colors | Actual (**fx**), target (**fx**), second target (Pro), forecast, positive / negative variance, three band colours, one colour per category |
 | Qualitative Bands | Show, band 1 and band 2 thresholds (% of the data maximum; rows with band measures use those) |
 | Variance | Show label, show %, green / red threshold |
 | Labels | Category, actual value, target value, font size and family |
-| Layout | Category column width %, values panel width % (horizontal only; applied once you set it), scale axis |
+| Sort | Sort bars by (Data order, Actual, Target, Variance, Variance %, Category name), Descending |
+| Layout and axis | Row height (Fit to visual / Fixed), fixed row height, bar thickness % of row, category column width %, values panel width % (horizontal only), scale axis, gridlines, axis title and its text |
 | Legend | Show, top or bottom, font size, font family, text colour |
 | Reference Lines | Two lines: show, value, label, colour |
-| Small Multiples [Pro] | Enable, columns, synced scale, panel titles, panel background, border and **title colour** |
+| Small Multiples [Pro] | Enable, columns (0 = automatic), space between panels, synced scale, panel titles, title size, title colour, bold title, title alignment, panel background, panel border, border colour |
+| Accessibility | High contrast (Automatic / On), focus colour, focus width, minimum text size |
 
 ## Tips & best practices
 
+- **Styles:** pick one in *Style template* for a page that matches your other TCViz visuals. A style only fills the colours you have not set; any colour you pick afterwards wins. *Report theme* goes back to the report's own colours.
+- **Worst misses first:** *Sort → Variance %* with *Descending* off puts the biggest relative misses at the top; *Variance* sorts by the amount instead. In small multiples every panel is sorted the same way.
+- **Row height:** *Fit to visual* (default) spreads the rows over the whole visual — great for a few rows in a dedicated tile. *Fixed* keeps every row at the same height (16–200 px) so several bullet charts on a page line up; if the rows do not fit, the visual scrolls.
+- **Bar thickness:** *Bar thickness % of row* (default 44) — raise it for bolder bars, lower it to let the bands show around the bar. In vertical orientation it sets the column width.
+- **Axis title:** *Layout and axis → Axis title* = On; leave the text empty to use the measure name, or write the unit ("€ thousands"). Turn *Gridlines* off for a cleaner look.
 - **Colour by rule:** *Colors → Actual bar → fx* drives the bar colour from a measure — red below target,
-  green above, for instance. The rule applies to every bar; a colour you then set by hand on a single
-  category overrides the rule just for that one, so the general rule and the exceptions coexist.
+  green above, for instance. The rule is evaluated per category; a colour you set by hand on a single
+  category overrides the rule just for that one.
+- **Rule on the target:** *Colors → Target marker → fx* colours each target by a rule — for example a different colour for targets that were revised.
+- **Minimum text size:** *Accessibility → Minimum text size* (default 6) — raise it for projected or printed reports; no text of the visual is drawn smaller.
+- **High contrast On:** *Accessibility → High contrast = On* draws black on white even without the Windows contrast theme — handy for printing or a projector.
 - **Variance threshold:** set it to 0 for a plain above/below target colour, or to a tolerance (e.g. -5) to only flag real misses.
 - **Bands** are a percentage of the largest value in the data, not of the target. Use them for "how good is this", and the target marker for "did we hit it".
-- **IBCS mode** replaces the bar, target and band colours with a monochrome palette inspired by IBCS notation. It is a style; IBCS compliance depends on the whole report.
-- **Reference lines** work well for a company-wide benchmark or last year's average; in Small Multiples they appear in every panel.
-- **Small Multiples:** use **Sync scale** on to compare magnitudes across panels, off to compare shapes within each panel. Two or three columns read best.
+- **Reference lines** work well for a company-wide benchmark or last year's average; their labels sit above the rows, and in Small Multiples they appear in every panel.
+- **Small Multiples:** use **Sync scale** on to compare magnitudes across panels, off to compare shapes within each panel. *Columns* = 0 lets the visual choose.
 - **Negative values** switch the scale to bipolar automatically, with a zero baseline.
 - **Thresholds that differ per row** (one KPI tolerates 5%, another 20%): use bands from measures (Pro) instead of the percentage bands.
 - **Target and stretch:** put the stretch goal or last year in *Second target*; the tooltip gives the variance against both.
@@ -88,9 +97,14 @@
 
 ## Troubleshooting
 
+- **Rows look too thick / too thin** — with *Row height = Fit to visual* the rows share the whole height of the visual. Choose *Fixed* and set *Fixed row height (px)*, and adjust *Bar thickness % of row* (default 44).
+- **My colours changed when I picked a style** — picking a style replaces the colours any style defines. Set your colours again by hand (they win over the style), or pick *Report theme* to follow the report theme.
+- **The background turned dark** — Boardroom and Aurora paint the background. Pick a light style.
+- **The IBCS switch is gone** — it was removed in 1.6. Reports saved with it on open in the Signal style; pick Signal for the closest look.
+- **My 1.5 template is not in the list** — the six 1.5 templates were replaced by the collection styles; your report opens with the closest one (Contrast → Boardroom, IBCS style → Signal, the rest → Report theme).
+- **The Power BI "Sort axis" menu does nothing** — it only works with *Sort bars by = Data order*.
 - **The variance is missing in a small tile** — there is no room in the values column; hover over the bar, the tooltip has it. Widen the visual or set *Values panel width %*.
 - **The setup guide is gone** — *Format → Style template → Setup guide* = On. It shows only while editing and in tiles of at least 360×220 px.
-- **My colours changed when I picked a template** — a template replaces the settings it defines. Pick *Clean* for the usual look.
 - **Band measures do nothing** — they are Pro; without a licence the bands stay as percentages (with a watermarked preview while editing).
 - **The values on the right disappeared** — the visual is too narrow. The bar always keeps at least 40% of the width, so the values column hides first. Widen the visual or reduce *Category column width %*.
 - **Small Multiples By does nothing** — Small Multiples is a Pro feature; without a licence Power BI shows its notice. With a licence, check *Enable small multiples* is on.
