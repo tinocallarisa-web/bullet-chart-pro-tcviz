@@ -8,3 +8,7 @@ Thumbs.db
 
 # Borrador antiguo (v1.2) con afirmaciones falsas: no publicar
 docs/docs.html
+
+# Simulador (1.6): capturas regenerables
+tools/simulador/capturas/
+tools/__pycache__/

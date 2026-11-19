@@ -1789,11 +1789,14 @@ export class BulletChartPro implements IVisual {
             return 14;
         }});
 
-        // Forecast — diamond
+        // Forecast — el mismo símbolo que en el gráfico: triángulo en horizontal, rombo en vertical (1.6: antes siempre rombo)
+        const vertical = s.orientation === "vertical" && (this.isPro || this.proPreview);
         if (hasForecast) items.push({ label: this.names.forecast, draw: (x) => {
             const cx = x + 7; const sz = 5;
             const poly = this.mkEl("polygon");
-            poly.setAttribute("points", `${cx},${mid-sz} ${cx+sz},${mid} ${cx},${mid+sz} ${cx-sz},${mid}`);
+            poly.setAttribute("points", vertical
+                ? `${cx},${mid-sz} ${cx+sz},${mid} ${cx},${mid+sz} ${cx-sz},${mid}`
+                : `${cx},${mid+sz*0.75} ${cx-sz},${mid-sz*0.75} ${cx+sz},${mid-sz*0.75}`);
             poly.setAttribute("fill",    s.forecastColor);
             poly.setAttribute("opacity", "0.85");
             this.rootSvg.appendChild(poly);
@@ -1879,9 +1882,10 @@ export class BulletChartPro implements IVisual {
     }
 
     // Horizontal axis: baseline + vertical guide lines + tick labels below bars.
-    // Drawn after rows so guide lines appear above bars (light dashed, pointer-events:none).
+    // Gridlines go to the back (1.6); the rest is drawn after the rows.
     private renderHAxis(labelW: number, chartW: number, yBase: number, maxV: number, formatStr?: string, minV: number = 0): void {
         const n0 = this.rootSvg.childNodes.length;
+        let front = 0;   // nodos insertados delante (cuadrícula): desplazan los índices de tagFrom
         const ff          = this.settings.fontFamily;
         const totalDomain = maxV - minV;
         const xOf         = (v: number) => labelW + ((v - minV) / totalDomain) * chartW;
@@ -1916,7 +1920,9 @@ export class BulletChartPro implements IVisual {
                 gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
                 gl.setAttribute("stroke-dasharray", "3,3");
                 gl.setAttribute("pointer-events", "none");
-                this.rootSvg.appendChild(gl);
+                // Detrás de las filas (1.6): antes se dibujaba encima y cruzaba las barras.
+                this.rootSvg.insertBefore(gl, this.rootSvg.firstChild);
+                front++;
             }
 
             const tk = this.mkEl("line");
@@ -1950,7 +1956,7 @@ export class BulletChartPro implements IVisual {
             tt.textContent = this.ellipsis(this.axisTitleText(), chartW, this.axisFs());
             this.rootSvg.appendChild(tt);
         }
-        this.tagFrom(n0, "axis", true);
+        this.tagFrom(n0 + front, "axis", true);
     }
 
     /** Alto (o ancho, en vertical) que ocupa el título del eje; 0 si no se muestra. */
@@ -1967,6 +1973,7 @@ export class BulletChartPro implements IVisual {
     // Vertical axis: Y-axis line + horizontal guide lines + labels on the left.
     private renderVAxis(xLeft: number, baseline: number, chartH: number, maxV: number, formatStr?: string, minV: number = 0): void {
         const n0 = this.rootSvg.childNodes.length;
+        let front = 0;   // nodos insertados delante (cuadrícula): desplazan los índices de tagFrom
         const ff          = this.settings.fontFamily;
         const totalDomain = maxV - minV;
         // baseline = y position for value=0 (passed in)
@@ -2004,7 +2011,9 @@ export class BulletChartPro implements IVisual {
                 gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
                 gl.setAttribute("stroke-dasharray", "3,3");
                 gl.setAttribute("pointer-events", "none");
-                this.rootSvg.appendChild(gl);
+                // Detrás de las filas (1.6): antes se dibujaba encima y cruzaba las barras.
+                this.rootSvg.insertBefore(gl, this.rootSvg.firstChild);
+                front++;
             }
 
             const tk = this.mkEl("line");
@@ -2040,7 +2049,7 @@ export class BulletChartPro implements IVisual {
             tt.textContent = this.ellipsis(this.axisTitleText(), Math.abs(botY - topY), fs);
             this.rootSvg.appendChild(tt);
         }
-        this.tagFrom(n0, "axis", true);
+        this.tagFrom(n0 + front, "axis", true);
     }
 
     // Draws a subtle scroll indicator badge when content overflows the viewport.
