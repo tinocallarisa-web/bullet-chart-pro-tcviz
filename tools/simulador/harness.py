@@ -137,7 +137,7 @@ async def ficha(b):
     for k, (w, h) in {"l": (900, 520), "m": (520, 330), "s": (300, 170)}.items():
         await shot("61_size_" + k, dv(base), w, h)
     for k in ("boardroom", "ledger", "editorial", "signal", "aurora", "terrace"):
-        await shot("62_style_" + k, dv({"style": {"template": k}, "labels": {"showTargetValue": True}}, forecast=True), 760, 480)
+        await shot("62_style_" + k, dv({"style": {"template": k}, "labels": {"showTargetValue": True}}), 760, 480)   # sin previsión: es Pro y los estilos son gratis
 
 
 async def main():

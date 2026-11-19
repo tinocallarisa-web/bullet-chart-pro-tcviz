@@ -27,7 +27,7 @@
 | Category | Grouping | One bullet per value. Supports hierarchies and drilldown. |
 | Actual (Real) | Measure | The bar. Respects the measure's format string. |
 | Target | Measure | Vertical marker; drives the variance label and colour. |
-| Forecast [Pro] | Measure | Triangle marker for the expected end-of-period value. |
+| Forecast [Pro] | Measure | Marker for the expected end-of-period value (triangle; diamond in vertical). |
 | Small Multiples By [Pro] | Grouping | One panel per value of this field. |
 | Second target [Pro] | Measure | Hollow marker; legend and tooltip with its own variance. |
 | Band 1 limit / Band 2 limit / Band maximum [Pro] | Measure | Per-row band thresholds from DAX. Band 3 runs to the data maximum if *Band maximum* is empty. |
@@ -108,7 +108,7 @@
 - **Band measures do nothing** — they are Pro; without a licence the bands stay as percentages (with a watermarked preview while editing).
 - **The values on the right disappeared** — the visual is too narrow. The bar always keeps at least 40% of the width, so the values column hides first. Widen the visual or reduce *Category column width %*.
 - **Small Multiples By does nothing** — Small Multiples is a Pro feature; without a licence Power BI shows its notice. With a licence, check *Enable small multiples* is on.
-- **No forecast triangle** — Forecast is Pro. With a licence, check the Forecast field is not blank for that category.
+- **No forecast marker** — Forecast is Pro. With a licence, check the Forecast field is not blank for that category.
 - **Vertical orientation shows horizontal bars** — vertical is Pro.
 - **Second target not drawn** — it is Pro; with a licence, check the measure is not blank for that row.
 - **Only part of the categories** — the visual receives up to 2,000 categories. Filter or aggregate larger lists.

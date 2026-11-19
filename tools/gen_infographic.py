@@ -49,8 +49,7 @@ P["features"] = [{"name": n, "free": True} for n in (
     "Sort by actual, target, variance or variance %",
     "Report theme or 6 collection styles",
     "Accessibility card: high contrast, focus, minimum text",
-    "Axis title, gridlines, row height and bar thickness",
-    "Dynamic format strings, drilldown, bookmarks, 12 languages",
+    "Axis title, gridlines, row height, 12 languages",
 )]
 P["freemium"] = {"free": "", "pro": ["Second target (stretch goal or last year)", "Year-end forecast marker", "Bands from your own measures",
                                      "Small multiples with the 9 common options", "Vertical orientation"]}

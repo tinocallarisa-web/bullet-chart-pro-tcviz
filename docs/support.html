@@ -137,7 +137,7 @@
       <tr><td>Small Multiples By <span class="badge">Pro</span></td><td>Grouping</td><td>One panel per value of this field (region, year…).</td></tr>
       <tr><td>Actual (Real)</td><td>Measure</td><td>The bar. Required: without it the start screen is shown.</td></tr>
       <tr><td>Target</td><td>Measure</td><td>Solid marker. Drives the variance label and its colour.</td></tr>
-      <tr><td>Forecast <span class="badge">Pro</span></td><td>Measure</td><td>Triangle marker for the expected end-of-period value.</td></tr>
+      <tr><td>Forecast <span class="badge">Pro</span></td><td>Measure</td><td>Marker for the expected end-of-period value: a triangle above the bar (a diamond in vertical orientation).</td></tr>
       <tr><td>Second target <span class="badge">Pro</span></td><td>Measure</td><td>Hollow marker next to the target: a stretch goal, last year or a commitment. Shown in the legend and in the tooltip with its own variance.</td></tr>
       <tr><td>Band 1 limit <span class="badge">Pro</span></td><td>Measure</td><td>Where band 1 (worst) ends, for this row.</td></tr>
       <tr><td>Band 2 limit <span class="badge">Pro</span></td><td>Measure</td><td>Where band 2 (mid) ends, for this row.</td></tr>
@@ -172,7 +172,7 @@
   <p>The guide appears over the chart only while you edit a report, once the visual has data, and
      not in tiles smaller than 360 × 220 px (there it would cover the whole chart).</p>
   <ol>
-    <li><strong>Your data</strong> — Category, Actual and Target, each with a tick once it is in its well. The list updates by itself as you drag fields.</li>
+    <li><strong>Your data</strong> — Category, Actual and Target; Target gets a tick once it is in its well. The list updates by itself as you drag fields.</li>
     <li><strong>Try Pro on your data</strong> — a <em>Try</em> button switches to vertical bars with one click. For bands from measures, the second target and small multiples, the guide tells you which well to use and ticks the item once it is filled. Without a licence they show under the watermark while you edit.</li>
     <li><strong>Pick a style</strong> — the seven collection styles, each with a thumbnail.</li>
   </ol>
@@ -476,8 +476,8 @@ Sales LY = CALCULATE ( [Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )</code></pr
   <details>
     <summary>Why is the variance not showing in a small tile?</summary>
     <p>When the values column is too narrow, the visual decides for the whole column what fits, in
-       this order: the variance amount is dropped first (the % stays), then the variance, then the
-       target value. Nothing is lost: <strong>hover over the bar and the tooltip shows the actual, the
+       this order: the target value is dropped first, then the variance amount (the % stays), then
+       the variance. Nothing is lost: <strong>hover over the bar and the tooltip shows the actual, the
        target and the variance in full</strong>. Widen the visual, reduce <em>Category column width %</em>,
        or set <em>Values panel width %</em>.</p>
   </details>
@@ -726,7 +726,7 @@ Band maximum = SUM ( T[Target] ) * 1.2</code></pre>
   </details>
 
   <details>
-    <summary>Does it work in Embedded, Publish to Web or Report Server?</summary>
+    <summary>Does it work in Embedded or Publish to Web?</summary>
     <p>The free features work everywhere. Where Power BI cannot check licences (Publish to Web,
        embedding, export) the free chart is drawn, without the Pro features and without a watermark.</p>
   </details>
