@@ -40,4 +40,4 @@ One renderingStarted/Finished pair per update(); repaints never call update(). e
 
 Full notes: docs/CERTIFICATION-NOTES.md
 Video https://www.youtube.com/watch?v=PdmOWIAKYho
-Support/privacy/terms: tinocallarisa-web.github.io/bullet-chart-pro-tcviz/
+Support/privacy/terms: tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html (privacy.html, terms.html)

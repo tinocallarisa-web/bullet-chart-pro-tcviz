@@ -12,7 +12,7 @@
 | GUID | `bulletChartProTCViz20260001` |
 | Plan ID | `bullet-chart-pro-tcviz` |
 | Repository | https://github.com/tinocallarisa-web/bullet-chart-pro-tcviz — branch `certification` |
-| Pages | https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/ |
+| Pages | https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html (privacy.html, terms.html) |
 | Video | https://www.youtube.com/watch?v=PdmOWIAKYho |
 
 ## What changed in 1.6.0.0
