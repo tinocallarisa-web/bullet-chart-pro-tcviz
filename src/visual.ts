@@ -1874,7 +1874,13 @@ export class BulletChartPro implements IVisual {
         const rawStep = maxValue / count;
         const mag  = Math.pow(10, Math.floor(Math.log10(rawStep)));
         const norm = rawStep / mag;
-        const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+        let step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+        // 1.6: con un eje estrecho el redondeo podía pasarse del máximo y dejar solo el 0. Siempre al menos una marca
+        // además del 0: se baja al paso "bonito" anterior (10 → 5 → 2 → 1) hasta que quepa.
+        for (let k = 0; k < 8 && step > maxValue * 1.001; k++) {
+            const n = step / Math.pow(10, Math.floor(Math.log10(step)) );
+            step = n >= 9.99 ? step / 2 : n >= 4.99 ? step * 2 / 5 : n >= 1.99 ? step / 2 : step / 2;
+        }
         const ticks: number[] = [];
         for (let v = 0; v <= maxValue * 1.001; v += step)
             ticks.push(parseFloat((Math.round(v / step) * step).toPrecision(10)));
