@@ -167,5 +167,10 @@
   "Enum_hc_on": "已开启",
   "Prop_accessibility_focusColor": "焦点颜色",
   "Prop_accessibility_focusWidth": "焦点宽度",
-  "Prop_accessibility_minTextSize": "最小文本大小"
+  "Prop_accessibility_minTextSize": "最小文本大小",
+  "Visual_Layout_RowHeightMode": "行高",
+  "Enum_rowHeight_auto": "适应视觉对象",
+  "Enum_rowHeight_fixed": "固定",
+  "Visual_Layout_RowHeight": "固定行高 (px)",
+  "Visual_Layout_BarHeightPct": "条形粗细占行的 % (10-90)"
 }

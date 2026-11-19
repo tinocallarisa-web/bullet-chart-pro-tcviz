@@ -68,7 +68,6 @@ const VERT_PAD_BOT    = 20;
 const VERT_PAD_LR     = 6;
 const LEGEND_H        = 22;
 const AXIS_H          = 16;   // height reserved below chart rows for H-axis labels
-const MAX_ROW_H       = 72;   // cap row height so tall visuals don't look odd
 const MIN_COL_W       = 32;   // minimum column width in vertical mode before H-scroll kicks in
 
 const URL_GUIDE   = "https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html";
@@ -471,6 +470,9 @@ export class BulletChartPro implements IVisual {
             labelWidthPct:      Math.min(40, Math.max(5,  num("layout","labelWidthPct",      d.labelWidthPct))),
             rightPanelWidthPct: Math.min(45, Math.max(10, num("layout","rightPanelWidthPct", d.rightPanelWidthPct))),
             rightPanelWidthSet: typeof obj?.["layout"]?.["rightPanelWidthPct"] === "number",
+            rowHeightMode:      str( "layout", "rowHeightMode",      d.rowHeightMode) as any,
+            rowHeight:          Math.min(200, Math.max(16, num("layout", "rowHeight", d.rowHeight))),
+            barHeightPct:       Math.min(90, Math.max(10, num("layout", "barHeightPct", d.barHeightPct))),
             showAxis:           bool("layout", "showAxis",           d.showAxis),
             showAxisTitle:      bool("layout", "showAxisTitle",      d.showAxisTitle),
             axisTitle:          str( "layout", "axisTitle",          d.axisTitle),
@@ -953,19 +955,23 @@ export class BulletChartPro implements IVisual {
         const legendH = s.showLegend ? this.legendH() : 0;
         const axisH   = s.showAxis   ? AXIS_H + this.axisTitleH() : 0;
         const isTop   = s.legendPosition === "top";
-        const chartY  = isTop ? legendH : 0;
-        const chartH  = vpH - legendH - axisH;
+        // Franja propia para las etiquetas de las líneas de referencia (1.6): antes iban pegadas al borde superior.
+        const refH    = (s.refLine1Show || s.refLine2Show) ? this.axisFs() + 8 : 0;
+        const chartY  = (isTop ? legendH : 0) + refH;
+        const chartH  = vpH - legendH - axisH - refH;
         const { min: rMin, max: rMax } = this.calcRange(data);
         const domainMin  = Math.min(0, rMin);
         const domainMax  = rMax * 1.1 || 1;
         const totalDomain = domainMax - domainMin;
 
-        const targetRowH = Math.min(MAX_ROW_H, Math.floor(chartH / data.length));
+        // 1.6: "Ajustar al visual" reparte todo el alto entre las filas (antes, tope de 72 px y hueco debajo);
+        // "Fijo" usa el alto de fila elegido y, si no caben, el visual se desplaza.
+        const targetRowH = s.rowHeightMode === "fixed" ? s.rowHeight : Math.floor(chartH / data.length);
         const autoRightW = this.estimateRightW(data, s, s.fontSize);
         const L       = this.hLayout(s, vpW, targetRowH, autoRightW);
         this.rp = this.rightPanelMode(data, s, L.rightW);
         const rowsH   = L.rowH * data.length;
-        const totalH  = rowsH + legendH + axisH;
+        const totalH  = rowsH + legendH + axisH + refH;
 
         this.clearSvg(vpW, Math.max(vpH, totalH));
         this.attachClearClick();
@@ -1367,7 +1373,7 @@ export class BulletChartPro implements IVisual {
         const zeroY    = botY - ((-domainMin) / totalDomain) * chartH; // y for value=0
         const yOf      = (v: number) => botY - ((v - domainMin) / totalDomain) * chartH;
         const baseline = zeroY; // baseline drawn at zero
-        const barW   = Math.max(4, colW * 0.55);
+        const barW   = Math.max(4, colW * Math.min(0.95, Math.max(0.15, s.barHeightPct / 80)));   // 44 % → 0,55 como antes
         const barXOff = (colW - barW) / 2;
 
         // Zero baseline
@@ -1575,7 +1581,7 @@ export class BulletChartPro implements IVisual {
         const fitH       = Math.floor((availH - GAP * (nRows + 1)) / nRows);
         // Las filas se encogen hasta 16 px para que los paneles quepan en el visual (antes, 28 px fijos: los paneles
         // se salían, salían barras de desplazamiento y la leyenda quedaba fuera de la vista).
-        const targetRowH  = Math.max(16, Math.floor((fitH - titleH - 4) / maxRows));
+        const targetRowH  = s.rowHeightMode === "fixed" ? s.rowHeight : Math.max(16, Math.floor((fitH - titleH - 4) / maxRows));
         const allData     = panels.flatMap(p => p.data);
         const autoRightW  = this.estimateRightW(allData, s, s.fontSize);
         const L           = this.hLayout(s, panelW, targetRowH, autoRightW, 16);
@@ -1664,7 +1670,7 @@ export class BulletChartPro implements IVisual {
                     this.renderRefLinesH(
                         px + L.labelW, L.chartW,
                         py + titleH, py + titleH + panel.data.length * L.rowH,
-                        pTotalDomain, pDomainMin, panel.data[0]?.formatActual);
+                        pTotalDomain, pDomainMin, panel.data[0]?.formatActual, false);
                 }
             }
         });
@@ -1701,7 +1707,7 @@ export class BulletChartPro implements IVisual {
     private hLayout(s: BulletSettings, vpW: number, targetRowH?: number, autoRightW?: number, minRowH = 28) {
         const fs      = s.fontSize;
         const rowH    = Math.max(minRowH, Math.ceil(targetRowH ?? fs * 3.4));
-        const barH    = Math.max(6,  Math.floor(rowH * 0.44));
+        const barH    = Math.max(6,  Math.min(rowH - 4, Math.floor(rowH * s.barHeightPct / 100)));
         const barY    = Math.floor((rowH - barH) / 2);
         const aBarH   = Math.max(3, Math.floor(barH * 0.55));
         const aBarY   = barY + Math.floor((barH - aBarH) / 2);
@@ -2090,11 +2096,12 @@ export class BulletChartPro implements IVisual {
     // labelW / chartW  = used only in H-mode. zeroX / totalDomain + domainMin derive the x position.
     private renderRefLinesH(
         labelW: number, chartW: number, chartTop: number, chartBot: number,
-        totalDomain: number, domainMin: number, formatStr?: string
+        totalDomain: number, domainMin: number, formatStr?: string, labelAbove = true
     ): void {
         const n0 = this.rootSvg.childNodes.length;
         const s   = this.settings;
         const ff  = s.fontFamily;
+        const fs  = this.axisFs();
         const xOf = (v: number) => labelW + ((v - domainMin) / totalDomain) * chartW;
         const lines = [
             { show: s.refLine1Show, value: s.refLine1Value, label: s.refLine1Label, color: s.refLine1Color },
@@ -2117,9 +2124,13 @@ export class BulletChartPro implements IVisual {
             const displayLabel = rl.label || this.formatValue(rl.value, formatStr);
             if (displayLabel) {
                 const t = this.mkEl("text");
-                t.setAttribute("x",           String(x + 3));
-                t.setAttribute("y",           String(chartTop + 9));
-                t.setAttribute("font-size",   String(this.fsMin(9)));
+                // Encima de las filas, en su franja (labelAbove); en small multiples, dentro del panel. Cerca del borde
+                // derecho la etiqueta se alinea a la izquierda de la línea para no salirse.
+                const right = x > labelW + chartW * 0.75;
+                t.setAttribute("x",           String(right ? x - 4 : x + 4));
+                t.setAttribute("text-anchor", right ? "end" : "start");
+                t.setAttribute("y",           String(labelAbove ? chartTop - 5 : chartTop + fs + 2));
+                t.setAttribute("font-size",   String(fs));
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        rl.color);
                 t.setAttribute("pointer-events", "none");
@@ -2163,7 +2174,7 @@ export class BulletChartPro implements IVisual {
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(xLeft + 2));
                 t.setAttribute("y",           String(y - 2));
-                t.setAttribute("font-size",   String(this.fsMin(9)));
+                t.setAttribute("font-size",   String(this.axisFs()));
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        rl.color);
                 t.setAttribute("pointer-events", "none");

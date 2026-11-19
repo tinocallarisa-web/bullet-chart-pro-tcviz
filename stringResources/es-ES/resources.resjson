@@ -167,5 +167,10 @@
   "Enum_hc_on": "Activo",
   "Prop_accessibility_focusColor": "Color del foco",
   "Prop_accessibility_focusWidth": "Grosor del foco",
-  "Prop_accessibility_minTextSize": "Tamaño mínimo del texto"
+  "Prop_accessibility_minTextSize": "Tamaño mínimo del texto",
+  "Visual_Layout_RowHeightMode": "Alto de fila",
+  "Enum_rowHeight_auto": "Ajustar al visual",
+  "Enum_rowHeight_fixed": "Fijo",
+  "Visual_Layout_RowHeight": "Alto de fila fijo (px)",
+  "Visual_Layout_BarHeightPct": "Grosor de la barra % de la fila (10-90)"
 }

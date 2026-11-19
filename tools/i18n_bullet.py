@@ -562,3 +562,11 @@ P.update({
 "Desviación %"
 ]
 })
+
+P.update({
+"Row height": ["Altura da linha", "Hauteur de ligne", "Zeilenhöhe", "Altezza riga", "Rijhoogte", "Wysokość wiersza", "行の高さ", "行高", "행 높이", "Alto de fila"],
+"Fit to visual": ["Ajustar ao visual", "Ajuster au visuel", "An Visual anpassen", "Adatta all’oggetto visivo", "Aanpassen aan visual", "Dopasuj do wizualizacji", "ビジュアルに合わせる", "适应视觉对象", "시각적 개체에 맞춤", "Ajustar al visual"],
+"Fixed": ["Fixa", "Fixe", "Fest", "Fissa", "Vast", "Stała", "固定", "固定", "고정", "Fijo"],
+"Fixed row height (px)": ["Altura fixa da linha (px)", "Hauteur de ligne fixe (px)", "Feste Zeilenhöhe (px)", "Altezza riga fissa (px)", "Vaste rijhoogte (px)", "Stała wysokość wiersza (px)", "固定の行の高さ (px)", "固定行高 (px)", "고정 행 높이(px)", "Alto de fila fijo (px)"],
+"Bar thickness % of row (10-90)": ["Espessura da barra % da linha (10-90)", "Épaisseur de la barre % de la ligne (10-90)", "Balkenstärke % der Zeile (10-90)", "Spessore barra % della riga (10-90)", "Balkdikte % van de rij (10-90)", "Grubość słupka % wiersza (10-90)", "バーの太さ (行の %、10-90)", "条形粗细占行的 % (10-90)", "막대 두께(행의 %, 10-90)", "Grosor de la barra % de la fila (10-90)"],
+})

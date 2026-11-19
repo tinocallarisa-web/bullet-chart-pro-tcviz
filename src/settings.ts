@@ -34,7 +34,10 @@ export interface BulletSettings {
     fontFamily:         string;
     labelWidthPct:      number;   // % of viewport width for category column (5-40)
     rightPanelWidthPct: number;   // % of viewport width for values/variance column (10-45)
-    rightPanelWidthSet: boolean;  // true si el usuario lo fijó (si no, el ancho se calcula del texto)
+    rightPanelWidthSet: boolean;
+    rowHeightMode:      "auto" | "fixed";   // 1.6: "auto" reparte todo el alto del visual entre las filas
+    rowHeight:          number;   // alto fijo de fila (px), con rowHeightMode = "fixed"
+    barHeightPct:       number;   // grosor de la barra, % del alto de la fila (antes fijo en 44)  // true si el usuario lo fijó (si no, el ancho se calcula del texto)
 
     // ── Axis / Scale ──────────────────────────────────────────────────
     showAxis:           boolean;
@@ -117,6 +120,9 @@ export function getDefaultSettings(): BulletSettings {
         labelWidthPct:      22,
         rightPanelWidthPct: 34,
         rightPanelWidthSet: false,
+        rowHeightMode:      "auto",
+        rowHeight:          40,
+        barHeightPct:       44,
 
         showAxis:           true,
         showAxisTitle:      false,

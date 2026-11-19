@@ -167,5 +167,10 @@
   "Enum_hc_on": "Wł.",
   "Prop_accessibility_focusColor": "Kolor fokusu",
   "Prop_accessibility_focusWidth": "Grubość fokusu",
-  "Prop_accessibility_minTextSize": "Minimalny rozmiar tekstu"
+  "Prop_accessibility_minTextSize": "Minimalny rozmiar tekstu",
+  "Visual_Layout_RowHeightMode": "Wysokość wiersza",
+  "Enum_rowHeight_auto": "Dopasuj do wizualizacji",
+  "Enum_rowHeight_fixed": "Stała",
+  "Visual_Layout_RowHeight": "Stała wysokość wiersza (px)",
+  "Visual_Layout_BarHeightPct": "Grubość słupka % wiersza (10-90)"
 }

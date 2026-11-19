@@ -167,5 +167,10 @@
   "Enum_hc_on": "An",
   "Prop_accessibility_focusColor": "Fokusfarbe",
   "Prop_accessibility_focusWidth": "Fokusbreite",
-  "Prop_accessibility_minTextSize": "Minimale Textgröße"
+  "Prop_accessibility_minTextSize": "Minimale Textgröße",
+  "Visual_Layout_RowHeightMode": "Zeilenhöhe",
+  "Enum_rowHeight_auto": "An Visual anpassen",
+  "Enum_rowHeight_fixed": "Fest",
+  "Visual_Layout_RowHeight": "Feste Zeilenhöhe (px)",
+  "Visual_Layout_BarHeightPct": "Balkenstärke % der Zeile (10-90)"
 }

@@ -105,6 +105,9 @@ export function buildFormattingCards(s: BulletSettings, cats: CategoryColor[]): 
         // Los dos anchos solo existen en horizontal: en vertical no se ofrecen.
         new NumUpDown({ name: "labelWidthPct",      displayName: "Category column width % (5-40)", displayNameKey: "Visual_Layout_LabelWidthPct",      value: s.labelWidthPct, visible: s.orientation !== "vertical" }),
         new NumUpDown({ name: "rightPanelWidthPct", displayName: "Values panel width % (10-45)",    displayNameKey: "Visual_Layout_RightPanelWidthPct", value: s.rightPanelWidthPct, visible: s.orientation !== "vertical" }),
+        new AutoDropdown({ name: "rowHeightMode",   displayName: "Row height",                     displayNameKey: "Visual_Layout_RowHeightMode",      value: s.rowHeightMode }),
+        new NumUpDown({    name: "rowHeight",       displayName: "Fixed row height (px)",          displayNameKey: "Visual_Layout_RowHeight",          value: s.rowHeight, visible: s.rowHeightMode === "fixed" }),
+        new NumUpDown({    name: "barHeightPct",    displayName: "Bar thickness % of row (10-90)", displayNameKey: "Visual_Layout_BarHeightPct",       value: s.barHeightPct }),
         new ToggleSwitch({ name: "showAxis",        displayName: "Show scale axis",                displayNameKey: "Visual_Layout_ShowAxis",           value: s.showAxis }),
         new ToggleSwitch({ name: "showGridlines",   displayName: "Gridlines",                      displayNameKey: "Visual_Layout_ShowGridlines",      value: s.showGridlines, visible: s.showAxis }),
         new ToggleSwitch({ name: "showAxisTitle",   displayName: "Axis title",                     displayNameKey: "Visual_Layout_ShowAxisTitle",      value: s.showAxisTitle, visible: s.showAxis }),

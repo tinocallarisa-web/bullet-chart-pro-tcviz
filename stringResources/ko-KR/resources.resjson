@@ -167,5 +167,10 @@
   "Enum_hc_on": "켜짐",
   "Prop_accessibility_focusColor": "포커스 색",
   "Prop_accessibility_focusWidth": "포커스 두께",
-  "Prop_accessibility_minTextSize": "최소 텍스트 크기"
+  "Prop_accessibility_minTextSize": "최소 텍스트 크기",
+  "Visual_Layout_RowHeightMode": "행 높이",
+  "Enum_rowHeight_auto": "시각적 개체에 맞춤",
+  "Enum_rowHeight_fixed": "고정",
+  "Visual_Layout_RowHeight": "고정 행 높이(px)",
+  "Visual_Layout_BarHeightPct": "막대 두께(행의 %, 10-90)"
 }

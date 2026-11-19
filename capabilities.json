@@ -540,6 +540,38 @@
             "numeric": true
           }
         },
+        "rowHeightMode": {
+          "displayName": "Row height",
+          "displayNameKey": "Visual_Layout_RowHeightMode",
+          "type": {
+            "enumeration": [
+              {
+                "value": "auto",
+                "displayName": "Fit to visual",
+                "displayNameKey": "Enum_rowHeight_auto"
+              },
+              {
+                "value": "fixed",
+                "displayName": "Fixed",
+                "displayNameKey": "Enum_rowHeight_fixed"
+              }
+            ]
+          }
+        },
+        "rowHeight": {
+          "displayName": "Fixed row height (px)",
+          "displayNameKey": "Visual_Layout_RowHeight",
+          "type": {
+            "numeric": true
+          }
+        },
+        "barHeightPct": {
+          "displayName": "Bar thickness % of row (10-90)",
+          "displayNameKey": "Visual_Layout_BarHeightPct",
+          "type": {
+            "numeric": true
+          }
+        },
         "showAxis": {
           "displayName": "Show scale axis",
           "displayNameKey": "Visual_Layout_ShowAxis",

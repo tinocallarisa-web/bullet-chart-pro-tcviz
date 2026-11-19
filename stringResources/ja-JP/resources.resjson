@@ -167,5 +167,10 @@
   "Enum_hc_on": "オン",
   "Prop_accessibility_focusColor": "フォーカスの色",
   "Prop_accessibility_focusWidth": "フォーカスの幅",
-  "Prop_accessibility_minTextSize": "最小のテキスト サイズ"
+  "Prop_accessibility_minTextSize": "最小のテキスト サイズ",
+  "Visual_Layout_RowHeightMode": "行の高さ",
+  "Enum_rowHeight_auto": "ビジュアルに合わせる",
+  "Enum_rowHeight_fixed": "固定",
+  "Visual_Layout_RowHeight": "固定の行の高さ (px)",
+  "Visual_Layout_BarHeightPct": "バーの太さ (行の %、10-90)"
 }

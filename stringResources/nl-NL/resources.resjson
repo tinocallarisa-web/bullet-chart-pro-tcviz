@@ -167,5 +167,10 @@
   "Enum_hc_on": "Aan",
   "Prop_accessibility_focusColor": "Kleur focus",
   "Prop_accessibility_focusWidth": "Breedte focus",
-  "Prop_accessibility_minTextSize": "Minimale tekstgrootte"
+  "Prop_accessibility_minTextSize": "Minimale tekstgrootte",
+  "Visual_Layout_RowHeightMode": "Rijhoogte",
+  "Enum_rowHeight_auto": "Aanpassen aan visual",
+  "Enum_rowHeight_fixed": "Vast",
+  "Visual_Layout_RowHeight": "Vaste rijhoogte (px)",
+  "Visual_Layout_BarHeightPct": "Balkdikte % van de rij (10-90)"
 }

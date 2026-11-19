@@ -167,5 +167,10 @@
   "Enum_hc_on": "On",
   "Prop_accessibility_focusColor": "Focus color",
   "Prop_accessibility_focusWidth": "Focus width",
-  "Prop_accessibility_minTextSize": "Minimum text size"
+  "Prop_accessibility_minTextSize": "Minimum text size",
+  "Visual_Layout_RowHeightMode": "Row height",
+  "Enum_rowHeight_auto": "Fit to visual",
+  "Enum_rowHeight_fixed": "Fixed",
+  "Visual_Layout_RowHeight": "Fixed row height (px)",
+  "Visual_Layout_BarHeightPct": "Bar thickness % of row (10-90)"
 }
