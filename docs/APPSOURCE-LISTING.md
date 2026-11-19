@@ -80,19 +80,19 @@ ACCESSIBILITY
 • Minimum text size: no text of the visual is drawn smaller than the size you choose
 
 PRO
-• Bands from measures: each row draws its own thresholds, calculated in DAX — 90% of its target, a value from a thresholds table, whatever the business defines
+• Bands from measures: each row draws its own thresholds, calculated in DAX
 • Second target: a stretch goal or last year as a hollow marker, with its own variance in the tooltip
-• Small multiples: one panel per region or year, with a shared or independent scale, automatic columns and the panel options of the TCViz collection
+• Small multiples: one panel per region or year, with a shared or independent scale
 • Forecast marker for the expected end-of-period value
 • Vertical bars, for months or long category names
 
-Try them on your own data first: while you edit a report without a licence, a Pro feature is drawn working under a "Pro preview" watermark that names it, and Power BI shows its own purchase notice. You see your bullets with per-row bands, not a screenshot of someone else's. In reading view the free chart is shown.
+Try them on your own data first: while you edit a report without a licence, a Pro feature is drawn working under a "Pro preview" watermark that names it, and Power BI shows its own purchase notice. Reading view shows the free chart.
 
 FREE AND PRO
-The free version is a complete and correct bullet chart: actual, target, variance and percentage bands for every row, with every style, sort, accessibility and format option above. Nothing in it is a demo or a truncated result. Pro adds the readings for more demanding reports: thresholds that differ per row, a second goal, panels and forecast.
+The free version is a complete and correct bullet chart: actual, target, variance and percentage bands for every row, with every style, sort, accessibility and format option above. Nothing in it is a demo or a truncated result.
 
 PRIVACY
-The visual makes no network calls, has no telemetry, sets no cookies and stores nothing outside your report: it declares no web access to Power BI, so it could not send your data anywhere even by mistake. The links on the start screen open only when you click them, through Power BI.
+The visual makes no network calls, has no telemetry, sets no cookies and stores nothing outside your report: it declares no web access, so it could not send your data anywhere. The links on the start screen open only when you click them, through Power BI.
 
 GETTING STARTED
 1. Drag regions, products or teams into Category.
