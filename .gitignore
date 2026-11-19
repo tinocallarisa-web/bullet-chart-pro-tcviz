@@ -13,3 +13,4 @@ docs/docs.html
 tools/simulador/capturas/
 tools/__pycache__/
 tools/simulador/__pycache__/
+!_releases/*.pbiviz
