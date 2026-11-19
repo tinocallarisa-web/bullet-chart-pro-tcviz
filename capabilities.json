@@ -184,33 +184,38 @@
             "enumeration": [
               {
                 "value": "clean",
-                "displayName": "Clean",
+                "displayName": "Report theme",
                 "displayNameKey": "Enum_tpl_clean"
               },
               {
-                "value": "minimal",
-                "displayName": "Minimal",
-                "displayNameKey": "Enum_tpl_minimal"
+                "value": "boardroom",
+                "displayName": "Boardroom",
+                "displayNameKey": "Enum_tpl_boardroom"
               },
               {
-                "value": "contrast",
-                "displayName": "Contrast",
-                "displayNameKey": "Enum_tpl_contrast"
+                "value": "ledger",
+                "displayName": "Ledger",
+                "displayNameKey": "Enum_tpl_ledger"
               },
               {
-                "value": "soft",
-                "displayName": "Soft",
-                "displayNameKey": "Enum_tpl_soft"
+                "value": "editorial",
+                "displayName": "Editorial",
+                "displayNameKey": "Enum_tpl_editorial"
               },
               {
-                "value": "compact",
-                "displayName": "Compact",
-                "displayNameKey": "Enum_tpl_compact"
+                "value": "signal",
+                "displayName": "Signal",
+                "displayNameKey": "Enum_tpl_signal"
               },
               {
-                "value": "ibcs",
-                "displayName": "IBCS style",
-                "displayNameKey": "Enum_tpl_ibcs"
+                "value": "aurora",
+                "displayName": "Aurora",
+                "displayNameKey": "Enum_tpl_aurora"
+              },
+              {
+                "value": "terrace",
+                "displayName": "Terrace",
+                "displayNameKey": "Enum_tpl_terrace"
               }
             ]
           }
@@ -466,8 +471,59 @@
         }
       }
     },
+    "sort": {
+      "displayName": "Sort",
+      "displayNameKey": "Obj_sort",
+      "properties": {
+        "by": {
+          "displayName": "Sort bars by",
+          "displayNameKey": "Prop_sort_by",
+          "type": {
+            "enumeration": [
+              {
+                "value": "none",
+                "displayName": "Data order",
+                "displayNameKey": "Enum_sort_none"
+              },
+              {
+                "value": "actual",
+                "displayName": "Actual",
+                "displayNameKey": "Enum_sort_actual"
+              },
+              {
+                "value": "target",
+                "displayName": "Target",
+                "displayNameKey": "Enum_sort_target"
+              },
+              {
+                "value": "variance",
+                "displayName": "Variance",
+                "displayNameKey": "Enum_sort_variance"
+              },
+              {
+                "value": "variancePct",
+                "displayName": "Variance %",
+                "displayNameKey": "Enum_sort_variancePct"
+              },
+              {
+                "value": "category",
+                "displayName": "Category name",
+                "displayNameKey": "Enum_sort_category"
+              }
+            ]
+          }
+        },
+        "descending": {
+          "displayName": "Descending",
+          "displayNameKey": "Prop_sort_descending",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
     "layout": {
-      "displayName": "Layout",
+      "displayName": "Layout and axis",
       "displayNameKey": "Visual_Layout",
       "properties": {
         "labelWidthPct": {
@@ -487,6 +543,27 @@
         "showAxis": {
           "displayName": "Show scale axis",
           "displayNameKey": "Visual_Layout_ShowAxis",
+          "type": {
+            "bool": true
+          }
+        },
+        "showAxisTitle": {
+          "displayName": "Axis title",
+          "displayNameKey": "Visual_Layout_ShowAxisTitle",
+          "type": {
+            "bool": true
+          }
+        },
+        "axisTitle": {
+          "displayName": "Axis title text (empty = measure name)",
+          "displayNameKey": "Visual_Layout_AxisTitle",
+          "type": {
+            "text": true
+          }
+        },
+        "showGridlines": {
+          "displayName": "Gridlines",
+          "displayNameKey": "Visual_Layout_ShowGridlines",
           "type": {
             "bool": true
           }
@@ -635,7 +712,7 @@
           }
         },
         "columns": {
-          "displayName": "Columns",
+          "displayName": "Columns (0 = automatic)",
           "displayNameKey": "Visual_Trellis_Columns",
           "type": {
             "numeric": true
@@ -686,6 +763,101 @@
                 "color": true
               }
             }
+          }
+        },
+        "gap": {
+          "displayName": "Space between panels",
+          "displayNameKey": "Visual_Trellis_Gap",
+          "type": {
+            "numeric": true
+          }
+        },
+        "titleSize": {
+          "displayName": "Title size",
+          "displayNameKey": "Visual_Trellis_TitleSize",
+          "type": {
+            "numeric": true
+          }
+        },
+        "titleBold": {
+          "displayName": "Bold title",
+          "displayNameKey": "Visual_Trellis_TitleBold",
+          "type": {
+            "bool": true
+          }
+        },
+        "titleAlign": {
+          "displayName": "Title alignment",
+          "displayNameKey": "Visual_Trellis_TitleAlign",
+          "type": {
+            "enumeration": [
+              {
+                "value": "left",
+                "displayName": "Left",
+                "displayNameKey": "Enum_align_left"
+              },
+              {
+                "value": "center",
+                "displayName": "Center",
+                "displayNameKey": "Enum_align_center"
+              }
+            ]
+          }
+        },
+        "border": {
+          "displayName": "Panel border",
+          "displayNameKey": "Visual_Trellis_Border",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "accessibility": {
+      "displayName": "Accessibility",
+      "displayNameKey": "Obj_accessibility",
+      "properties": {
+        "highContrast": {
+          "displayName": "High contrast",
+          "displayNameKey": "Prop_accessibility_highContrast",
+          "type": {
+            "enumeration": [
+              {
+                "value": "auto",
+                "displayName": "Automatic (Windows setting)",
+                "displayNameKey": "Enum_hc_auto"
+              },
+              {
+                "value": "on",
+                "displayName": "On",
+                "displayNameKey": "Enum_hc_on"
+              }
+            ]
+          }
+        },
+        "focusColor": {
+          "displayName": "Focus color",
+          "displayNameKey": "Prop_accessibility_focusColor",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "focusWidth": {
+          "displayName": "Focus width",
+          "displayNameKey": "Prop_accessibility_focusWidth",
+          "type": {
+            "numeric": true
+          }
+        },
+        "minTextSize": {
+          "displayName": "Minimum text size",
+          "displayNameKey": "Prop_accessibility_minTextSize",
+          "type": {
+            "numeric": true
           }
         }
       }

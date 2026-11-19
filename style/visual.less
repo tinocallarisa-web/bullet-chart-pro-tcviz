@@ -11,8 +11,9 @@
     box-sizing: border-box;
 
     /* Remove outline ring on focus in most browsers, keep for keyboard nav */
+    /* Foco de teclado: color y grosor de la tarjeta Accesibilidad (1.6), puestos por visual.ts. */
     &:focus {
-        outline: 2px solid #0078D4;
+        outline: var(--bc-focus-w, 2px) solid var(--bc-focus, #0078D4);
         outline-offset: -2px;
     }
 
@@ -104,3 +105,6 @@
     .bc-l-title { font-size: 14px; }
     .bc-l-inline { font-size: 12px; }
 }
+
+/* Marca de agua "Pro preview" común de la cartera (1.6). */
+@import (less) "comun/watermark.less";

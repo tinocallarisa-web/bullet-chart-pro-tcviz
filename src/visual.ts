@@ -21,6 +21,7 @@ import {
     SubSelectableObjectNameAttribute, SubSelectableTypeAttribute,
 } from "powerbi-visuals-utils-onobjectutils";
 import { buildFormattingCards, CategoryColor, COLOR_FIXED_SLICES } from "./formatting";
+import { createProWatermark, renderProWatermark } from "./comun/watermark";
 import "./../style/visual.less";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -60,7 +61,6 @@ const TARGET_W        = 3;
 const TARGET_H_RATIO  = 0.80;
 const FORECAST_SIZE   = 5;
 const CHART_PAD_R     = 8;
-const TRELLIS_GAP     = 10;
 const TRELLIS_TITLE_H = 28;
 const MIN_PANEL_W     = 220;  // below this a small-multiples panel is unreadable: use fewer columns
 const VERT_PAD_TOP    = 8;
@@ -76,21 +76,63 @@ const URL_PRODUCT = "https://tcviz.com/product/bullet-chart-pro/?ref=visual-bull
 const URL_VIDEO   = "https://www.youtube.com/watch?v=PdmOWIAKYho";
 
 /**
- * Plantillas de estilo (1.5). Un punto de partida: solo rellenan lo que el usuario no ha tocado (lo guardado en
- * metadata.objects gana siempre) y, al ELEGIR una, se borran los ajustes que ella define (aplicarPlantilla).
- * "clean" no cambia nada: es el aspecto de siempre. "ibcs" usa el modo IBCS que ya existía; es un estilo inspirado en
- * la notación IBCS, no afirma cumplir el estándar.
+ * Estilos (1.6): los siete de la colección TCViz (Treemap, Line Chart, Box & Whisker, Radar, KPI Card, Pareto,
+ * Histogram), con los mismos tokens, para que una página en Boardroom se vea como un solo informe. "clean" = Report
+ * theme (por defecto): textos y tinta del tema del informe. Todos GRATIS, como las plantillas de la 1.5.
+ * Un estilo solo rellena lo que el usuario no ha tocado (lo guardado en metadata.objects gana siempre) y, al ELEGIR
+ * uno, se borran los ajustes que define (aplicarPlantilla). El alto contraste manda sobre el estilo.
  */
-const TEMPLATES: Record<string, Record<string, Record<string, any>>> = {
-    clean: {},
-    minimal: { colors: { targetColor: "#605E5C", band1Color: "#F3F2F1", band2Color: "#EDEBE9", band3Color: "#E1DFDD" },
-        layout: { showAxis: false }, legend: { color: "#8A8886" } },
-    contrast: { colors: { actualColor: "#1F3864", targetColor: "#000000", band1Color: "#D9D9D9", band2Color: "#BFBFBF",
-        band3Color: "#A6A6A6", positiveColor: "#107C10", negativeColor: "#C00000" } },
-    soft: { colors: { actualColor: "#5B9BD5", targetColor: "#404040", band1Color: "#EEF4FA", band2Color: "#DCE8F4",
-        band3Color: "#C9DCEF", positiveColor: "#70AD47", negativeColor: "#ED7D31" } },
-    compact: { labels: { fontSize: 9 }, legend: { fontSize: 8 } },
-    ibcs: { general: { ibcsMode: true }, colors: { positiveColor: "#8CB400", negativeColor: "#FF0000" } },
+const COLLECTION_STYLES = ["boardroom", "ledger", "editorial", "signal", "aurora", "terrace"];
+interface StyleTokens { bg: string; text: string; axis: string; grid: string; plan: string; up: string; down: string; series: string[]; font?: string; grad?: string; }
+const STYLE_TOKENS: Record<string, StyleTokens> = {
+    boardroom: { bg: "#16263D", text: "#F2F0E8", axis: "#9FB0C6", grid: "#2A3E5C", plan: "#6FCF97", up: "#6FCF97", down: "#EB8A7B", series: ["#C9A45C", "#8FB8E8", "#EB8A7B", "#6FCF97", "#C5D3E3"] },
+    ledger: { bg: "#FBF8EF", text: "#231F16", axis: "#6E6652", grid: "#D9D2BE", plan: "#946A10", up: "#2F6B3B", down: "#A32A2A", series: ["#7A1F1F", "#3A3528", "#2F6B3B", "#946A10", "#B7AD92"], font: "Georgia, serif" },
+    editorial: { bg: "#FFFFFF", text: "#111111", axis: "#5F5F5F", grid: "#E2E2E2", plan: "#111111", up: "#111111", down: "#D7263D", series: ["#D7263D", "#111111", "#5F5F5F", "#BDBDBD", "#8C1C2B"], font: "Georgia, serif" },
+    signal: { bg: "#FFFFFF", text: "#14202B", axis: "#566472", grid: "#D9DEE4", plan: "#B7791F", up: "#1F7A4D", down: "#C0392B", series: ["#1F7A4D", "#14202B", "#B7791F", "#C0392B", "#9AA5B1"] },
+    aurora: { bg: "#10395E", text: "#FFFFFF", axis: "#C5D3E3", grid: "#3A5C7E", plan: "#FFD27D", up: "#7CE7D0", down: "#FF9DB0", series: ["#7CE7D0", "#FFD27D", "#FF9DB0", "#9DB7FF", "#C5D3E3"], grad: "linear-gradient(135deg, #1B1147, #10395E 50%, #0B5A5E)" },
+    terrace: { bg: "#FBF5EC", text: "#3A2A1E", axis: "#7A6450", grid: "#E5D6C2", plan: "#5E7128", up: "#5E7128", down: "#B5372A", series: ["#B5532A", "#5E7128", "#B5782A", "#B5372A", "#C9A77E"] },
+};
+
+/** Mezcla dos colores #RRGGBB (t = 0 → a, 1 → b). Las bandas salen del fondo hacia la tinta del eje. */
+function mix(a: string, b: string, t: number): string {
+    const p = (h: string) => { const n = parseInt(h.replace("#", "").slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+    const x = p(a), y = p(b);
+    return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+/** Lo que cada estilo pone en el panel: [objeto][propiedad] = valor. "clean" no pone nada (el aspecto de siempre). */
+const TEMPLATES: Record<string, Record<string, Record<string, any>>> = { clean: {} };
+for (const k of COLLECTION_STYLES) {
+    const t = STYLE_TOKENS[k];
+    // Barra = la serie principal (como la línea real del Line Chart); objetivo con la tinta; previsión con el color del
+    // plan; bandas del fondo hacia el eje (la peor, la más clara).
+    TEMPLATES[k] = {
+        colors: { actualColor: t.series[0], targetColor: t.text, target2Color: t.axis, forecastColor: t.plan,
+            positiveColor: t.up, negativeColor: t.down,
+            band1Color: mix(t.bg, t.axis, 0.14), band2Color: mix(t.bg, t.axis, 0.26), band3Color: mix(t.bg, t.axis, 0.40) },
+        legend: { color: t.axis, ...(t.font ? { fontFamily: t.font } : {}) },
+        ...(t.font ? { labels: { fontFamily: t.font } } : {}),
+        trellis: { trellisPanelColor: t.bg, trellisBorderColor: t.grid, trellisTitleColor: t.text },
+        accessibility: { focusColor: t.plan },
+    };
+}
+
+/**
+ * Compatibilidad 1.5: las seis plantillas propias ya no se ofrecen. Un informe guardado con una de ellas se lee como
+ * el estilo nuevo más parecido, conservando lo que no era color (eje, tamaños), para que no cambie de forma:
+ *   minimal  (grises suaves, sin eje)          → clean  + sin eje
+ *   contrast (azul marino, verde y rojo)       → boardroom
+ *   soft     (azules suaves)                   → clean
+ *   compact  (textos de 9 y leyenda de 8)      → clean  + la misma densidad
+ *   ibcs     (grises sobrios)                  → signal
+ * El valor guardado no se reescribe (nunca persistProperties al leer): el panel muestra el estilo nuevo.
+ */
+const LEGACY_TEMPLATES: Record<string, { style: string; keep: Record<string, Record<string, any>> }> = {
+    minimal:  { style: "clean",     keep: { layout: { showAxis: false } } },
+    contrast: { style: "boardroom", keep: {} },
+    soft:     { style: "clean",     keep: {} },
+    compact:  { style: "clean",     keep: { labels: { fontSize: 9 }, legend: { fontSize: 8 } } },
+    ibcs:     { style: "signal",    keep: {} },
 };
 const PLAN_ID         = "bullet-chart-pro-tcviz";   // Plan ID: última parte del Service ID de Partner Center
 
@@ -192,18 +234,9 @@ export class BulletChartPro implements IVisual {
         this.rootSvg.setAttribute("aria-label", "Bullet Chart Pro");
         this.container.appendChild(this.rootSvg);
 
-        // Marca de agua de la vista previa Pro. Blanca con contorno oscuro y opacidad 0.55:
-        // un gris translúcido desaparece sobre fondos saturados u oscuros. No intercepta
-        // clics ni entra en el recorrido del lector de pantalla.
-        this.watermarkEl = document.createElement("div");
-        this.watermarkEl.setAttribute("aria-hidden", "true");
-        this.watermarkEl.textContent = this.t("UI_ProPreview", "Pro preview");
-        this.watermarkEl.style.cssText =
-            "position:absolute;left:0;top:0;right:0;bottom:0;display:none;align-items:center;" +
-            "justify-content:center;pointer-events:none;z-index:5;font:700 32px 'Segoe UI',sans-serif;" +
-            "color:#FFFFFF;opacity:0.55;transform:rotate(-20deg);" +
-            "text-shadow:0 0 2px rgba(51,51,51,0.85),0 1px 3px rgba(51,51,51,0.65);";
-        this.container.appendChild(this.watermarkEl);
+        // Marca de agua de la vista previa Pro: la pieza común de la cartera (src/comun/watermark.ts, 1.6), con el
+        // título y las funciones Pro en uso. No intercepta clics ni entra en el lector de pantalla.
+        this.watermarkEl = createProWatermark(this.container);
 
         // Background context menu (required for Microsoft certification)
         this.rootSvg.addEventListener("contextmenu", (e: MouseEvent) => {
@@ -366,13 +399,14 @@ export class BulletChartPro implements IVisual {
      * al ancho del visual: un font-size fijo se queda ridículo a pantalla completa, que es
      * justo donde lo mira el revisor.
      */
-    private updateWatermark(wantsPro: boolean): void {
-        const show = this.proPreview && wantsPro;
-        this.watermarkEl.style.display = show ? "flex" : "none";
-        if (!show) { return; }
-        const width = this.container.clientWidth || 0;
-        const size  = Math.max(20, Math.min(72, Math.round(width * 0.09)));
-        this.watermarkEl.style.fontSize = `${size}px`;
+    private updateWatermark(wanted: string[]): void {
+        const vp = this.lastOptions?.viewport;
+        const hc = this.hc();
+        renderProWatermark(this.watermarkEl, this.proPreview && wanted.length ? {
+            width: vp?.width || this.container.clientWidth || 0, height: vp?.height || this.container.clientHeight || 0,
+            title: this.t("UI_ProPreview", "Pro preview"), features: wanted,
+            highContrast: hc.on ? { foreground: hc.fg, background: hc.bg } : null,
+        } : null);
     }
 
     private cancelLicenseIcon(): void {
@@ -395,19 +429,25 @@ export class BulletChartPro implements IVisual {
 
     private parseSettings(dv: DataView): BulletSettings {
         const d = getDefaultSettings();
-        if (!dv?.metadata?.objects) return d;
-        const obj = dv.metadata.objects;
+        const obj = dv?.metadata?.objects ?? {};
 
-        const tpl  = TEMPLATES[String((obj as any)?.style?.template ?? "clean")] ?? {};
-        const tv   = (g: string, p: string): any => tpl[g]?.[p];
+        // Estilo: el elegido; una plantilla de la 1.5 se lee como su estilo nuevo (LEGACY_TEMPLATES); un informe con el
+        // antiguo "IBCS Mode" activo y sin plantilla elegida se dibuja con Signal.
+        const raw    = (obj as any)?.style?.template;
+        const legacy = LEGACY_TEMPLATES[String(raw)];
+        const ibcsOn = (obj as any)?.general?.ibcsMode === true;
+        const tplName = legacy ? legacy.style : (TEMPLATES[String(raw)] ? String(raw) : (ibcsOn && raw == null ? "signal" : "clean"));
+        const base = TEMPLATES[tplName] ?? {};
+        const keep = legacy?.keep ?? {};
+        const tv   = (g: string, p: string): any => keep[g]?.[p] ?? base[g]?.[p];
         const col  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return (v && typeof v === "object" && "solid" in v) ? (v as any).solid.color ?? def : (tv(g, p) ?? def); };
         const num  = (g: string, p: string, def: number)  => { const v = obj?.[g]?.[p]; return typeof v === "number"  ? v : (tv(g, p) ?? def); };
         const bool = (g: string, p: string, def: boolean) => { const v = obj?.[g]?.[p]; return typeof v === "boolean" ? v : (tv(g, p) ?? def); };
-        const str  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return typeof v === "string"  ? v : def; };
+        const str  = (g: string, p: string, def: string)  => { const v = obj?.[g]?.[p]; return typeof v === "string"  ? v : (tv(g, p) ?? def); };
 
         const s: BulletSettings = {
             orientation:        str( "general","orientation",       d.orientation) as any,
-            ibcsMode:           bool("general","ibcsMode",           d.ibcsMode),
+            ibcsMode:           false,
             actualColor:        col( "colors", "actualColor",        d.actualColor),
             targetColor:        col( "colors", "targetColor",        d.targetColor),
             target2Color:       col( "colors", "target2Color",       d.target2Color),
@@ -432,12 +472,17 @@ export class BulletChartPro implements IVisual {
             rightPanelWidthPct: Math.min(45, Math.max(10, num("layout","rightPanelWidthPct", d.rightPanelWidthPct))),
             rightPanelWidthSet: typeof obj?.["layout"]?.["rightPanelWidthPct"] === "number",
             showAxis:           bool("layout", "showAxis",           d.showAxis),
+            showAxisTitle:      bool("layout", "showAxisTitle",      d.showAxisTitle),
+            axisTitle:          str( "layout", "axisTitle",          d.axisTitle),
+            showGridlines:      bool("layout", "showGridlines",      d.showGridlines),
+            sortBy:             str( "sort",   "by",                 d.sortBy) as any,
+            sortDescending:     bool("sort",   "descending",         d.sortDescending),
             showLegend:         bool("legend", "showLegend",         d.showLegend),
             legendPosition:     str( "legend", "legendPosition",     d.legendPosition) as any,
             legendFontSize:     Math.max(6, num("legend", "fontSize", d.legendFontSize)),
             legendFontFamily:   str( "legend", "fontFamily",         d.legendFontFamily),
             legendColor:        col( "legend", "color",              d.legendColor),
-            template:           str( "style",  "template",           d.template),
+            template:           tplName,
             guide:              bool("style",  "guide",              d.guide),
             refLine1Show:       bool("referenceLines","refLine1Show",  d.refLine1Show),
             refLine1Value:      num( "referenceLines","refLine1Value", d.refLine1Value),
@@ -448,43 +493,91 @@ export class BulletChartPro implements IVisual {
             refLine2Label:      str( "referenceLines","refLine2Label", d.refLine2Label),
             refLine2Color:      col( "referenceLines","refLine2Color", d.refLine2Color),
             trellisEnabled:     bool("trellis","enabled",             d.trellisEnabled),
-            trellisColumns:     Math.max(1,   num("trellis","columns",           d.trellisColumns)),
+            trellisColumns:     Math.max(0, Math.round(num("trellis","columns", d.trellisColumns))),   // 0 = automático
             trellisSyncScale:   bool("trellis","syncScale",           d.trellisSyncScale),
             trellisShowTitle:   bool("trellis","trellisShowTitle",    d.trellisShowTitle),
             trellisPanelColor:  col( "trellis","trellisPanelColor",   d.trellisPanelColor),
             trellisBorderColor: col( "trellis","trellisBorderColor",  d.trellisBorderColor),
             trellisTitleColor:  col( "trellis","trellisTitleColor",   d.trellisTitleColor),
+            trellisGap:         Math.min(60, Math.max(0, num("trellis","gap", d.trellisGap))),
+            trellisTitleSize:   Math.min(40, Math.max(6, num("trellis","titleSize", d.trellisTitleSize))),
+            trellisTitleBold:   bool("trellis","titleBold",           d.trellisTitleBold),
+            trellisTitleAlign:  str( "trellis","titleAlign",          d.trellisTitleAlign) as any,
+            trellisBorder:      bool("trellis","border",              d.trellisBorder),
+            hcMode:             str( "accessibility","highContrast",  d.hcMode) as any,
+            focusColor:         col( "accessibility","focusColor",    d.focusColor),
+            focusWidth:         Math.min(6, Math.max(1, num("accessibility","focusWidth", d.focusWidth))),
+            minTextSize:        Math.min(24, Math.max(6, num("accessibility","minTextSize", d.minTextSize))),
         };
 
-        if (s.ibcsMode) {
-            s.actualColor = "#333333"; s.targetColor = "#000000";
-            s.band1Color  = "#E8E8E8"; s.band2Color  = "#D0D0D0"; s.band3Color = "#B8B8B8";
-        }
-        const pal = this.host.colorPalette as any;
-        if (pal?.isHighContrast) {
-            s.actualColor = s.targetColor = s.target2Color = s.positiveColor = s.negativeColor = pal.foreground?.value ?? "#FFF";
-            s.band1Color  = pal.background?.value ?? "#000";
-            s.band2Color  = pal.backgroundLight?.value ?? "#111";
-            s.band3Color  = pal.backgroundDark?.value  ?? "#222";
+        // Tamaño mínimo de texto (Accesibilidad): ninguna fuente que elige el usuario baja de él.
+        s.fontSize         = Math.max(s.minTextSize, s.fontSize);
+        s.legendFontSize   = Math.max(s.minTextSize, s.legendFontSize);
+        s.trellisTitleSize = Math.max(s.minTextSize, s.trellisTitleSize);
+
+        // Alto contraste: el de Windows o forzado desde Accesibilidad ("On"). Manda sobre el estilo y los colores.
+        this.settings = s;   // hc() lo lee
+        const hc = this.hc();
+        if (hc.on) {
+            const pal = this.host.colorPalette as any;
+            const sys = !!pal?.isHighContrast;
+            s.actualColor = s.targetColor = s.target2Color = s.positiveColor = s.negativeColor = s.forecastColor = hc.fg;
+            s.band1Color  = hc.bg;
+            s.band2Color  = sys ? (pal.backgroundLight?.value ?? hc.bg) : "#E6E6E6";
+            s.band3Color  = sys ? (pal.backgroundDark?.value  ?? hc.bg) : "#C8C8C8";
             // El titulo del panel se pinta sobre el color de borde: en alto contraste
             // ambos vienen del tema, asi que el texto tiene que seguir al primer plano.
-            s.trellisTitleColor = pal.foreground?.value ?? "#FFF";
+            s.trellisTitleColor = hc.fg;
+            s.legendColor = hc.fg;
         }
         return s;
     }
 
+    /**
+     * Alto contraste (1.6): el de Windows (siempre) o forzado desde la tarjeta Accesibilidad ("On"). Forzado sin el tema
+     * de Windows, negro sobre blanco. sel = color de selección/foco del tema.
+     */
+    private hc(): { on: boolean; fg: string; bg: string; sel: string } {
+        const p: any = this.host?.colorPalette;
+        const sys = !!p?.isHighContrast;
+        const on = sys || this.settings?.hcMode === "on";
+        return { on, fg: sys ? (p?.foreground?.value || "#FFFFFF") : "#000000", bg: sys ? (p?.background?.value || "#000000") : "#FFFFFF",
+            sel: sys ? (p?.foregroundSelected?.value || p?.foreground?.value || "#FFFFFF") : "#000000" };
+    }
+
+    /** Tokens del estilo de la colección que se dibuja (null con Report theme o alto contraste). */
+    private look(): StyleTokens | null {
+        const t = this.settings?.template;
+        return !this.hc().on && t && COLLECTION_STYLES.indexOf(t) >= 0 ? STYLE_TOKENS[t] : null;
+    }
+
+    /**
+     * Tintas del lienzo (textos, ejes, cuadrícula, halo): las del estilo, las del tema del informe con Report theme, o
+     * las del alto contraste. main = texto principal, dim = secundario, axis = línea del eje, grid = cuadrícula.
+     */
+    private ink(): { main: string; dim: string; axis: string; grid: string; bg: string } {
+        const hc = this.hc();
+        if (hc.on) return { main: hc.fg, dim: hc.fg, axis: hc.fg, grid: hc.fg, bg: hc.bg };
+        const l = this.look();
+        if (l) return { main: l.text, dim: l.axis, axis: l.axis, grid: l.grid, bg: l.bg };
+        const p: any = this.host?.colorPalette;
+        return { main: p?.foreground?.value ?? "#333333", dim: p?.foregroundNeutralSecondary?.value ?? "#605E5C",
+            axis: "#C8C6C4", grid: "#E1DFDD", bg: p?.background?.value ?? "#FFFFFF" };
+    }
+
+    /** Foco de teclado (Accesibilidad); en alto contraste, el color de selección del tema. */
+    private focusColor(): string { const hc = this.hc(); return hc.on ? hc.sel : (this.settings?.focusColor || "#1A73E8"); }
+    private focusW(): number { return Math.min(6, Math.max(1, this.settings?.focusWidth ?? 2)); }
+
+    /** Fuente fija del visual (ejes, líneas de referencia, aviso de desplazamiento) con el mínimo de Accesibilidad. */
+    private fsMin(px: number): number { return Math.max(this.settings?.minTextSize ?? 6, px); }
+
     // Returns HC-aware foreground/background for UI chrome (axis, legend, scroll hint, drill label).
-    // Falls back to standard dark-on-light defaults when not in high-contrast mode.
     private hcColors(): { fg: string; bg: string; isHC: boolean } {
-        const pal = this.host.colorPalette as any;
-        if (pal?.isHighContrast) {
-            return {
-                fg:   pal.foreground?.value       ?? "#FFFFFF",
-                bg:   pal.background?.value       ?? "#000000",
-                isHC: true,
-            };
-        }
-        return { fg: "#333333", bg: "#FFFFFF", isHC: false };
+        const hc = this.hc();
+        if (hc.on) return { fg: hc.fg, bg: hc.bg, isHC: true };
+        const k = this.ink();
+        return { fg: k.main, bg: k.bg, isHC: false };
     }
 
     // ── Data parsing ─────────────────────────────────────────────────
@@ -500,7 +593,28 @@ export class BulletChartPro implements IVisual {
         this.readExtraCols(cat.values);
         const n   = mainCat ? mainCat.values.length : actCol.values.length;
         const hl  = actCol.highlights != null;
-        return Array.from({length: n}, (_, i) => this.buildPoint(i, mainCat, actCol, tgtCol, fstCol, ttipCols, hl));
+        return this.sortData(Array.from({length: n}, (_, i) => this.buildPoint(i, mainCat, actCol, tgtCol, fstCol, ttipCols, hl)));
+    }
+
+    /**
+     * Orden (1.6, gratis): por real, objetivo, desviación, desviación % o nombre. "none" deja el orden de los datos
+     * (el del menú "Ordenar" de Power BI, que sigue funcionando). Las filas sin valor van al final en los dos sentidos.
+     */
+    private sortData(data: BulletDataPoint[]): BulletDataPoint[] {
+        const by = this.settings?.sortBy ?? "none";
+        if (by === "none") return data;
+        const dir = this.settings.sortDescending ? -1 : 1;
+        const key = (d: BulletDataPoint): number | string | null =>
+            by === "category" ? d.category : by === "actual" ? d.actual : by === "target" ? d.target
+                : by === "variance" ? d.variance : d.variancePct;
+        return data.map((d, i) => ({ d, i })).sort((x, y) => {
+            const a = key(x.d), b = key(y.d);
+            if (a == null && b == null) return x.i - y.i;
+            if (a == null) return 1;
+            if (b == null) return -1;
+            const c = typeof a === "string" ? a.localeCompare(String(b), this.host.locale, { numeric: true }) : (a as number) - (b as number);
+            return c !== 0 ? c * dir : x.i - y.i;
+        }).map(o => o.d);
     }
 
     private parseTrellis(dv: DataView): TrellisPanel[] {
@@ -532,7 +646,7 @@ export class BulletChartPro implements IVisual {
             const cfIndex = categoryFirstIndex.get(catName) ?? i;
             map.get(key)!.push(this.buildPoint(i, mainCat, actCol, tgtCol, fstCol, ttipCols, hl, cfIndex));
         }
-        return order.map(title => ({ title, data: map.get(title)! }));
+        return order.map(title => ({ title, data: this.sortData(map.get(title)!) }));
     }
 
     /** Bandas por medida y segundo objetivo (Pro). Fuera de Pro y de la vista previa no se leen. */
@@ -646,7 +760,8 @@ export class BulletChartPro implements IVisual {
         const dv = options.dataViews?.[0];
         const vp = options.viewport;
         if (!dv) {
-            this.updateWatermark(false);   // nada que pintar: tampoco marca
+            this.updateWatermark([]);   // nada que pintar: tampoco marca
+            this.container.style.background = "";
             this.renderLanding(vp);
             return;
         }
@@ -682,7 +797,12 @@ export class BulletChartPro implements IVisual {
             target2:  nameOf("target2",  this.t("UI_Target2", "Second target")),
         };
         this.notifyProBlocked(dv);
-        this.updateWatermark(this.attemptedPro(dv).length > 0);
+        this.updateWatermark(this.attemptedPro(dv));
+        // Con un estilo de la colección manda su fondo; con Report theme, transparente (el del lienzo del informe).
+        const look = this.look();
+        this.container.style.background = this.hc().on ? this.hc().bg : (look ? (look.grad ?? look.bg) : "");
+        this.container.style.setProperty("--bc-focus", this.focusColor());
+        this.container.style.setProperty("--bc-focus-w", this.focusW() + "px");
 
         // Small multiples: basta con poner un campo en su pozo (enabled viene true por defecto)
         const hasTrellisField = !!dv.categorical?.categories?.some(c => c.source.roles?.["trellisBy"]);
@@ -831,7 +951,7 @@ export class BulletChartPro implements IVisual {
         this.container.style.overflowX = "hidden";   // la barra vertical restaba unos px y forzaba una horizontal inútil
         const s       = this.settings;
         const legendH = s.showLegend ? this.legendH() : 0;
-        const axisH   = s.showAxis   ? AXIS_H   : 0;
+        const axisH   = s.showAxis   ? AXIS_H + this.axisTitleH() : 0;
         const isTop   = s.legendPosition === "top";
         const chartY  = isTop ? legendH : 0;
         const chartH  = vpH - legendH - axisH;
@@ -894,9 +1014,9 @@ export class BulletChartPro implements IVisual {
     ): void {
         const { rowH, barH, barY, actualBarH, actualBarY, labelW, chartW, rightW } = L;
         const fs = s.fontSize; const ff = s.fontFamily;
-        const { fg: hcFg, isHC } = this.hcColors();
-        const textPrimary   = isHC ? hcFg : "#333";
-        const textSecondary = isHC ? hcFg : "#666";
+        const ink = this.ink();
+        const textPrimary   = ink.main;
+        const textSecondary = ink.dim;
 
         const g = this.mkEl("g");
         g.setAttribute("transform", `translate(0,${gy})`);
@@ -946,7 +1066,7 @@ export class BulletChartPro implements IVisual {
             base.setAttribute("x2",           String(zeroX));
             base.setAttribute("y1",           String(barY - 1));
             base.setAttribute("y2",           String(barY + barH + 1));
-            base.setAttribute("stroke",       "#555");
+            base.setAttribute("stroke",       ink.dim);
             base.setAttribute("stroke-width", "1.5");
             g.appendChild(base);
         }
@@ -1112,7 +1232,7 @@ export class BulletChartPro implements IVisual {
         this.vPadL = VERT_PAD_LR;
         if (s.showAxis) {
             const longest = Math.max(...this.niceTicks(domainMaxV).map(v => this.formatValue(v, data[0]?.formatActual).length), 1);
-            this.vPadL = VERT_PAD_LR + Math.ceil(longest * this.axisFs() * 0.6) + 8;
+            this.vPadL = VERT_PAD_LR + Math.ceil(longest * this.axisFs() * 0.6) + 8 + this.axisTitleH();
         }
 
         // Enforce minimum column width — if too many categories, widen SVG and let container H-scroll
@@ -1215,7 +1335,7 @@ export class BulletChartPro implements IVisual {
 
     /** Fuente de las etiquetas de los ejes: dos puntos menos que la de las etiquetas, nunca menos de 9. */
     private axisFs(): number {
-        return Math.max(9, (this.settings?.fontSize ?? 11) - 2);
+        return Math.max(9, this.settings?.minTextSize ?? 6, (this.settings?.fontSize ?? 11) - 2);
     }
 
     private drawVerticalContent(
@@ -1232,9 +1352,9 @@ export class BulletChartPro implements IVisual {
         const fs = s.fontSize; const ff = s.fontFamily;
         const n  = data.length;
         if (n === 0) return;
-        const { fg: hcFgV, isHC: isHCV } = this.hcColors();
-        const textPrimaryV   = isHCV ? hcFgV : "#333";
-        const textSecondaryV = isHCV ? hcFgV : "#555";
+        const inkV = this.ink();
+        const textPrimaryV   = inkV.main;
+        const textSecondaryV = inkV.dim;
 
         const varH   = s.showVariance ? fs * 2.0 : 0;
         const labH   = this.vLabH(s);
@@ -1256,7 +1376,7 @@ export class BulletChartPro implements IVisual {
         axis.setAttribute("x2",           String(this.vPadL + colW * n));
         axis.setAttribute("y1",           String(baseline));
         axis.setAttribute("y2",           String(baseline));
-        axis.setAttribute("stroke",       "#CCC");
+        axis.setAttribute("stroke",       inkV.axis);
         axis.setAttribute("stroke-width", "1");
         appendTo.appendChild(axis);
 
@@ -1302,7 +1422,7 @@ export class BulletChartPro implements IVisual {
                 const bg = this.mkEl("rect");
                 bg.setAttribute("x",String(barXOff)); bg.setAttribute("y",String(topY));
                 bg.setAttribute("width",String(barW)); bg.setAttribute("height",String(chartH));
-                bg.setAttribute("fill","#E8E8E8"); bg.setAttribute("rx","2");
+                bg.setAttribute("fill", mix(inkV.bg, inkV.axis, 0.2)); bg.setAttribute("rx","2");
                 bg.setAttribute("data-o", "bands");
                 g.appendChild(bg);
             }
@@ -1327,7 +1447,7 @@ export class BulletChartPro implements IVisual {
                     t.setAttribute("text-anchor","middle"); t.setAttribute("font-size",String(this.fitFs(vtxt, colW - 2, fs)));
                     t.setAttribute("font-family",ff); t.setAttribute("font-weight","600"); t.setAttribute("fill",textPrimaryV);
                     // Halo del fondo: la etiqueta cae sobre las bandas y los marcadores de objetivo.
-                    t.setAttribute("paint-order","stroke"); t.setAttribute("stroke", isHCV ? this.hcColors().bg : "#FFFFFF");
+                    t.setAttribute("paint-order","stroke"); t.setAttribute("stroke", inkV.bg);
                     t.setAttribute("stroke-width","3"); t.setAttribute("stroke-linejoin","round");
                     t.textContent = vtxt; g.appendChild(t);
                     t.setAttribute("data-o", "labels");
@@ -1435,7 +1555,8 @@ export class BulletChartPro implements IVisual {
     private renderTrellis(panels: TrellisPanel[], vpW: number, vpH: number): void {
         this.container.style.overflowX = "hidden";
         const s      = this.settings;
-        const titleH = s.trellisShowTitle ? TRELLIS_TITLE_H : 0;
+        const titleH = s.trellisShowTitle ? Math.max(TRELLIS_TITLE_H, Math.ceil(s.trellisTitleSize * 2)) : 0;
+        const GAP    = s.trellisGap;
 
         // Reserve space for legend before computing panel heights
         const legendH    = s.showLegend ? this.legendH() : 0;
@@ -1444,12 +1565,14 @@ export class BulletChartPro implements IVisual {
         const panelOffY  = isTop ? legendH : 0; // panels shift down when legend is on top
 
         // Columnas: nunca paneles más estrechos que MIN_PANEL_W. Si no caben, menos columnas.
-        const fitCols    = Math.max(1, Math.floor((vpW - TRELLIS_GAP) / (MIN_PANEL_W + TRELLIS_GAP)));
-        const cols       = Math.max(1, Math.min(s.trellisColumns, fitCols, panels.length));
+        const fitCols    = Math.max(1, Math.floor((vpW - GAP) / (MIN_PANEL_W + GAP)));
+        // 0 = automático: la raíz cuadrada del número de paneles, sin pasar de lo que cabe.
+        const wantCols   = s.trellisColumns > 0 ? s.trellisColumns : Math.ceil(Math.sqrt(panels.length));
+        const cols       = Math.max(1, Math.min(wantCols, fitCols, panels.length));
         const nRows      = Math.ceil(panels.length / cols);
-        const panelW     = Math.floor((vpW - TRELLIS_GAP * (cols  + 1)) / cols);
+        const panelW     = Math.floor((vpW - GAP * (cols  + 1)) / cols);
         const maxRows    = Math.max(1, ...panels.map(p => p.data.length));
-        const fitH       = Math.floor((availH - TRELLIS_GAP * (nRows + 1)) / nRows);
+        const fitH       = Math.floor((availH - GAP * (nRows + 1)) / nRows);
         // Las filas se encogen hasta 16 px para que los paneles quepan en el visual (antes, 28 px fijos: los paneles
         // se salían, salían barras de desplazamiento y la leyenda quedaba fuera de la vista).
         const targetRowH  = Math.max(16, Math.floor((fitH - titleH - 4) / maxRows));
@@ -1469,15 +1592,15 @@ export class BulletChartPro implements IVisual {
         const globalDomainMax = gRMax * 1.1 || 1;
         const globalTotalDomain = globalDomainMax - globalDomainMin;
 
-        const totalTrellisH = legendH + TRELLIS_GAP + nRows * (panelH + TRELLIS_GAP);
+        const totalTrellisH = legendH + GAP + nRows * (panelH + GAP);
         this.clearSvg(vpW, Math.max(vpH, totalTrellisH));
         this.attachClearClick();
 
         panels.forEach((panel, pi) => {
             const col  = pi % cols;
             const row  = Math.floor(pi / cols);
-            const px   = TRELLIS_GAP + col * (panelW + TRELLIS_GAP);
-            const py   = panelOffY + TRELLIS_GAP + row * (panelH + TRELLIS_GAP);
+            const px   = GAP + col * (panelW + GAP);
+            const py   = panelOffY + GAP + row * (panelH + GAP);
             const { min: pRMin, max: pRMax } = this.calcRange(panel.data);
             const pDomainMin   = s.trellisSyncScale ? globalDomainMin   : Math.min(0, pRMin);
             const pDomainMax   = s.trellisSyncScale ? globalDomainMax   : pRMax * 1.1 || 1;
@@ -1488,26 +1611,30 @@ export class BulletChartPro implements IVisual {
             bg.setAttribute("x",      String(px));    bg.setAttribute("y",      String(py));
             bg.setAttribute("width",  String(panelW)); bg.setAttribute("height", String(panelH));
             bg.setAttribute("fill",   s.trellisPanelColor);
-            bg.setAttribute("stroke", s.trellisBorderColor);
+            bg.setAttribute("stroke", s.trellisBorder ? s.trellisBorderColor : "none");
             bg.setAttribute("rx",     "4");
             this.rootSvg.appendChild(bg);
 
             if (s.trellisShowTitle) {
-                const tbg = this.mkEl("rect");
-                tbg.setAttribute("x",String(px)); tbg.setAttribute("y",String(py));
-                tbg.setAttribute("width",String(panelW)); tbg.setAttribute("height",String(titleH));
-                tbg.setAttribute("fill", s.trellisBorderColor); tbg.setAttribute("rx","4");
-                this.rootSvg.appendChild(tbg);
+                // La franja del título lleva el color del borde (aspecto de la 1.5); sin borde, no hay franja.
+                if (s.trellisBorder) {
+                    const tbg = this.mkEl("rect");
+                    tbg.setAttribute("x",String(px)); tbg.setAttribute("y",String(py));
+                    tbg.setAttribute("width",String(panelW)); tbg.setAttribute("height",String(titleH));
+                    tbg.setAttribute("fill", s.trellisBorderColor); tbg.setAttribute("rx","4");
+                    this.rootSvg.appendChild(tbg);
+                }
 
+                const left = s.trellisTitleAlign === "left";
                 const tt = this.mkEl("text");
-                tt.setAttribute("x",           String(px + panelW / 2));
-                tt.setAttribute("y",           String(py + titleH / 2 + s.fontSize * 0.38));
-                tt.setAttribute("text-anchor", "middle");
-                tt.setAttribute("font-size",   String(Math.min(s.fontSize + 1, 13)));
+                tt.setAttribute("x",           String(left ? px + 8 : px + panelW / 2));
+                tt.setAttribute("y",           String(py + titleH / 2 + s.trellisTitleSize * 0.36));
+                tt.setAttribute("text-anchor", left ? "start" : "middle");
+                tt.setAttribute("font-size",   String(s.trellisTitleSize));
                 tt.setAttribute("font-family", s.fontFamily);
-                tt.setAttribute("font-weight", "600");
+                tt.setAttribute("font-weight", s.trellisTitleBold ? "600" : "400");
                 tt.setAttribute("fill",        s.trellisTitleColor);
-                tt.textContent = panel.title;
+                tt.textContent = this.ellipsis(panel.title, panelW - 16, s.trellisTitleSize);
                 tt.setAttribute("data-o", "trellis");
                 this.rootSvg.appendChild(tt);
             }
@@ -1697,7 +1824,7 @@ export class BulletChartPro implements IVisual {
             t.setAttribute("y",           String(mid + fs * 0.38));
             t.setAttribute("font-size",   String(fs));
             t.setAttribute("font-family", ff);
-            t.setAttribute("fill",        isHC ? fg : s.legendColor);
+            t.setAttribute("fill",        isHC ? fg : (s.legendColor || this.ink().dim));
             t.setAttribute("pointer-events", "none");
             t.textContent = it.label;
             this.rootSvg.appendChild(t);
@@ -1716,7 +1843,7 @@ export class BulletChartPro implements IVisual {
             const bgr = this.mkEl("rect");
             bgr.setAttribute("x", "0"); bgr.setAttribute("y", String(yPos));
             bgr.setAttribute("width", String(vpW)); bgr.setAttribute("height", String(this.legendH()));
-            bgr.setAttribute("fill", this.hcColors().isHC ? this.hcColors().bg : "#FFFFFF");
+            bgr.setAttribute("fill", this.ink().bg);
             bgr.setAttribute("data-o", "legend");   // el fondo también elige la leyenda en modo formato
             lg.appendChild(bgr);
         }
@@ -1752,11 +1879,11 @@ export class BulletChartPro implements IVisual {
         const ff          = this.settings.fontFamily;
         const totalDomain = maxV - minV;
         const xOf         = (v: number) => labelW + ((v - minV) / totalDomain) * chartW;
-        const { fg, isHC } = this.hcColors();
-        const lineColor   = isHC ? fg : "#D0D0D0";
-        const guideColor  = isHC ? fg : "#E0E0E0";
-        const tickColor   = isHC ? fg : "#B0B0B0";
-        const labelColor  = isHC ? fg : "#AAA";
+        const k           = this.ink();
+        const lineColor   = k.axis;
+        const guideColor  = k.grid;
+        const tickColor   = k.axis;
+        const labelColor  = k.dim;
 
         // Baseline
         const bl = this.mkEl("line");
@@ -1776,13 +1903,15 @@ export class BulletChartPro implements IVisual {
             if (v < minV || v > maxV) return;
             const x = xOf(v);
 
-            const gl = this.mkEl("line");
-            gl.setAttribute("x1", String(x)); gl.setAttribute("x2", String(x));
-            gl.setAttribute("y1", "0");        gl.setAttribute("y2", String(yBase));
-            gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
-            gl.setAttribute("stroke-dasharray", "3,3");
-            gl.setAttribute("pointer-events", "none");
-            this.rootSvg.appendChild(gl);
+            if (this.settings.showGridlines) {
+                const gl = this.mkEl("line");
+                gl.setAttribute("x1", String(x)); gl.setAttribute("x2", String(x));
+                gl.setAttribute("y1", "0");        gl.setAttribute("y2", String(yBase));
+                gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
+                gl.setAttribute("stroke-dasharray", "3,3");
+                gl.setAttribute("pointer-events", "none");
+                this.rootSvg.appendChild(gl);
+            }
 
             const tk = this.mkEl("line");
             tk.setAttribute("x1", String(x)); tk.setAttribute("x2", String(x));
@@ -1801,7 +1930,32 @@ export class BulletChartPro implements IVisual {
             t.textContent = this.formatValue(v, formatStr);
             this.rootSvg.appendChild(t);
         });
+        // Título del eje (1.6): centrado bajo las etiquetas.
+        if (this.settings.showAxisTitle) {
+            const tt = this.mkEl("text");
+            tt.setAttribute("x", String(labelW + chartW / 2));
+            tt.setAttribute("y", String(yBase + 13 + this.axisFs() + 4));
+            tt.setAttribute("text-anchor", "middle");
+            tt.setAttribute("font-size", String(this.axisFs()));
+            tt.setAttribute("font-family", ff);
+            tt.setAttribute("font-weight", "600");
+            tt.setAttribute("fill", labelColor);
+            tt.setAttribute("pointer-events", "none");
+            tt.textContent = this.ellipsis(this.axisTitleText(), chartW, this.axisFs());
+            this.rootSvg.appendChild(tt);
+        }
         this.tagFrom(n0, "axis", true);
+    }
+
+    /** Alto (o ancho, en vertical) que ocupa el título del eje; 0 si no se muestra. */
+    private axisTitleH(): number {
+        const s = this.settings;
+        return s?.showAxis && s.showAxisTitle ? this.axisFs() + 6 : 0;
+    }
+
+    /** Texto del título del eje: el escrito, o el nombre de la medida Actual. */
+    private axisTitleText(): string {
+        return (this.settings.axisTitle || "").trim() || this.names.actual;
     }
 
     // Vertical axis: Y-axis line + horizontal guide lines + labels on the left.
@@ -1811,11 +1965,11 @@ export class BulletChartPro implements IVisual {
         const totalDomain = maxV - minV;
         // baseline = y position for value=0 (passed in)
         const yOf = (v: number) => baseline - ((v - minV) / totalDomain) * chartH;
-        const { fg, isHC } = this.hcColors();
-        const lineColor  = isHC ? fg : "#D0D0D0";
-        const guideColor = isHC ? fg : "#E0E0E0";
-        const tickColor  = isHC ? fg : "#B0B0B0";
-        const labelColor = isHC ? fg : "#AAA";
+        const k          = this.ink();
+        const lineColor  = k.axis;
+        const guideColor = k.grid;
+        const tickColor  = k.axis;
+        const labelColor = k.dim;
 
         // Y-axis line spans from bottom of negative region to top
         const topY = yOf(maxV);
@@ -1837,13 +1991,15 @@ export class BulletChartPro implements IVisual {
             if (v < minV || v > maxV) return;
             const y = yOf(v);
 
-            const gl = this.mkEl("line");
-            gl.setAttribute("x1", String(xLeft)); gl.setAttribute("x2", String(xLeft + 2000));
-            gl.setAttribute("y1", String(y));      gl.setAttribute("y2", String(y));
-            gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
-            gl.setAttribute("stroke-dasharray", "3,3");
-            gl.setAttribute("pointer-events", "none");
-            this.rootSvg.appendChild(gl);
+            if (this.settings.showGridlines) {
+                const gl = this.mkEl("line");
+                gl.setAttribute("x1", String(xLeft)); gl.setAttribute("x2", String(xLeft + 2000));
+                gl.setAttribute("y1", String(y));      gl.setAttribute("y2", String(y));
+                gl.setAttribute("stroke", guideColor); gl.setAttribute("stroke-width", "1");
+                gl.setAttribute("stroke-dasharray", "3,3");
+                gl.setAttribute("pointer-events", "none");
+                this.rootSvg.appendChild(gl);
+            }
 
             const tk = this.mkEl("line");
             tk.setAttribute("x1", String(xLeft - 3)); tk.setAttribute("x2", String(xLeft));
@@ -1862,6 +2018,22 @@ export class BulletChartPro implements IVisual {
             t.textContent = this.formatValue(v, formatStr);
             this.rootSvg.appendChild(t);
         });
+        // Título del eje (1.6): girado, a la izquierda de las etiquetas.
+        if (this.settings.showAxisTitle) {
+            const fs = this.axisFs();
+            const cy = (topY + botY) / 2;
+            const tt = this.mkEl("text");
+            tt.setAttribute("x", "0"); tt.setAttribute("y", "0");
+            tt.setAttribute("transform", `translate(${VERT_PAD_LR + fs * 0.85},${cy}) rotate(-90)`);
+            tt.setAttribute("text-anchor", "middle");
+            tt.setAttribute("font-size", String(fs));
+            tt.setAttribute("font-family", ff);
+            tt.setAttribute("font-weight", "600");
+            tt.setAttribute("fill", labelColor);
+            tt.setAttribute("pointer-events", "none");
+            tt.textContent = this.ellipsis(this.axisTitleText(), Math.abs(botY - topY), fs);
+            this.rootSvg.appendChild(tt);
+        }
         this.tagFrom(n0, "axis", true);
     }
 
@@ -1886,9 +2058,9 @@ export class BulletChartPro implements IVisual {
         t.setAttribute("x",           String(bX + bW / 2));
         t.setAttribute("y",           String(bY + bH - 3));
         t.setAttribute("text-anchor", "middle");
-        t.setAttribute("font-size",   "9");
+        t.setAttribute("font-size",   String(this.fsMin(9)));
         t.setAttribute("font-family", this.settings.fontFamily);
-        t.setAttribute("fill",        isHC ? fg : "#666");
+        t.setAttribute("fill",        isHC ? fg : this.ink().dim);
         t.setAttribute("pointer-events", "none");
         t.textContent = label;
         this.rootSvg.appendChild(t);
@@ -1903,9 +2075,9 @@ export class BulletChartPro implements IVisual {
         t.setAttribute("x",           String(vpW - 4));
         t.setAttribute("y",           "11");
         t.setAttribute("text-anchor", "end");
-        t.setAttribute("font-size",   "10");
+        t.setAttribute("font-size",   String(this.fsMin(10)));
         t.setAttribute("font-family", this.settings.fontFamily);
-        t.setAttribute("fill",        isHC ? fg : "#AAAAAA");
+        t.setAttribute("fill",        isHC ? fg : this.ink().dim);
         t.setAttribute("pointer-events", "none");
         t.textContent = label;
         this.rootSvg.appendChild(t);
@@ -1947,7 +2119,7 @@ export class BulletChartPro implements IVisual {
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(x + 3));
                 t.setAttribute("y",           String(chartTop + 9));
-                t.setAttribute("font-size",   "9");
+                t.setAttribute("font-size",   String(this.fsMin(9)));
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        rl.color);
                 t.setAttribute("pointer-events", "none");
@@ -1991,7 +2163,7 @@ export class BulletChartPro implements IVisual {
                 const t = this.mkEl("text");
                 t.setAttribute("x",           String(xLeft + 2));
                 t.setAttribute("y",           String(y - 2));
-                t.setAttribute("font-size",   "9");
+                t.setAttribute("font-size",   String(this.fsMin(9)));
                 t.setAttribute("font-family", ff);
                 t.setAttribute("fill",        rl.color);
                 t.setAttribute("pointer-events", "none");
@@ -2051,7 +2223,7 @@ export class BulletChartPro implements IVisual {
             const r = this.mkEl("rect");
             r.setAttribute("x",String(cx)); r.setAttribute("y",String(y));
             r.setAttribute("width",String(chartW)); r.setAttribute("height",String(h));
-            r.setAttribute("fill","#E8E8E8"); r.setAttribute("rx","2");
+            r.setAttribute("fill", mix(this.ink().bg, this.ink().axis, 0.2)); r.setAttribute("rx","2");
             r.setAttribute("data-o", "bands");
             g.appendChild(r);
         }
@@ -2160,8 +2332,8 @@ export class BulletChartPro implements IVisual {
             ring.setAttribute("height",       String(bb.height + 4));
             ring.setAttribute("rx",           "2");
             ring.setAttribute("fill",         "none");
-            ring.setAttribute("stroke",       "#1A73E8");
-            ring.setAttribute("stroke-width", "2");
+            ring.setAttribute("stroke",       this.focusColor());
+            ring.setAttribute("stroke-width", String(this.focusW()));
             ring.setAttribute("pointer-events", "none");
             // Insert before end of SVG so it appears on top
             this.rootSvg.appendChild(ring);
@@ -2297,10 +2469,16 @@ export class BulletChartPro implements IVisual {
 
     /** Quita los ajustes guardados que la plantilla define, para que se vea. Lo demás se queda como estaba. */
     private aplicarPlantilla(nombre: string): void {
-        const tp = TEMPLATES[nombre] ?? {};
-        const remove: any[] = Object.keys(tp).map(obj => ({
+        // Se borran los ajustes que define CUALQUIER estilo (no solo el elegido): al volver a Report theme desde Boardroom
+        // tienen que irse también los colores que dejó Boardroom. Lo demás se queda como estaba.
+        const props: Record<string, Set<string>> = {};
+        Object.keys(TEMPLATES).forEach(t => Object.keys(TEMPLATES[t]).forEach(obj => {
+            props[obj] = props[obj] ?? new Set<string>();
+            Object.keys(TEMPLATES[t][obj]).forEach(p => props[obj].add(p));
+        }));
+        const remove: any[] = Object.keys(props).map(obj => ({
             objectName: obj, selector: null,
-            properties: Object.keys(tp[obj]).reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
+            properties: Array.from(props[obj]).reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
         }));
         if (remove.length) this.host.persistProperties({ remove });
     }
@@ -2424,11 +2602,11 @@ export class BulletChartPro implements IVisual {
             pie.appendChild(boton(this.t("Guide_Next", "Next"), true, () => { this.guideStep = 3; this.renderGuide(); }));
         } else {
             titulo.textContent = this.t("Guide_Style", "Pick a style");
-            const actual = String(objs?.style?.template ?? "clean");
+            const actual = this.settings.template;
             const rejilla = mk("div", "bc-g-grid");
-            const nombres: [string, string, string][] = [["clean", "Enum_tpl_clean", "Clean"], ["minimal", "Enum_tpl_minimal", "Minimal"],
-                ["contrast", "Enum_tpl_contrast", "Contrast"], ["soft", "Enum_tpl_soft", "Soft"], ["compact", "Enum_tpl_compact", "Compact"],
-                ["ibcs", "Enum_tpl_ibcs", "IBCS style"]];
+            const nombres: [string, string, string][] = [["clean", "Enum_tpl_clean", "Report theme"], ["boardroom", "Enum_tpl_boardroom", "Boardroom"],
+                ["ledger", "Enum_tpl_ledger", "Ledger"], ["editorial", "Enum_tpl_editorial", "Editorial"], ["signal", "Enum_tpl_signal", "Signal"],
+                ["aurora", "Enum_tpl_aurora", "Aurora"], ["terrace", "Enum_tpl_terrace", "Terrace"]];
             for (const [nombre, clave, def] of nombres) {
                 const chip = mk("button", "bc-g-tpl") as HTMLButtonElement;
                 chip.type = "button";
@@ -2447,16 +2625,21 @@ export class BulletChartPro implements IVisual {
         el.appendChild(pie);
     }
 
-    /** Miniatura de una plantilla: dos bullets con las bandas, la barra y el objetivo en sus colores. */
+    /** Miniatura de un estilo: dos bullets sobre su fondo, con las bandas, la barra y el objetivo en sus colores. */
     private miniBullet(nombre: string, hc: boolean): SVGSVGElement {
         const tp: any = TEMPLATES[nombre] ?? {};
+        const tk = STYLE_TOKENS[nombre];
         const d = getDefaultSettings();
-        const ibcs = tp.general?.ibcsMode === true;
-        const c = (p: string, def: string) => hc ? "#FFFFFF" : (ibcs && p === "actualColor" ? "#333333" : ibcs && p === "targetColor" ? "#000000" : (tp.colors?.[p] ?? def));
-        const bands = ibcs ? ["#B8B8B8", "#D0D0D0", "#E8E8E8"] : [c("band3Color", d.band3Color), c("band2Color", d.band2Color), c("band1Color", d.band1Color)];
+        const c = (p: string, def: string) => hc ? "#FFFFFF" : (tp.colors?.[p] ?? def);
+        const bands = [c("band3Color", d.band3Color), c("band2Color", d.band2Color), c("band1Color", d.band1Color)];
         const NS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(NS, "svg") as SVGSVGElement;
         svg.setAttribute("width", "64"); svg.setAttribute("height", "40"); svg.setAttribute("aria-hidden", "true");
+        if (tk && !hc) {
+            const fondo = document.createElementNS(NS, "rect");
+            fondo.setAttribute("width", "64"); fondo.setAttribute("height", "40"); fondo.setAttribute("rx", "3"); fondo.setAttribute("fill", tk.bg);
+            svg.appendChild(fondo);
+        }
         [[8, 44, 38], [24, 34, 46]].forEach(([y, act, tgt]) => {
             [60, 46, 30].forEach((w, k) => {
                 const r = document.createElementNS(NS, "rect");
@@ -2488,7 +2671,7 @@ export class BulletChartPro implements IVisual {
         labels:   ["labels",         "Visual_Labels",               "Labels"],
         variance: ["variance",       "Visual_Variance",             "Variance"],
         legend:   ["legend",         "Visual_Legend",               "Legend"],
-        axis:     ["layout",         "Visual_Layout_ShowAxis",      "Show scale axis"],
+        axis:     ["layout",         "Visual_Layout",               "Layout and axis"],
         refs:     ["referenceLines", "Visual_ReferenceLines",       "Reference Lines"],
         trellis:  ["trellis",        "Visual_Trellis",              "Small Multiples [Pro]"],
     };
@@ -2562,13 +2745,16 @@ export class BulletChartPro implements IVisual {
                     toggle("legend", "showLegend", "Visual_Legend_ShowLegend", "Show legend"), div,
                     reset("legend", ["fontSize", "fontFamily", "color"]), nav] as any;
             case "axis":
-                return [toggle("layout", "showAxis", "Visual_Layout_ShowAxis", "Show scale axis"), div, nav] as any;
+                return [toggle("layout", "showAxis", "Visual_Layout_ShowAxis", "Show scale axis"),
+                    toggle("layout", "showGridlines", "Visual_Layout_ShowGridlines", "Gridlines"),
+                    toggle("layout", "showAxisTitle", "Visual_Layout_ShowAxisTitle", "Axis title"), div, nav] as any;
             case "refs":
                 return [toggle("referenceLines", "refLine1Show", "Visual_ReferenceLines_RefLine1Show", "Line 1 – Show"),
                     toggle("referenceLines", "refLine2Show", "Visual_ReferenceLines_RefLine2Show", "Line 2 – Show"), div, nav] as any;
             case "trellis":
-                return [toggle("trellis", "trellisShowTitle", "Visual_Trellis_TrellisShowTitle", "Show panel titles"), div,
-                    reset("trellis", ["trellisPanelColor", "trellisBorderColor", "trellisTitleColor"]), nav] as any;
+                return [toggle("trellis", "trellisShowTitle", "Visual_Trellis_TrellisShowTitle", "Show panel titles"),
+                    toggle("trellis", "border", "Visual_Trellis_Border", "Panel border"), div,
+                    reset("trellis", ["trellisPanelColor", "trellisBorderColor", "trellisTitleColor", "titleSize", "titleBold", "titleAlign"]), nav] as any;
         }
         return undefined;
     }

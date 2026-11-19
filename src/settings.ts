@@ -38,6 +38,13 @@ export interface BulletSettings {
 
     // ── Axis / Scale ──────────────────────────────────────────────────
     showAxis:           boolean;
+    showAxisTitle:      boolean;  // 1.6: título del eje de escala
+    axisTitle:          string;   // vacío = nombre de la medida Actual
+    showGridlines:      boolean;  // 1.6: líneas de cuadrícula del eje (antes siempre)
+
+    // ── Sort (1.6) ────────────────────────────────────────────────────
+    sortBy:             "none" | "actual" | "target" | "variance" | "variancePct" | "category";
+    sortDescending:     boolean;
 
     // ── Legend ────────────────────────────────────────────────────────
     showLegend:         boolean;
@@ -66,6 +73,17 @@ export interface BulletSettings {
     trellisPanelColor:  string;
     trellisBorderColor: string;
     trellisTitleColor: string;
+    trellisGap:         number;   // 1.6: las 9 opciones comunes de small multiples
+    trellisTitleSize:   number;
+    trellisTitleBold:   boolean;
+    trellisTitleAlign:  "left" | "center";
+    trellisBorder:      boolean;
+
+    // ── Accessibility (1.6) ───────────────────────────────────────────
+    hcMode:             "auto" | "on";
+    focusColor:         string;
+    focusWidth:         number;
+    minTextSize:        number;
 }
 
 export function getDefaultSettings(): BulletSettings {
@@ -101,13 +119,19 @@ export function getDefaultSettings(): BulletSettings {
         rightPanelWidthSet: false,
 
         showAxis:           true,
+        showAxisTitle:      false,
+        axisTitle:          "",
+        showGridlines:      true,
+
+        sortBy:             "none",
+        sortDescending:     true,
 
         showLegend:         true,
         legendPosition:     "bottom",
         legendFontSize:     10,
         legendFontFamily:   "Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
         legendColor:        "#333333",
-        template:           "clean",
+        template:           "clean",   // Report theme
         guide:              true,
 
         refLine1Show:       false,
@@ -126,5 +150,16 @@ export function getDefaultSettings(): BulletSettings {
         trellisPanelColor:  "#FAFAFA",
         trellisBorderColor: "#E0E0E0",
         trellisTitleColor: "#333333",
+        // Valores de la 1.5 como defecto, para que los informes guardados no cambien de aspecto.
+        trellisGap:         10,
+        trellisTitleSize:   12,
+        trellisTitleBold:   true,
+        trellisTitleAlign:  "center",
+        trellisBorder:      true,
+
+        hcMode:             "auto",
+        focusColor:         "#1A73E8",
+        focusWidth:         2,
+        minTextSize:        6,
     };
 }

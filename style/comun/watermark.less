@@ -1,0 +1,18 @@
+// Marca de agua "Pro preview", común a todos los visuales de TCViz.
+// FUENTE ÚNICA: C:\tcviz\utillaje\comun\watermark.less — copia idéntica en style/comun/ (sincronizar_comun.py).
+// No se edita en el repo del visual. Ver watermark.ts.
+.tcviz-wm {
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    color: rgba(31, 78, 128, 0.9);
+    font-weight: 800;
+    text-align: center;
+    // Banda clara semiopaca detrás del texto: se lee sobre cualquier fondo y solo tapa una franja central.
+    .tcviz-wm-title, .tcviz-wm-why { background: rgba(255, 255, 255, 0.55); border-radius: 6px; }
+    .tcviz-wm-title { text-transform: uppercase; letter-spacing: .08em; padding: .08em .5em; line-height: 1.15; }
+    .tcviz-wm-why { font-weight: 700; margin-top: .3em; padding: .25em .8em; color: rgba(31, 78, 128, 0.95); max-width: 80%; line-height: 1.3; }
+}
